@@ -1,0 +1,48 @@
+\begin{Schunk}
+\begin{Sinput}
+> design.matrix <- matrix(c(0, -1, 0, 1), dimnames = list(names(samples.list), 
++     "C-N"))
+> design.matrix
+\end{Sinput}
+\begin{Soutput}
+            C-N
+PrEC input    0
+PrEC IP      -1
+LNCaP input   0
+LNCaP IP      1
+\end{Soutput}
+\begin{Sinput}
+> stats <- blocksStats(samples.list, gene.anno, up = 2000, down = 0, 
++     seq.len = 300, design = design.matrix)
+\end{Sinput}
+\begin{Soutput}
+Comparison of groups:  1 - -1 
+\end{Soutput}
+\begin{Sinput}
+> stats <- stats[order(stats$`adj.p.vals_C-N`), ]
+> head(stats)
+\end{Sinput}
+\begin{Soutput}
+          chr     start       end width strand    name symbol PrEC input
+8019804 chr18     99064    112217 13154      + 8019804  ROCK1        600
+8015798 chr17  38802738  38821439 18702      - 8015798    ---         87
+7904879  chr1 145017918 145018085   168      + 7904879    ---         21
+7908529  chr1 196148257 196165896 17640      + 7908529   LHX9         16
+8115391  chr5 153834725 153838017  3293      - 8115391  HAND1          8
+7976073 chr14  85066240  85164023 97784      + 7976073  FLRT2         17
+        PrEC IP LNCaP input LNCaP IP PrEC IP_pseudo LNCaP IP_pseudo logConc_C-N
+8019804     397         686       58   3.995887e+02        57.62379   -16.01856
+8015798      56          64      314   5.636562e+01       311.96569   -16.21306
+7904879      13          28      153   1.308530e+01       152.00848   -17.78513
+7908529       3          13      112   3.020114e+00       111.27404   -19.06788
+8115391       4          28       95   4.026631e+00        94.38415   -18.97912
+7976073       0          20       69   1.435022e-11        68.55255   -33.59047
+        logFC_C-N  p.value_C-N adj.p.vals_C-N
+8019804 -2.793764 9.642793e-36   2.407420e-31
+8015798  2.468516 3.662695e-24   4.572142e-20
+7904879  3.538199 3.672510e-18   3.056262e-14
+7908529  5.203643 7.401219e-18   4.619471e-14
+8115391  4.551106 2.875722e-14   1.435905e-10
+7976073 32.851160 1.911561e-13   7.954003e-10
+\end{Soutput}
+\end{Schunk}

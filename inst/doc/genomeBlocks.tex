@@ -1,0 +1,34 @@
+\begin{Schunk}
+\begin{Sinput}
+> library(BSgenome.Hsapiens.UCSC.hg18)
+> genomeBlocks(Hsapiens, chrs = 1:25, width = 5000)
+\end{Sinput}
+\begin{Soutput}
+GRanges with 616087 ranges and 0 elementMetadata values
+         seqnames               ranges strand   |
+            <Rle>            <IRanges>  <Rle>   |
+     [1]     chr1       [    1,  5000]      *   |
+     [2]     chr1       [ 5001, 10000]      *   |
+     [3]     chr1       [10001, 15000]      *   |
+     [4]     chr1       [15001, 20000]      *   |
+     [5]     chr1       [20001, 25000]      *   |
+     [6]     chr1       [25001, 30000]      *   |
+     [7]     chr1       [30001, 35000]      *   |
+     [8]     chr1       [35001, 40000]      *   |
+     [9]     chr1       [40001, 45000]      *   |
+     ...      ...                  ...    ... ...
+[616079]     chrY [57745001, 57750000]      *   |
+[616080]     chrY [57750001, 57755000]      *   |
+[616081]     chrY [57755001, 57760000]      *   |
+[616082]     chrY [57760001, 57765000]      *   |
+[616083]     chrY [57765001, 57770000]      *   |
+[616084]     chrY [57770001, 57772954]      *   |
+[616085]     chrM [       1,     5000]      *   |
+[616086]     chrM [    5001,    10000]      *   |
+[616087]     chrM [   10001,    15000]      *   |
+
+seqlengths
+  chr1  chr2  chr3  chr4  chr5  chr6 ... chr20 chr21 chr22  chrX  chrY  chrM
+    NA    NA    NA    NA    NA    NA ...    NA    NA    NA    NA    NA    NA
+\end{Soutput}
+\end{Schunk}

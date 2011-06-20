@@ -1,0 +1,45 @@
+\begin{Schunk}
+\begin{Sinput}
+> prostateCvgs <- featureScores(samples.list[c("PrEC IP", "LNCaP IP")], 
++     gene.anno, up = 5000, down = 1000, freq = 1000, s.width = 500)
+> prostateCvgs
+\end{Sinput}
+\begin{Soutput}
+An object of class 'ScoresList'.
+Tables: PrEC IP, LNCaP IP.
+Features:
+GRanges with 24966 ranges and 2 elementMetadata values
+        seqnames               ranges strand   |      name      symbol
+           <Rle>            <IRanges>  <Rle>   | <integer> <character>
+    [1]     chr1   [ 781253,  783614]      +   |   7896759   LOC643837
+    [2]     chr1   [ 850983,  869824]      +   |   7896761      SAMD11
+    [3]     chr1   [ 885829,  890958]      +   |   7896779      KLHL17
+    [4]     chr1   [ 891739,  900345]      +   |   7896798     PLEKHN1
+    [5]     chr1   [ 938709,  939782]      +   |   7896817       ISG15
+    [6]     chr1   [ 945365,  981355]      +   |   7896822        AGRN
+    [7]     chr1   [1092346, 1092441]      +   |   7896859         ---
+    [8]     chr1   [1093105, 1093195]      +   |   7896861         ---
+    [9]     chr1   [1094247, 1094330]      +   |   7896863         ---
+    ...      ...                  ...    ... ...       ...         ...
+[24958]     chrY [19611913, 19614093]      -   |   8177222        CD24
+[24959]     chrY [19640262, 19640361]      -   |   8177227         ---
+[24960]     chrY [20076704, 20124427]      -   |   8177229      BCORL2
+[24961]     chrY [20326698, 20366197]      -   |   8177232     JARID1D
+[24962]     chrY [21036941, 21090502]      -   |   8177261      TTTY10
+[24963]     chrY [21954227, 21957634]      -   |   8177273         ---
+[24964]     chrY [22001970, 22008519]      -   |   8177280         ---
+[24965]     chrY [22154873, 22165940]      -   |   8177282      TTTY13
+[24966]     chrY [22852332, 22854411]      -   |   8177344       TTTY5
+
+seqlengths
+  chr1 chr10 chr11 chr12 chr13 chr14 ...  chr6  chr7  chr8  chr9  chrX  chrY
+    NA    NA    NA    NA    NA    NA ...    NA    NA    NA    NA    NA    NA
+Region: 5000 bases up to 1000 bases down.
+Smoothing: 500, 500 bases.
+Sampling : 1000 bases.
+\end{Soutput}
+\begin{Sinput}
+> prostateCvgs@scores <- list(tables(prostateCvgs)[[2]] - tables(prostateCvgs)[[1]])
+> names(prostateCvgs) <- "LNCaP - PrEC"
+\end{Sinput}
+\end{Schunk}

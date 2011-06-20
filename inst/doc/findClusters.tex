@@ -1,0 +1,36 @@
+\begin{Schunk}
+\begin{Sinput}
+> stats.table <- cbind(gene.anno, expr)
+> stats.table$pos <- ifelse(stats.table$strand == "+", stats.table$start, 
++     stats.table$end)
+> pos.order <- order(stats.table$chr, stats.table$pos)
+> stats.table <- stats.table[pos.order, ]
+> stats.clustered <- findClusters(stats.table, score.col = 7, w.size = 5, 
++     n.med = 2, n.consec = 3, cut.samps = seq(-2, -10, -2), maxFDR = 0.05, 
++     trend = "down", n.perm = 10)
+> cluster.1 <- which(stats.clustered$cluster == 1)
+> stats.clustered[cluster.1, ]
+\end{Sinput}
+\begin{Soutput}
+           name  chr strand    start      end  symbol      t-stat      pos
+7914667 7914667 chr1      - 33829993 33947691   CSMD2  -0.8496609 33947691
+7899898 7899898 chr1      + 34102217 34102979   HMGB4  -0.2014024 34102217
+7899905 7899905 chr1      + 34102217 34102979   HMGB4  -0.1829972 34102217
+7914748 7914748 chr1      - 34251727 34252405     ---  -0.3865665 34252405
+7899911 7899911 chr1      + 34405070 34457319 C1orf94  -0.9322332 34405070
+7899921 7899921 chr1      + 34993307 34996699    GJB5 -16.4867896 34993307
+7899927 7899927 chr1      + 34999364 35000515    GJB4  -8.2965082 34999364
+7899932 7899932 chr1      + 35019376 35024552    GJB3 -11.7589771 35019376
+7899939 7899939 chr1      + 35031185 35033935    GJA4  -0.2142715 35031185
+        cluster
+7914667       1
+7899898       1
+7899905       1
+7914748       1
+7899911       1
+7899921       1
+7899927       1
+7899932       1
+7899939       1
+\end{Soutput}
+\end{Schunk}

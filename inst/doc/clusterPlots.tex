@@ -1,0 +1,21 @@
+\begin{Schunk}
+\begin{Sinput}
+> cvgs <- featureScores(H1samples[1:3], gene.anno, up = 5000, down = 2000, 
++     dist = "base", freq = 200, s.width = 500)
+\end{Sinput}
+\end{Schunk}
+
+
+\begin{Schunk}
+\begin{Sinput}
+> cp <- clusterPlots(cvgs, scale = function(x) sqrt(x), plot.type = "heatmap", 
++     t.name = "H1 Cells", n.clusters = 10)
+\end{Sinput}
+\end{Schunk}
+
+\begin{Schunk}
+\begin{Soutput}
+pdf 
+  2 
+\end{Soutput}
+\end{Schunk}

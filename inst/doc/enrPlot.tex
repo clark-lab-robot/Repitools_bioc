@@ -1,0 +1,33 @@
+\begin{Schunk}
+\begin{Sinput}
+> seqinfo(samples.list)
+\end{Sinput}
+\begin{Soutput}
+Seqinfo of length 25
+seqnames seqlengths isCircular
+chr1      247249719       <NA>
+chr2      242951149       <NA>
+chr3      199501827       <NA>
+chr4      191273063       <NA>
+chr5      180857866       <NA>
+chr6      170899992       <NA>
+chr7      158821424       <NA>
+chr8      146274826       <NA>
+chr9      140273252       <NA>
+...             ...        ...
+chr17      78774742       <NA>
+chr18      76117153       <NA>
+chr19      63811651       <NA>
+chr20      62435964       <NA>
+chr21      46944323       <NA>
+chr22      49691432       <NA>
+chrX      154913754       <NA>
+chrY       57772954       <NA>
+chrM          16571       <NA>
+\end{Soutput}
+\begin{Sinput}
+> enrichmentPlot(samples.list, seq.len = 300, cols = c("black", 
++     "green", "orange", "red"), xlim = c(0, 10), lwd = 2)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{enrPlot-enrPlot}

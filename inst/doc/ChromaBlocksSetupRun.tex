@@ -1,0 +1,39 @@
+\begin{Schunk}
+\begin{Sinput}
+> load("H1samples.RData")
+> class(H1samples)
+\end{Sinput}
+\begin{Soutput}
+[1] "GRangesList"
+attr(,"package")
+[1] "GenomicRanges"
+\end{Soutput}
+\begin{Sinput}
+> names(H1samples)
+\end{Sinput}
+\begin{Soutput}
+[1] "H3K4me1"  "H3K27me3" "H3K36me3" "Input"   
+\end{Soutput}
+\begin{Sinput}
+> elementLengths(H1samples)
+\end{Sinput}
+\begin{Soutput}
+ H3K4me1 H3K27me3 H3K36me3    Input 
+ 1201402  8673675  4151895 15289957 
+\end{Soutput}
+\begin{Sinput}
+> H3K27me3.blocks <- ChromaBlocks(rs.ip = H1samples["H3K27me3"], 
++     rs.input = H1samples["Input"], organism = Hsapiens, chrs = "chr20", 
++     preset = "small", seq.len = 300)
+\end{Sinput}
+\begin{Soutput}
+Permutation 1.
+Permutation 2.
+Permutation 3.
+Permutation 4.
+Permutation 5.
+Testing positive regions.
+Using cutoff of 2.337163 for a FDR of 0.01 
+.
+\end{Soutput}
+\end{Schunk}

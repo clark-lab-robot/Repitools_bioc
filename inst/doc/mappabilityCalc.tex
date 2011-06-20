@@ -1,0 +1,11 @@
+\begin{Schunk}
+\begin{Sinput}
+> library(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
+> locations <- data.frame(chr = c("chr4", "chr9"), position = c(5e+07, 
++     1e+08))
+> mappabilityCalc(locations, window = 500, organism = Hsapiens36bp)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.000 0.998
+\end{Soutput}
+\end{Schunk}

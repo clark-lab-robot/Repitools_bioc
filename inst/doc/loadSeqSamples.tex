@@ -1,0 +1,56 @@
+\begin{Schunk}
+\begin{Sinput}
+> library(GenomicRanges)
+> load("samplesList.RData")
+> class(samples.list)
+\end{Sinput}
+\begin{Soutput}
+[1] "GRangesList"
+attr(,"package")
+[1] "GenomicRanges"
+\end{Soutput}
+\begin{Sinput}
+> names(samples.list)
+\end{Sinput}
+\begin{Soutput}
+[1] "PrEC input"  "PrEC IP"     "LNCaP input" "LNCaP IP"   
+\end{Soutput}
+\begin{Sinput}
+> elementLengths(samples.list)
+\end{Sinput}
+\begin{Soutput}
+ PrEC input     PrEC IP LNCaP input    LNCaP IP 
+   11061279    10008129    19119904    10139044 
+\end{Soutput}
+\begin{Sinput}
+> samples.list[[1]]
+\end{Sinput}
+\begin{Soutput}
+GRanges with 11061279 ranges and 1 elementMetadata value
+           seqnames         ranges strand   | pData.alignData.from...notNA...
+              <Rle>      <IRanges>  <Rle>   |                       <integer>
+       [1]     chr1   [ 248,  283]      +   |                               0
+       [2]     chr1   [ 447,  482]      -   |                              16
+       [3]     chr1   [ 602,  637]      -   |                              16
+       [4]     chr1   [3182, 3217]      +   |                               0
+       [5]     chr1   [4783, 4818]      -   |                              16
+       [6]     chr1   [6287, 6322]      -   |                              16
+       [7]     chr1   [6310, 6345]      +   |                               0
+       [8]     chr1   [7340, 7375]      -   |                              16
+       [9]     chr1   [9103, 9138]      -   |                              16
+       ...      ...            ...    ... ...                             ...
+[11061271]     chrM [16531, 16566]      +   |                               0
+[11061272]     chrM [16532, 16567]      +   |                               0
+[11061273]     chrM [16532, 16567]      -   |                              16
+[11061274]     chrM [16533, 16568]      -   |                              16
+[11061275]     chrM [16533, 16568]      +   |                               0
+[11061276]     chrM [16534, 16569]      -   |                              16
+[11061277]     chrM [16535, 16570]      -   |                              16
+[11061278]     chrM [16536, 16571]      +   |                               0
+[11061279]     chrM [16536, 16571]      -   |                              16
+
+seqlengths
+      chr1      chr2      chr3      chr4 ...      chrX      chrY      chrM
+ 247249719 242951149 199501827 191273063 ... 154913754  57772954     16571
+\end{Soutput}
+\end{Schunk}

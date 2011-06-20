@@ -1,0 +1,13 @@
+Package: Repitools
+Version: 0.99.1
+Date: 2011/6/15
+Title: Epigenomic tools
+Author: Mark Robinson <mrobinson@wehi.edu.au>
+Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
+LazyLoad: Yes
+Depends: R (>= 2.13.0), methods
+Imports: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, zoo
+Suggests: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, zoo, ShortRead, BSgenome.Hsapiens.UCSC.hg18
+Description: Tools for the analysis of enrichment-based epigenomic data.  Features include summarization and visualization of epigenomic data across promoters according to gene expression context, finding regions of differential methylation/binding, etc. 
+License: LGPL version 2 or newer
+Packaged: 2011-06-16 00:20:04 UTC; mrobinson
