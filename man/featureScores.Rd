@@ -109,11 +109,9 @@
          experiment type.}
 \author{Dario Strbenac}
 \examples{
-  data.path <- system.file("data", package = "Repitools")
-  load(file.path(data.path, "samplesList.RData"))
-  samplesList <- samplesList[1:2]
-  load(file.path(data.path, "expr.RData"))
-  anno <- read.csv(file.path(data.path, "chr21genes.csv"), stringsAsFactors = FALSE)
+  data(chr21genes)
+  data(samplesList)
+  data(expr)
 
-  fs <- featureScores(samplesList, anno, up = 2000, down = 1000, freq = 500, s.width = 500)
+  fs <- featureScores(samplesList[1:2], chr21genes, up = 2000, down = 1000, freq = 500, s.width = 500)
 }
