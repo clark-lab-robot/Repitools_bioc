@@ -148,7 +148,7 @@ setMethod(".blocksStats", c("GRangesList", "GRanges"),
     for (i in 1:ncol(design))
     {
 	if (verbose == TRUE)
-            message("Processing column ", i, " of design matrix.\n")
+            message("Processing column ", i, " of design matrix.")
 	stopifnot(sum(design[,i] ==  1) > 0,
                   sum(design[,i] == -1) > 0,
                   all(design[,i] %in% c(-1, 0, 1)))

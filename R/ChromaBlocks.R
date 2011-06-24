@@ -56,7 +56,7 @@ setMethod("ChromaBlocks", c("GRangesList", "GRangesList"), function(rs.ip, rs.in
         minBlocks=25
         extend=0.1
     } 
-    if (verbose) message("Creating bins\n")
+    if (verbose) message("Creating bins")
     IPbins <- genomeBlocks(organism, chrs, ipWidth)
     InputBins <- genomeBlocks(organism, chrs, inputWidth, ipWidth)
     if (verbose) message("Counting IP lanes")

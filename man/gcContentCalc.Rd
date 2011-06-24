@@ -5,8 +5,8 @@
 \title{Calculate The gcContent of a Region}
 \description{Function to calculate the GC content of windows}
 \usage{
-  \S4method{gcContentCalc}{GRanges,BSgenome}(x, organism)
-  \S4method{gcContentCalc}{data.frame,BSgenome}(x, organism, window = NULL)
+  \S4method{gcContentCalc}{GRanges,BSgenome}(x, organism, verbose = TRUE)
+  \S4method{gcContentCalc}{data.frame,BSgenome}(x, organism, window = NULL, ...)
 }
 \arguments{
   \item{x}{A \code{GRanges} object or a \code{data.frame}, with columns \code{chr}
@@ -15,6 +15,9 @@
                 consider \code{windowSize/2} bases upstream, and \code{windowSize / 2 - 1 }
                 bases downstream.}
   \item{organism}{The \code{BSgenome} object to calculate gcContent upon.}
+  \item{verbose}{Whether to print the progess of processing.}
+  \item{...}{The \code{verbose} variable for the \code{data.frame} method,
+             passed onto the \code{GRanges} method.}
 }
 \details{
   The windows considered will be \code{windowSize/2} bases upstream and \code{windowSize/2-1}

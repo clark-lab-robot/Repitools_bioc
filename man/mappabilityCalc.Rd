@@ -5,16 +5,25 @@
 \title{Calculate The Mappability of a Region}
 \description{Function to calculate mappability of windows}
 \usage{
-  \S4method{mappabilityCalc}{GRanges}(x, organism)
-  \S4method{mappabilityCalc}{data.frame}(x, organism, window = NULL)
+  \S4method{mappabilityCalc}{GRanges}(x, organism, verbose = TRUE)
+  \S4method{mappabilityCalc}{data.frame}(x, organism, window = NULL, ...)
 }
 \arguments{
-  \item{x}{A \code{GRanges} object or a \code{data.frame}, with columns \code{chr} and either \code{position} or \code{start}, \code{end} and \code{strand}.}
-  \item{window}{Bases around the locations that are in the window. Calculation will consider \code{windowSize/2} bases upstream, and \code{windowSize/2-1} bases downstream.}
+  \item{x}{A \code{GRanges} object or a \code{data.frame}, with columns \code{chr} and
+           either \code{position} or \code{start}, \code{end} and \code{strand}.}
+  \item{window}{Bases around the locations that are in the window. Calculation will
+                consider \code{windowSize/2} bases upstream, and \code{windowSize/2-1}
+                bases downstream.}
   \item{organism}{The \code{BSgenome} object to calculate mappability upon.}
+  \item{verbose}{Whether to print the progess of processing.}
+  \item{...}{The \code{verbose} variable for the \code{data.frame} method,
+             passed onto the \code{GRanges} method.}
 }
 \details{
-The windows considered will be \code{windowSize/2} bases upstream and \code{windowSize/2-1} bases downstream of the given position, for each position. The value returned for each region is a percentage of bases in that region that are not N (any base in IUPAC nomenclature).
+  The windows considered will be \code{windowSize/2} bases upstream and
+  \code{windowSize/2-1} bases downstream of the given position, for each position.
+  The value returned for each region is a percentage of bases in that region that
+  are not N (any base in IUPAC nomenclature).
 }
 \value{
   A vector of mappability percentages, one for each region.

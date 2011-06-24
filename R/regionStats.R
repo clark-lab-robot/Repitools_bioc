@@ -19,7 +19,7 @@ setGeneric("regionStats", function(x, design, ...){standardGeneric("regionStats"
   for(col in 1:ncol(diffs)) {
   
     if( verbose )
-	    message("Calculating trimmed means for column", col, "of design matrix:\n")
+	    message("Calculating trimmed means for column", col, "of design matrix:")
       
     for(ii in 1:length(uch)) {
       if( verbose )
@@ -42,7 +42,7 @@ setGeneric("regionStats", function(x, design, ...){standardGeneric("regionStats"
 
 
     if( verbose )
-      message("\nCalculating FDR table.\n")
+      message("Calculating FDR table.")
 	  mx <- max(abs(tmeanPerms[[col]]),na.rm=TRUE)
 
 
@@ -59,7 +59,7 @@ setGeneric("regionStats", function(x, design, ...){standardGeneric("regionStats"
 	  cut <- min( fdrTabs[[col]]$cut[w], na.rm=TRUE )
 	
     if( verbose )
-      message("Using cutoff of", cut, "for FDR of", maxFDR,"\n")
+      message("Using cutoff of", cut, "for FDR of", maxFDR)
 	  
 	  regions[[col]] <- .getBed(tmeanReal[,col], ch, sp, cut, min.probes, max.gap, two.sides)
   }
@@ -107,7 +107,7 @@ setMethod("regionStats","AffymetrixCelSet",
 
     w <- rowSums( is.na(diffs) )==0
     if( verbose )
-        message("Removing", sum(!w), "rows, due to NAs.\n")
+        message("Removing", sum(!w), "rows, due to NAs.")
 	
     diffs <- diffs[w,,drop=FALSE]
     ch <- ch[w]
@@ -137,7 +137,7 @@ setMethod("regionStats","matrix",
 
     w <- rowSums( is.na(diffs) )==0
     if( verbose )
-        message("Removing", sum(!w), "rows, due to NAs.\n")
+        message("Removing", sum(!w), "rows, due to NAs.")
 
 
     return(.regionStats(diffs, design, gsub("chr","",ndf$chr), ndf$position, maxFDR, 
@@ -229,6 +229,6 @@ setMethod("regionStats","matrix",
     fdr[i,] <- c(cuts[i],neg,pos,min(neg/pos,1))
     if (verbose) message(".")
   }
-  if (verbose) message("\n")
+  if (verbose) message("")
   as.data.frame(fdr)
 }

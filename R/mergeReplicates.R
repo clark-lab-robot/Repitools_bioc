@@ -10,13 +10,13 @@ setMethod("mergeReplicates", "GRangesList", function(reads, types, verbose = TRU
     if(length(types) != length(reads))
     	stop("'types' and 'reads' lengths differ.\n")
 
-    if(verbose) message("Unlisting GRangesList.\n")
+    if(verbose) message("Unlisting GRangesList.")
     readsGR <- unlist(reads, use.names = FALSE)
     rdTypes <- Rle(types, elementLengths(reads))
-    if(verbose) message("Splitting by types.\n")
+    if(verbose) message("Splitting by types.")
     reads <- split(readsGR, rdTypes)
     metadata(reads) <- list(names(reads))
     gc()
-    if(verbose) message("Pooled GRangesList created.\n")
+    if(verbose) message("Pooled GRangesList created.")
     reads
 })

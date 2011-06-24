@@ -1,0 +1,53 @@
+\texttt{annotationCounts} is useful to tally the counts of reads surrounding some set of genomic landmarks. \texttt{annotationBlocksCounts} is the analogous function for counting in user-specified regions of the genome.
+
+\begin{Schunk}
+\begin{Sinput}
+ annotationCounts(samples.list, head(gene.anno, 10), up = 2000, 
+     down = 500, seq.len = 300)
+\end{Sinput}
+\begin{Soutput}
+        PrEC input PrEC IP LNCaP input LNCaP IP
+7896759         25      35          29       69
+7896761         10       2           8       36
+7896779         11      15          10       14
+7896798         19      61          15       83
+7896817         20      41          22       46
+7896822         11      17           8       28
+7896859         24      35           8       70
+7896861         21      57           6       78
+7896863         18      85           8       85
+7896865         22      92          18       90
+\end{Soutput}
+\end{Schunk}
+	
+\noindent This example counts reads that fall within 2000 bases upstream and 500 bases downstream of (the first ten) TSSs in the gene annotation table.  Reads are extended to 300 bases.
+
+\subsection{Characteristics of the DNA sequence}
+It would be useful to know when seeing a lack of reads in some windows, if the mappability of the window is the cause. Some regions of the genome have low complexity sequence, where reads are unlikely to map uniquely to. The function \texttt{mappabilityCalc} calculates the percentage of each region that can be mapped to by reads generated from the experiment. It operates on a user-created \texttt{BSgenome} object of a masked genome sequence. The definition of which bases are mappable and which are not depends on the read length of the sequencing technology used. Therefore, there is no one masked \texttt{BSgenome} object that can be used by all users. Note that by masking, we mean replacing the unmappable reference sequence bases by `N', not creating a built-in mask.
+
+\begin{Schunk}
+\begin{Sinput}
+ library(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
+ locations <- data.frame(chr = c("chr4", "chr9"), position = c(5e+07, 
+     1e+08))
+ mappabilityCalc(locations, window = 500, organism = Hsapiens36bp)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.000 0.998
+\end{Soutput}
+\end{Schunk}
+
+\noindent The region on chromosome 4 is completely unmappable, whereas the region on chromosome 9 is almost completely mappable.
+\ \\ \ \\
+Next, we may be interested in determining CpG density of a region.
+
+\begin{Schunk}
+\begin{Sinput}
+ cpgDensityCalc(head(gene.anno, 10), window = 100, organism = Hsapiens)
+\end{Sinput}
+\begin{Soutput}
+ [1]  0 10 16  7 10 20  6  4  6  4
+\end{Soutput}
+\end{Schunk}
+
+\noindent This example calculates the CpG density of a window 100 bases either side of the TSS for the first ten genes in the gene annotation table. By default, the CpG density is just the raw number of counts in the windows. There are also linearly, exponentially and logarithmically decaying weight schemes available.

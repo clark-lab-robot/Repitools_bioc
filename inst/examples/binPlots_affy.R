@@ -25,13 +25,13 @@ csMNU <- convertToUnique(csMN,verbose=-20)
 
 des <- matrix( c(0,0,1,-1,rep(0,length(cs)-4)), ncol=1, dimnames=list(getNames(cs),"elut5_L-P") )
 
-annoFile <- system.file("data","chr21genes.csv", package="Repitools")
-annoDF <- read.csv(annoFile)
+data(chr21genes)
+data(expr)
 
 ms <- MatSmoothing(csMNU, design = des, probeWindow = 300, 
                    tag = "300bp_smoothing", nProbes = 10)
 csTS <- process(ms, units = NULL, verbose=TRUE)
 
-binPlots(csTS, coordinatesTable=annoDF, verbose=TRUE, nbins=10,
+binPlots(csTS, coordinatesTable=chr21genes, verbose=TRUE, nbins=10,
            ordering=expr, ordLabel="expression",plotType="line")
 

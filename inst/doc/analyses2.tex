@@ -1,0 +1,84 @@
+\subsection{Finding enriched regions in a single sample}
+Repitools contains an implementation of \texttt{ChromaBlocks} (described in \href{http://www.ncbi.nlm.nih.gov/pubmed/20452322}{Hawkins RD et al}), designed to discover regions of the genome which are enriched for epigenetic marks, such as H3K27me3.  Briefly, ChromaBlocks counts the number of sequencing reads aligned to adjacent bins in the genome in both Immunoprecipitated and Input samples, determines which bins exceed a cutoff for IP-Input enrichment (either specified or set at a supplied FDR by permutation) and returns regions of the genome where multiple adjacent bins are enriched.
+
+\noindent Data from the Human Reference Epigenome Mapping Project is used to demonstrate \texttt{ChromaBlocks}. The data was downloaded from \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16256}{here}. Samples \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM466734}{GSM466734}, \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM466737}{GSM466737}, \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM466739}{GSM466739}, and \href{http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=GSM450270}{GSM450270} are used here.
+
+\begin{Schunk}
+\begin{Sinput}
+ load("H1samples.RData")
+ class(H1samples)
+\end{Sinput}
+\begin{Soutput}
+[1] "GRangesList"
+attr(,"package")
+[1] "GenomicRanges"
+\end{Soutput}
+\begin{Sinput}
+ names(H1samples)
+\end{Sinput}
+\begin{Soutput}
+[1] "H3K4me1"  "H3K27me3" "H3K36me3" "Input"   
+\end{Soutput}
+\begin{Sinput}
+ elementLengths(H1samples)
+\end{Sinput}
+\begin{Soutput}
+ H3K4me1 H3K27me3 H3K36me3    Input 
+ 1201402  8673675  4151895 15289957 
+\end{Soutput}
+\begin{Sinput}
+ H3K27me3.blocks <- ChromaBlocks(rs.ip = H1samples["H3K27me3"], 
+     rs.input = H1samples["Input"], organism = Hsapiens, chrs = "chr20", 
+     preset = "small", seq.len = 300)
+\end{Sinput}
+\begin{Soutput}
+Permutation 1.
+Permutation 2.
+Permutation 3.
+Permutation 4.
+Permutation 5.
+Testing positive regions.
+Using cutoff of 2.337163 for a FDR of 0.01 
+.
+\end{Soutput}
+\end{Schunk}
+
+\texttt{ChromaBlocks} returns a \texttt{ChromaResults} object, from which an \texttt{IRangesList} of the regions determined to be enriched can be retrieved using the \texttt{regions} method.
+
+\begin{Schunk}
+\begin{Sinput}
+ H3K27me3.blocks
+\end{Sinput}
+\begin{Soutput}
+Object of class 'ChromaResults'.
+1400 regions found with using a cutoff of 2.337163 
+\end{Soutput}
+\begin{Sinput}
+ regions(H3K27me3.blocks)
+\end{Sinput}
+\begin{Soutput}
+SimpleRangesList of length 1
+$chr20
+IRanges of length 1400
+          start      end width
+[1]       60150    61550  1401
+[2]      189750   191050  1301
+[3]      228950   236350  7401
+[4]      237050   243050  6001
+[5]      243450   245550  2101
+[6]      245850   248250  2401
+[7]      259250   260950  1701
+[8]      275950   277950  2001
+[9]      279350   281050  1701
+...         ...      ...   ...
+[1392] 62185050 62186750  1701
+[1393] 62204850 62206750  1901
+[1394] 62272950 62274750  1801
+[1395] 62282050 62285250  3201
+[1396] 62362950 62364450  1501
+[1397] 62367750 62371150  3401
+[1398] 62404450 62405650  1201
+[1399] 62407650 62409450  1801
+[1400] 62426850 62428550  1701
+\end{Soutput}
+\end{Schunk}

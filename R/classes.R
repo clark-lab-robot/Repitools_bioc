@@ -157,6 +157,37 @@ setMethod("clusters", "ClusteredScoresList",
     x@cluster.id
 })
 
+setClass("GCAdjustParams", representation(
+                                    genome = "BSgenome",
+                                    mappability = "BSgenome",
+                                    min.mappability = "numeric",
+				    n.bins = "numeric",
+                                    min.bin.size = "numeric",
+				    poly.degree = "numeric",
+                                    ploidy = "numeric")
+)
+
+# Constructor
+setGeneric("GCAdjustParams", function(genome, mappability, ...)
+           {standardGeneric("GCAdjustParams")})
+setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
+    function(genome, mappability, min.mappability, n.bins = NULL, min.bin.size = 1,
+             poly.degree = NULL, ploidy = 1)
+{
+    if(is.null(min.mappability))
+        stop("Minimum mappability of counting windows to keep not given.")
+
+    if(is.null(n.bins))
+        stop("Number of GC bins to bin counts into not given.")
+
+    if(is.null(poly.degree))
+        stop("Polynomial degree not given.")
+
+    new("GCAdjustParams", genome = genome, mappability = mappability, min.mappability = min.mappability,
+        n.bins = n.bins, min.bin.size = min.bin.size, poly.degree = poly.degree,
+        ploidy = ploidy)
+})
+
 # container for output of regionStats()    
 setClass("RegionStats", representation("list"))
 

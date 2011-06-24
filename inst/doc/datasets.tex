@@ -1,0 +1,108 @@
+A small \texttt{GRangesList} of mapped short reads (four samples run on an Illumina Genome Analyser) is included with the package (for example, see \texttt{?binPlots}). This data has been published and is available \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE24546}{here}. LNCaP is a prostate cancer cell line, and PrEC is a (normal) prostate epithelial cell line.  Here, the ``IP" represents an MBD capture experiment, whereby a population of DNA fragments containing methylated DNA (generally in the CpG context) and ``input" represents fragmented genomic DNA from the same cell lines. \\
+
+Note that \texttt{GRanges} objects of mapped reads from many popular aligners can be created in \textbf{R} using the \texttt{readAligned} function in the \texttt{ShortRead} package, then coerced with \texttt{as(alnRdObj, "GRanges")}. Alternatively, two convenience methods \texttt{BAM2GRanges} and \texttt{BAM2GRangesList} in \texttt{Repitools} could also be used, if the reads were stored on disk in BAM format (this uses the \texttt{scanBam} function from the \texttt{Rsamtools} package). By default, these two methods read in only the uniquely-mapping reads. See the \texttt{ShortRead} package documentation for ideas about how to read other sequencing data into \texttt{GRanges} or \texttt{GRangesList} objects.
+
+\begin{Schunk}
+\begin{Sinput}
+ library(GenomicRanges)
+ load("samplesList.RData")
+ class(samples.list)
+\end{Sinput}
+\begin{Soutput}
+[1] "GRangesList"
+attr(,"package")
+[1] "GenomicRanges"
+\end{Soutput}
+\begin{Sinput}
+ names(samples.list)
+\end{Sinput}
+\begin{Soutput}
+[1] "PrEC input"  "PrEC IP"     "LNCaP input" "LNCaP IP"   
+\end{Soutput}
+\begin{Sinput}
+ elementLengths(samples.list)
+\end{Sinput}
+\begin{Soutput}
+ PrEC input     PrEC IP LNCaP input    LNCaP IP 
+   11061279    10008129    19119904    10139044 
+\end{Soutput}
+\begin{Sinput}
+ samples.list[[1]]
+\end{Sinput}
+\begin{Soutput}
+GRanges with 11061279 ranges and 1 elementMetadata value
+           seqnames         ranges strand   | pData.alignData.from...notNA...
+              <Rle>      <IRanges>  <Rle>   |                       <integer>
+       [1]     chr1   [ 248,  283]      +   |                               0
+       [2]     chr1   [ 447,  482]      -   |                              16
+       [3]     chr1   [ 602,  637]      -   |                              16
+       [4]     chr1   [3182, 3217]      +   |                               0
+       [5]     chr1   [4783, 4818]      -   |                              16
+       [6]     chr1   [6287, 6322]      -   |                              16
+       [7]     chr1   [6310, 6345]      +   |                               0
+       [8]     chr1   [7340, 7375]      -   |                              16
+       [9]     chr1   [9103, 9138]      -   |                              16
+       ...      ...            ...    ... ...                             ...
+[11061271]     chrM [16531, 16566]      +   |                               0
+[11061272]     chrM [16532, 16567]      +   |                               0
+[11061273]     chrM [16532, 16567]      -   |                              16
+[11061274]     chrM [16533, 16568]      -   |                              16
+[11061275]     chrM [16533, 16568]      +   |                               0
+[11061276]     chrM [16534, 16569]      -   |                              16
+[11061277]     chrM [16535, 16570]      -   |                              16
+[11061278]     chrM [16536, 16571]      +   |                               0
+[11061279]     chrM [16536, 16571]      -   |                              16
+
+seqlengths
+      chr1      chr2      chr3      chr4 ...      chrX      chrY      chrM
+ 247249719 242951149 199501827 191273063 ... 154913754  57772954     16571
+\end{Soutput}
+\end{Schunk}
+
+Also, an annotation of genes will be used. The annotation used here is based on one provided from Affymetrix for their Gene 1.0 ST expression arrays\footnote{\href{http://www.affymetrix.com/Auth/analysis/downloads/na27/wtgene/HuGene-1\_0-st-v1.na27.hg18.transcript.csv.zip}{http://www.affymetrix.com/Auth/analysis/downloads/na27/wtgene/HuGene-1\_0-st-v1.na27.hg18.transcript.csv.zip}}. We will relate the epigenomic sequencing data to the Affymetrix gene expression measurements.  Of course, users may wish to make use of the rich functionality available within the \texttt{GenomicFeatures} package.
+ 
+\begin{Schunk}
+\begin{Sinput}
+ gene.anno <- read.csv("geneAnno.csv", stringsAsFactors = FALSE)
+ head(gene.anno)
+\end{Sinput}
+\begin{Soutput}
+     name  chr strand  start    end    symbol
+1 7896759 chr1      + 781253 783614 LOC643837
+2 7896761 chr1      + 850983 869824    SAMD11
+3 7896779 chr1      + 885829 890958    KLHL17
+4 7896798 chr1      + 891739 900345   PLEKHN1
+5 7896817 chr1      + 938709 939782     ISG15
+6 7896822 chr1      + 945365 981355      AGRN
+\end{Soutput}
+\begin{Sinput}
+ dim(gene.anno)
+\end{Sinput}
+\begin{Soutput}
+[1] 24966     6
+\end{Soutput}
+\end{Schunk}
+
+\noindent Lastly, there is matrix of gene expression changes, with each element related to the corresponding row in the gene annotation table. These values are moderated t-statistics (see the \texttt{limma} package) of background corrected and RMA normalised Affymetrix expression array experiments. The unprocessed array data is available \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE19726}{here}.
+
+\begin{Schunk}
+\begin{Sinput}
+ load("expr.RData")
+ head(expr)
+\end{Sinput}
+\begin{Soutput}
+            t-stat
+7896759  4.1130688
+7896761  3.0691214
+7896779  0.9724271
+7896798 -0.5090460
+7896817  2.1949896
+7896822 -6.4049774
+\end{Soutput}
+\begin{Sinput}
+ dim(expr)
+\end{Sinput}
+\begin{Soutput}
+[1] 24966     1
+\end{Soutput}
+\end{Schunk}
