@@ -10,5 +10,5 @@ Imports: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, 
 Suggests: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, zoo, ShortRead, BSgenome.Hsapiens.UCSC.hg18
 Description: Tools for the analysis of enrichment-based epigenomic data.  Features include summarization and visualization of epigenomic data across promoters according to gene expression context, finding regions of differential methylation/binding, etc. 
 License: LGPL (>= 2)
-biocViews: DNAmethylation, GeneExpression
+biocViews: DNAmethylation, GeneExpression, Methylseq
 
