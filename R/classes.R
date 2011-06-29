@@ -171,7 +171,7 @@ setClass("GCAdjustParams", representation(
 setGeneric("GCAdjustParams", function(genome, mappability, ...)
            {standardGeneric("GCAdjustParams")})
 setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
-    function(genome, mappability, min.mappability, n.bins = NULL, min.bin.size = 1,
+    function(genome, mappability, min.mappability, n.bins = NULL, min.bin.size = 2,
              poly.degree = NULL, ploidy = 1)
 {
     if(is.null(min.mappability))
@@ -180,12 +180,42 @@ setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
     if(is.null(n.bins))
         stop("Number of GC bins to bin counts into not given.")
 
-    if(is.null(poly.degree))
-        stop("Polynomial degree not given.")
-
     new("GCAdjustParams", genome = genome, mappability = mappability, min.mappability = min.mappability,
         n.bins = n.bins, min.bin.size = min.bin.size, poly.degree = poly.degree,
         ploidy = ploidy)
+})
+
+setClass("CopyEstimate", representation(
+                                    windows = "GRanges",
+                                    old.counts = "matrix",
+                                    mappability = "numeric",
+                                    gc = "numeric",
+                                    models = "list",
+                                    cn = "matrix")
+)
+setGeneric("CopyEstimate", function(windows, old.counts, mappability, gc, model, cn)
+           {standardGeneric("CopyEstimate")})
+
+setMethod("CopyEstimate", c("GRanges", "matrix", "numeric", "numeric", "list", "matrix"),
+    function(windows, old.counts, mappability, gc, model, cn)
+{
+    new("CopyEstimate", windows = windows, old.counts = old.counts, mappability = round(mappability, 2),
+                    gc = round(gc, 2), models = models, cn = round(cn, 2))
+})
+
+setMethod("show", "CopyEstimate", function(object) {
+    cat("Object of class 'CopyEstimate'.\n")
+    cat("Windows:\n")
+    print(object@windows)
+    cat("Raw Counts (first 6):\n")
+    print(head(object@old.counts))
+    cat("Mappability: ", paste(head(object@mappability), collapse = ", "), ", ...\n", sep = '')
+    cat("GC content: ", paste(head(object@gc), collapse = ", "), ", ...\n", sep = '')
+
+    cat("Model Fits:\n")
+    invisible(lapply(object@models, print))
+    cat("Copy Number Estimates (first 6):\n")
+    print(head(object@cn))
 })
 
 # container for output of regionStats()    

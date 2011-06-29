@@ -31,6 +31,32 @@ setMethod("profilePlots", "ScoresList",
         else
             legend.plot <- rep(legend.plot, length(scores))
 
+    # Get rid of any gene list genes that are in NA group.
+    # For numeric indices, give an error.
+    keep <- lapply(gene.lists, function(u)
+                  {
+                      if(class(u) == "logical")
+                      {
+                          names(u) <- 1:length(u)
+                          u <- na.omit(u)
+                          as.numeric(names(u))
+                      } else {
+                          if(any(is.na(u)))
+                              stop("Numeric gene indices mixed with NAs not allowed.")
+                      }
+                  })
+
+    scores <- mapply(function(u, v, w)
+                     {
+                         if(class(w) == "logical")
+                             u[v, ]
+                         else
+                             u
+                     }, scores, keep, gene.lists, SIMPLIFY = FALSE)
+
+    gene.lists <- lapply(gene.lists, na.omit)
+
+    # Pick a size for random gene sets.
     samp.size <- max(sapply(gene.lists, function(u)
                                         if(class(u) == "logical") sum(u)
                                         else length(u)))

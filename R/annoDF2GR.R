@@ -15,6 +15,6 @@ setMethod("annoDF2GR", "data.frame", function(anno)
 
     GRanges(anno$chr,
 	    IRanges(anno$start, anno$end),
-            if("strand" %in% colnames(anno)) anno$strand else '*',
+            if("strand" %in% colnames(anno)) anno$strand else rep('*', nrow(anno)),
             DF)
 })

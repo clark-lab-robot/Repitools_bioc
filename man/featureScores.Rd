@@ -13,9 +13,9 @@
 }
 \section{Usage}{
   \describe{
-    The ANY,data.frame method:
-    \code{featureScores(x, anno, ...)}
-    The ANY,GRanges method:
+    The ANY,data.frame method: \cr
+    \code{featureScores(x, anno, ...)} \cr
+    The ANY,GRanges method: \cr
     \code{featureScores(x, anno, up = NULL, down = NULL, ...)}
   }
 }
@@ -37,7 +37,7 @@
                 direction.}
     \item{dist:}{The type of distance measure to use, in determining the boundaries
                 of the sampling area. Only provide this if \code{x} is sequencing
-                data. Default: \code{"base"}.}
+                        data. Default: \code{"base"}. \code{"percent"} is also accepted.}
     \item{freq:}{Score sampling frequency.}
     \item{log2.adj:}{Whether to log2 scale the array intensities. Only provide this
                     if \code{x} is array data. Default: TRUE.}
@@ -49,12 +49,9 @@
     \item{verbose:}{Whether to print the progess of processing. Default: TRUE.}
   }
 }
-\value{
-  A \code{\linkS4class{ScoresList}} object, that holds a list of score
-  matrices, one for each experiment type, and the parameters that were used
-  to create the score matrices.
-}
-\details{
+
+\section{Details}{
+  \describe{
   If \code{x} is a vector of paths or \code{GRangesList} object,
   then \code{names(x)} should contain the types of the experiments.
 
@@ -104,10 +101,19 @@
   gene that has a TSS very near to the edge of a chromosome) are given a coverage
   of 0. Coverage is normalised by dividing the raw coverage by the total number of
   reads in a sample.
+}}
+
+\section{Value}{
+  \describe{
+    A \code{\linkS4class{ScoresList}} object, that holds a list of score
+    matrices, one for each experiment type, and the parameters that were used
+    to create the score matrices.
+  }
 }
+
 \seealso{\code{\link{mergeReplicates}} for merging sequencing data replicates of an
          experiment type.}
-\author{Dario Strbenac}
+\author{Dario Strbenac, with contributions from Matthew Young at WEHI.}
 \examples{
   data(chr21genes)
   data(samplesList)

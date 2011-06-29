@@ -9,9 +9,9 @@
 }
 \section{Usage}{
   \describe{
-    # ANY,data.frame method
-    \code{annotationCounts(x, anno, ...)}
-    # ANY,GRanges method
+    # ANY,data.frame method \cr
+    \code{annotationCounts(x, anno, ...)} \cr
+    # ANY,GRanges method \cr
     \code{annotationCounts(x, anno, up, down, ...)}
   }
 }
@@ -31,15 +31,24 @@
                processing.}
   }
 }
-\value{A \code{matrix} of counts is returned, one column per sample and one row
-       per row of genomic features supplied.}
-\details{
+
+\section{Details}{
+  \describe{
     If the genomic features annotation contains all unstranded features, the
     \code{up} and \code{down} distances refer to how far towards the start of
     a chromosome, and how far towards the end to make the counting window
     boundaries. If the annotation is all stranded, then the \code{up} and
     \code{down} distances are relative to the TSS of the features.
+  }
 }
+
+\section{Value}{
+  \describe{
+    A \code{matrix} of counts is returned, one column per sample and one row
+    per row of genomic features supplied.
+  }
+}
+
 \author{Aaron Statham}
 \seealso{\code{\link{annotationBlocksCounts}}, \code{\link{genomeBlocks}}}
 \examples{

@@ -11,9 +11,9 @@
 }
 \section{Usage}{
   \describe{
-    The data.frame,data.frame method:
-    \code{annotationLookup(x, anno, ...)}
-    The data.frame,GRanges method:
+    The data.frame,data.frame method: \cr
+    \code{annotationLookup(x, anno, ...)} \cr
+    The data.frame,GRanges method: \cr
     \code{annotationLookup(x, anno, up, down, ...)}
   }
 }
@@ -33,27 +33,33 @@
                them in its processing.}
   }
 }
-\details{
-  This function is a wrapper for the generic function \code{annotationBlocksLookup}
-  which can handle annotations of varying sizes. \code{annotationLookup} is
-  appropriate where you wish to map probes that are within a fixed distance of
-  points of annotation e.g gene transcription start sites. Even if strand information
-  is given for probes, it is ignored.
+\section{Details}{
+  \describe{
+    This function is a wrapper for the generic function \code{annotationBlocksLookup}
+    which can handle annotations of varying sizes. \code{annotationLookup} is
+    appropriate where you wish to map probes that are within a fixed distance of
+    points of annotation e.g gene transcription start sites. Even if strand information
+    is given for probes, it is ignored.
 
-  If \code{x} has no index column, then the probes are given indices from 1 to
-  the number of probes, in the order that they appear in the \code{data.frame} or
-  \code{GRanges} object.
+    If \code{x} has no index column, then the probes are given indices from 1 to
+    the number of probes, in the order that they appear in the \code{data.frame} or
+    \code{GRanges} object.
 
-  It is an error for the gene annotation to have unstranded features.
+    It is an error for the gene annotation to have unstranded features.
+  }
 }
-\value{
-  A list with elements
-  \item{indexes}{a list for each gene in \code{y}, giving a vector
-                 of indices to the probe data.}
-  \item{offsets}{a list for each gebe in \code{y}, giving a vector
-                 (corresponding to \code{indexes}) of offsets relative to the
-                 genes' TSSs for each probe that mapped that that gene.}
+
+\section{Value}{
+  \describe{
+    A list with elements
+    \item{indexes}{a list for each gene in \code{y}, giving a vector
+                   of indices to the probe data.}
+    \item{offsets}{a list for each gebe in \code{y}, giving a vector
+                   (corresponding to \code{indexes}) of offsets relative to the
+                   genes' TSSs for each probe that mapped that that gene.}
+  }
 }
+
 \author{Aaron Statham, Mark Robinson}
 \seealso{\code{\link{annotationBlocksLookup}}, \code{\link{makeWindowLookupTable}}}
 \examples{

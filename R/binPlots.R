@@ -1,10 +1,15 @@
 setGeneric("binPlots", signature = "x", function(x, ...){standardGeneric("binPlots")})
 
 setMethod("binPlots", "ScoresList",
-    function(x, summarize = c("mean", "median"), ordering, ord.label,
+    function(x, summarize = c("mean", "median"), ordering = NULL, ord.label = NULL,
              plot.type = c("line", "heatmap", "terrain"), n.bins = 10, cols = NULL,
              lwd = 3, lty = 1, same.scale = TRUE, symm.scale = FALSE, verbose = TRUE)
 {
+    if(is.null(ordering))
+        stop("Nothing given to bin by.")
+    if(is.null(ord.label))
+        stop("Label text for ordering not given.")
+
     summarize <- match.arg(summarize)
     scores <- tables(x)
     n.points <- ncol(scores[[1]])
@@ -13,6 +18,8 @@ setMethod("binPlots", "ScoresList",
 
     def.par <- par(no.readonly = TRUE) # save default, for resetting.
     plot.type <- match.arg(plot.type)
+    if(class(ordering) %in% c("numeric", "integer", "factor"))
+        ordering <- data.frame(ordering)
     if(!ncol(ordering) == length(scores))
     {
         if(!ncol(ordering) == 1)
@@ -42,16 +49,18 @@ setMethod("binPlots", "ScoresList",
     
     # Split genes into intervals.
     if(verbose) message("Calculating intervals.")
-    breaks <- apply(ordering, 2, function(u)
-                   {
-                       if(class(u) == "numeric") {
-                           br <- quantile(u, p = (0:n.bins)/n.bins)
-                           list(breakpoints = br, intervals = cut(u, breaks = br))
-	               } else if(class(u) == "factor") {
-	                   n.bins <- length(levels(u))
-	                   list(breakpoints = u, intervals = u)
-	               }
-                   })
+    breaks <- list()
+    for(index in 1:ncol(ordering))
+    {
+        if(class(ordering[, index]) == "numeric")
+        {
+            br <- quantile(ordering[, index], p = (0:n.bins)/n.bins)
+            breaks[[index]] <- list(breakpoints = br, intervals = cut(ordering[, index], breaks = br))
+        } else if(class(ordering[, index]) == "factor") {
+            n.bins <- length(levels(ordering[, index]))
+            breaks[[index]] <- list(breakpoints = levels(ordering[, index]), intervals = ordering[, index])
+        }
+    }
 
     # Get matrices for each ordering bin, in each dataset.
     if(verbose) message("Splitting scores into bins.")
@@ -102,7 +111,7 @@ setMethod("binPlots", "ScoresList",
                     ylim = range)
             par(mai = c(1.02, 0.05, 0.82, 0))
             plot.new()
-            legend(x = "top", title = ord.label, col = cols, lty = 1, legend = cut.levels)
+            legend(x = "top", title = ord.label, col = cols, lty = lty, lwd = lwd, legend = cut.levels)
             mtext(t.name, line = 0.5, outer = TRUE)
         } else if(plot.type == "heatmap") {
                layout(rbind(c(1, 2, 3)), widths=c(1, 3, 1))
@@ -117,7 +126,15 @@ setMethod("binPlots", "ScoresList",
                      yaxt = 'n', ylab = "Bin", col = cols, zlim = range)
                 par(mai = c(1.02, 0.05, 0.82, 0.50))
                 bounds <- item.breaks[["breakpoints"]]
-                plot(x = bounds, y = 0:n.bins, type = 'l', yaxt = 'n', lwd = 3, xlab = ord.label, yaxs = 'i')
+                if(class(bounds) != "character")
+                {
+                    plot(x = bounds, y = 0:n.bins, type = 'l', yaxt = 'n', lwd = 3, xlab = ord.label, yaxs = 'i')
+                } else {
+                    plot.new()
+                    plot.window(xlim = c(0, 1), ylim = c(0, n.bins), xaxs = 'i', yaxs = 'i')
+                    text(0.5, (1:n.bins - 0.5), bounds)
+                    title(xlab = ord.label)
+                }
                 par(oma = c(0, 0, 2, 0))
 		mtext(t.name, line = 0, outer = TRUE)
         } else if(plot.type == "terrain") {
@@ -135,6 +152,6 @@ setMethod("binPlots", "ScoresList",
                   ticktype = "detailed", zlab = "Signal")
 	      mtext(t.name, line = 0, outer = TRUE)
 	}
-        par(def.par)#- reset to default
+        par(def.par) #- reset to default
     }, items.bins, names(x), ranges, o.types, colnames(ordering), breaks))
 })

@@ -7,15 +7,16 @@
   the signal across is summarized and displayed visually.
 }
 \usage{
-  \S4method{binPlots}{ScoresList}(x, summarize = c("mean", "median"), ordering,
-   ord.label, plot.type = c("line", "heatmap", "terrain"), n.bins = 10, cols = NULL,
+  \S4method{binPlots}{ScoresList}(x, summarize = c("mean", "median"), ordering = NULL,
+   ord.label = NULL, plot.type = c("line", "heatmap", "terrain"), n.bins = 10, cols = NULL,
    lwd = 3, lty = 1, same.scale = TRUE, symm.scale = FALSE, verbose = TRUE)
 }
 \arguments{
   \item{x}{A \code{\linkS4class{ScoresList}} object. See \code{\link{featureScores}}.}
   \item{summarize}{How to summarise the scores for each bin into a single value.}
   \item{ordering}{A \code{data.frame} of either numeric or factor variables, with the same
-                  number of rows as the annotation used to create \code{x}.}
+                  number of rows as the annotation used to create \code{x}, or a vector
+                  of such types.}
   \item{ord.label}{Character string that describes what type of data the ordering is.
                    e.g. "log2 expression". Used to label relevant plot axis.}
   \item{plot.type}{Style of plot to draw.}

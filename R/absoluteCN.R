@@ -1,60 +1,52 @@
-setGeneric("absoluteCN", function(input.windows, ip.windows, ...){standardGeneric("absoluteCN")})
+setGeneric("absoluteCN", function(input.windows, input.counts, gc.params, ...)
+                                 {standardGeneric("absoluteCN")})
 
-setMethod("absoluteCN", c("GRanges", "GRanges"),
-    function(input.windows, ip.windows, input.counts = NULL, gc.params = NULL, verbose = TRUE)
+setMethod("absoluteCN", c("GRanges", "matrix", "GCAdjustParams"),
+    function(input.windows, input.counts, gc.params, segment.sqrt = TRUE,
+            regions = input.windows[NULL], ..., verbose = TRUE)
 {
-    if(is.null(gc.params))
-        stop("gc.params must be specified for absolute copy estimation.")
+    require(GenomicRanges)
+    require(DNAcopy)
 
-    n.bins <- gc.params@n.bins
+    adj.CN <- GCadjustCopy(input.windows, input.counts, gc.params, verbose = verbose)
+    if(segment.sqrt) adj.CN@cn <- sqrt(adj.CN@cn)
 
-    # Find which counting windows have sufficient mappability.
-    input.win.mappability <- mappabilityCalc(input.windows, gc.params@mappability) * 100
-    mappable <- input.win.mappability > gc.params@min.mappability
-    input.windows <- input.windows[mappable, ]
-    input.counts <- input.counts[mappable, ]
-    input.counts <- input.counts * 100 / input.win.mappability[mappable]
-    abs.CN <- apply(input.counts, 2, function(x) x / median(x))
-
-    # Get the GC content of windows.
-    gc <- gcContentCalc(input.windows, gc.params@genome)
-
-    # Break GC content into bins, and find mode of bins, also including adjacent bins.
-    gc.range <- range(gc)
-    bins <- seq(gc.range[1], gc.range[2], length.out = n.bins) # Midpoint of each bin.
-    mode.gcs <- apply(abs.CN, 2, function(x)
-    {
-        modes <- rep(NA, n.bins)
-        for(index in 2:(gc.params@n.bins-1))
-        {
-            in.bins <- which(gc >= bins[index - 1] & gc < bins[index + 1])
-            count.dens <- density(x[in.bins])
-            modes[index] <- as.numeric(count.dens$x[which.max(count.dens$y)])
-        }
-        modes
-    })
-
-    # Find expected copy number for each window, based on its GC content.
-    model.CN <- apply(mode.gcs, 2, function(x)
-    {
-        counts.model <- lm(x ~ poly(bins, gc.params@poly.degree))
-        predict(counts.model, data.frame(bins = gc))
-    })
-
-    # Adjust the real counts by dividing by expected counts.
-    scaled.CN <- t(t(abs.CN / model.CN) * gc.params@ploidy)
+    # Do segmentation.
+    if(verbose) message("Segmenting absolute copy number estimates and matching to input windows.")
+    adj.CN@cn <- apply(adj.CN@cn, 2, function(x)
+                 {
+                     cn <- CNA(chrom = as.character(seqnames(input.windows)),
+                               maploc = as.numeric(start(input.windows)),
+                               genomdat = x)
+                     cn <- segment(smooth.CNA(cn), ..., verbose = 0)
+                     cn$out[, "loc.end"] <- cn$out[, "loc.end"] + width(input.windows)[1]
+                     CNV.windows <- GRanges(cn$out[, "chrom"],
+                                            IRanges(cn$out[, "loc.start"], cn$out[, "loc.end"]))
+                    map <- findOverlaps(input.windows, CNV.windows, select = "first")			   
+                    cn$out[map, "seg.mean"]   
+                 })
+    if(verbose) message("Done segmenting and matching.")
     
-    if(verbose == TRUE) message("Mapping copy number windows to IP windows.")
-    map <- findOverlaps(ip.windows, input.windows, select = "first")
+    if(segment.sqrt) adj.CN@cn <- adj.CN@cn^2
 
-    features.CN <- scaled.CN[map, ]
-    rownames(features.CN) <- .getNames(ip.windows)
+    if(length(regions) > 0)
+    {
+        if(verbose) 
+            message("Mapping copy number windows to regions.")
+        map <- findOverlaps(regions, input.windows, select = "first")
+        
+        adj.CN@old.counts <- adj.CN@old.counts[map, ]
+        adj.CN@cn <- adj.CN@cn[map, ]
+        adj.CN@windows <- regions
+        adj.CN@gc <- adj.CN@gc[map]
+        adj.CN@mappability <- adj.CN@mappability[map]
+    }
 
-    features.CN
+    adj.CN
 })
 
-setMethod("absoluteCN", c("data.frame", "data.frame"),
-    function(input.windows, ip.windows, ...)
+setMethod("absoluteCN", c("data.frame", "matrix", "GCAdjustParams"),
+    function(input.windows, input.counts, gc.params, regions = input.windows[NULL, ], ...)
 {
-    absoluteCN(annoDF2GR(input.windows), annoDF2GR(ip.windows), ...)
+    absoluteCN(annoDF2GR(input.windows), input.counts, gc.params, regions = annoDF2GR(regions), ...)
 })

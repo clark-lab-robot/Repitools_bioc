@@ -14,9 +14,9 @@
 }
 \section{Usage}{
   \describe{
-    The ANY,data.frame method:
-    \code{blocksStats{ANY,data.frame}(x, anno, ...)}
-    The ANY,GRanges method:
+    The ANY,data.frame method: \cr
+    \code{blocksStats{ANY,data.frame}(x, anno, ...)} \cr
+    The ANY,GRanges method: \cr
     \code{blocksStats{ANY,GRanges}(x, anno, up = NULL, down = NULL, ...)}
   }
 }
@@ -71,15 +71,20 @@
                processing.}
   }
 }
-\details{
-  For array data, the statstics are either determined by a t-test, or a linear
-  model. For sequencing data, the two groups are assumed to be from a
-  negative binomial distribution, and an exact test is used.
+\section{Details}{
+  \describe{
+    For array data, the statstics are either determined by a t-test, or a linear
+    model. For sequencing data, the two groups are assumed to be from a
+    negative binomial distribution, and an exact test is used.
+  }
 }
-\value{
-  A \code{data.frame}, with the same number of rows as there are features described
-  by \code{anno}, but with additional columns for the statistics calculated at each
-  feature.
+
+\section{Value}{
+  \describe{
+    A \code{data.frame}, with the same number of rows as there are features described
+    by \code{anno}, but with additional columns for the statistics calculated at each
+    feature.
+  }
 }
 \author{Mark Robinson}
 \seealso{\code{\link{annotationLookup}} and \code{\link{annotationBlocksLookup}}}
