@@ -186,29 +186,36 @@ setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
 })
 
 setClass("CopyEstimate", representation(
+                                    ploidy = "numeric",
                                     windows = "GRanges",
-                                    old.counts = "matrix",
+                                    raw.counts = "matrix",
                                     mappability = "numeric",
                                     gc = "numeric",
                                     models = "list",
-                                    cn = "matrix")
+                                    cn = "matrix",
+                                    seg.cn = "matrix")
 )
-setGeneric("CopyEstimate", function(windows, old.counts, mappability, gc, model, cn)
+setGeneric("CopyEstimate", function(ploidy, windows, raw.counts, mappability, gc, model, cn, seg.cn)
            {standardGeneric("CopyEstimate")})
 
-setMethod("CopyEstimate", c("GRanges", "matrix", "numeric", "numeric", "list", "matrix"),
-    function(windows, old.counts, mappability, gc, model, cn)
+setMethod("CopyEstimate", c("numeric", "GRanges", "matrix", "numeric", "numeric", "list", "matrix"),
+    function(ploidy, windows, raw.counts, mappability, gc, model, cn)
 {
-    new("CopyEstimate", windows = windows, old.counts = old.counts, mappability = round(mappability, 2),
-                    gc = round(gc, 2), models = models, cn = round(cn, 2))
+    if(length(ploidy) < ncol(raw.counts))
+        ploidy <- rep(ploidy, ncol(raw.counts))
+
+    new("CopyEstimate", ploidy = ploidy, windows = windows, raw.counts = raw.counts,
+                        mappability = round(mappability, 2), gc = round(gc, 2),
+                        models = models, cn = round(cn, 2))
 })
 
 setMethod("show", "CopyEstimate", function(object) {
     cat("Object of class 'CopyEstimate'.\n")
+    cat("Genome Ploidy: ", paste(object@ploidy, collapse = ", "), '\n', sep = '')
     cat("Windows:\n")
     print(object@windows)
     cat("Raw Counts (first 6):\n")
-    print(head(object@old.counts))
+    print(head(object@raw.counts))
     cat("Mappability: ", paste(head(object@mappability), collapse = ", "), ", ...\n", sep = '')
     cat("GC content: ", paste(head(object@gc), collapse = ", "), ", ...\n", sep = '')
 
@@ -216,6 +223,11 @@ setMethod("show", "CopyEstimate", function(object) {
     invisible(lapply(object@models, print))
     cat("Copy Number Estimates (first 6):\n")
     print(head(object@cn))
+    if(length(object@seg.cn) > 0)
+    {
+        cat("Segmented Copy Number Estimates (first 6):\n")
+        print(head(object@seg.cn))
+    }
 })
 
 # container for output of regionStats()    

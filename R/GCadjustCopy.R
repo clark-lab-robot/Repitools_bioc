@@ -6,6 +6,9 @@ setMethod("GCadjustCopy", c("GRanges", "matrix", "GCAdjustParams"),
 {
     n.bins <- gc.params@n.bins
 
+    if(length(input.windows) != nrow(input.counts))
+        stop("Number of input windows different to rows of counts.")
+
     # Find which counting windows have sufficient mappability.
     input.win.mappability <- mappabilityCalc(input.windows, gc.params@mappability)
     mappable <- input.win.mappability * 100 > gc.params@min.mappability 
@@ -49,7 +52,8 @@ setMethod("GCadjustCopy", c("GRanges", "matrix", "GCAdjustParams"),
     adj.CN <- t(t(abs.CN / single.CNs) * gc.params@ploidy)
     adj.CN[!mappable, ] <- NA
 
-    CopyEstimate(input.windows, input.counts, input.win.mappability / 100, gc, models, adj.CN)
+    CopyEstimate(gc.params@ploidy, input.windows, input.counts, input.win.mappability / 100,
+                 gc, models, adj.CN)
 })
 
 setMethod("GCadjustCopy", c("data.frame", "matrix", "GCAdjustParams"),

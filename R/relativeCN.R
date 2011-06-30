@@ -8,7 +8,7 @@ setMethod("relativeCN", c("GRanges", "matrix"),
     if(length(input.windows) != nrow(input.counts))
         stop("Rows of counts differ to rows of input regions.\n")
 
-    if(!class(gc.params) %in% c("GCAdjustParams", NULL))
+    if(!class(gc.params) %in% c("GCAdjustParams", "NULL"))
         stop("'gc.params' is not an object of class 'GCAdjustParams' or NULL.")
     
     require(GenomicRanges)
@@ -62,17 +62,17 @@ setMethod("relativeCN", c("GRanges", "matrix"),
             relative.cn <- relative.cn[map]
         } else {
             adj.CN@windows <- regions
-            adj.CN@old.counts <- adj.CN@old.counts[map, , drop = FALSE]
+            adj.CN@raw.counts <- adj.CN@raw.counts[map, , drop = FALSE]
             adj.CN@mappability <- adj.CN@mappability[map]
             adj.CN@gc <- adj.CN@gc[map]
-            adj.CN@cn <- matrix(relative.cn[map])
+            adj.CN@seg.cn <- matrix(relative.cn[map])
         }
     } else
     {
         if(!is.null(gc.params))
             fc.matrix <- matrix(relative.cn)
             colnames(fc.matrix) <- "Fold Change"
-            adj.CN@cn <- fc.matrix
+            adj.CN@seg.cn <- fc.matrix
     }
 
     if(is.null(gc.params)) relative.cn else adj.CN

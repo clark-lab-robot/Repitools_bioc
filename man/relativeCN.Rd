@@ -53,18 +53,13 @@
   Circular binary segmentation for the analysis of array-based DNA copy number data.
   \emph{Biostatistics} 5: 557-572}
 \examples{
-\dontrun{  inputs <- data.frame(chr = c("chr1", "chr1", "chr1", "chr2", "chr2"),
-                     start = c(1, 50001, 1000001, 1, 10001),
-                       end = c(50000, 100000, 1050000, 10000, 20000))
+  inputs <- data.frame(chr = c("chr1", "chr1", "chr1", "chr2", "chr2"),
+                     start = c(1, 50001, 100001, 1, 10001),
+                       end = c(50000, 100000, 150000, 10000, 20000))
   enriched <- data.frame(chr = c("chr1", "chr1", "chr1", "chr1", "chr1", "chr2", "chr2"),
                        start = c(1, 1001, 2001, 10000001, 10005001, 9001, 9501),
                          end = c(1000, 2000, 3000, 10001000, 10006000, 9500, 10000))
   counts <- matrix(c(25, 39, 3, 10, 22, 29, 38, 5, 19, 31), nrow = 5)
   colnames(counts) <- c("Control", "Treatment")
-  gc.par <- GCAdjustParams(genome = Hsapiens, mappability = Hsapiens36bp,
-                           min.mappability = 50, n.bins = 2, min.bin.size = 2,
-                           poly.degree = 3, ploidy = c(2, 4))
-
-  relativeCN(inputs, counts, gc.par, regions = enriched, p.method = "perm")
-}
+  relativeCN(inputs, input.counts = counts, regions = enriched, p.method = "perm")
 }

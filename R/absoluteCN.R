@@ -9,11 +9,11 @@ setMethod("absoluteCN", c("GRanges", "matrix", "GCAdjustParams"),
     require(DNAcopy)
 
     adj.CN <- GCadjustCopy(input.windows, input.counts, gc.params, verbose = verbose)
-    if(segment.sqrt) adj.CN@cn <- sqrt(adj.CN@cn)
+    if(segment.sqrt) transformed.cn <- sqrt(adj.CN@cn) else transformed.cn <- adj.CN@cn
 
     # Do segmentation.
     if(verbose) message("Segmenting absolute copy number estimates and matching to input windows.")
-    adj.CN@cn <- apply(adj.CN@cn, 2, function(x)
+    adj.CN@seg.cn <- apply(transformed.cn, 2, function(x)
                  {
                      cn <- CNA(chrom = as.character(seqnames(input.windows)),
                                maploc = as.numeric(start(input.windows)),
@@ -27,7 +27,7 @@ setMethod("absoluteCN", c("GRanges", "matrix", "GCAdjustParams"),
                  })
     if(verbose) message("Done segmenting and matching.")
     
-    if(segment.sqrt) adj.CN@cn <- adj.CN@cn^2
+    if(segment.sqrt) adj.CN@seg.cn <- adj.CN@seg.cn^2
 
     if(length(regions) > 0)
     {
@@ -35,8 +35,9 @@ setMethod("absoluteCN", c("GRanges", "matrix", "GCAdjustParams"),
             message("Mapping copy number windows to regions.")
         map <- findOverlaps(regions, input.windows, select = "first")
         
-        adj.CN@old.counts <- adj.CN@old.counts[map, ]
+        adj.CN@raw.counts <- adj.CN@raw.counts[map, ]
         adj.CN@cn <- adj.CN@cn[map, ]
+        adj.CN@seg.cn <- adj.CN@seg.cn[map, ]
         adj.CN@windows <- regions
         adj.CN@gc <- adj.CN@gc[map]
         adj.CN@mappability <- adj.CN@mappability[map]
