@@ -12,7 +12,7 @@ setMethod("GCadjustCopy", c("GRanges", "matrix", "GCAdjustParams"),
     # Find which counting windows have sufficient mappability.
     input.win.mappability <- mappabilityCalc(input.windows, gc.params@mappability)
     mappable <- input.win.mappability * 100 > gc.params@min.mappability 
-    counts.map.scaled <- input.counts * 100 / input.win.mappability
+    counts.map.scaled <- input.counts / input.win.mappability
     abs.CN <- apply(counts.map.scaled, 2, function(x) x / median(x[mappable]))
 
     # Get the GC content of windows.
@@ -52,7 +52,7 @@ setMethod("GCadjustCopy", c("GRanges", "matrix", "GCAdjustParams"),
     adj.CN <- t(t(abs.CN / single.CNs) * gc.params@ploidy)
     adj.CN[!mappable, ] <- NA
 
-    CopyEstimate(gc.params@ploidy, input.windows, input.counts, input.win.mappability / 100,
+    CopyEstimate(gc.params@ploidy, input.windows, input.counts, input.win.mappability,
                  gc, models, adj.CN)
 })
 
