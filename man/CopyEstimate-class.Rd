@@ -2,7 +2,7 @@
 \docType{class}
 \alias{CopyEstimate}
 \alias{CopyEstimate-class}
-\alias{CopyEstimate,numeric,GRanges,matrix,numeric,numeric,list,matrix-method}
+\alias{CopyEstimate,numeric,GRanges,numeric,numeric,matrix,list,matrix-method}
 \alias{show,CopyEstimate-method}
 
 \title{Container for results of GC adjusted copy number estimation.}
@@ -14,24 +14,30 @@
 \section{Constructor}{
   \describe{
     \item{}{
-    	\code{CopyEstimate(ploidy, windows, old.counts, mappability, gc, models, cn, seg.cn)}
+    	\code{CopyEstimate(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN)}
 	Creates a CopyEstimate object.
 	\describe{
             \item{\code{ploidy}}{Sets of chromosomes in each sample.}
 	    \item{\code{windows}}{A \code{\linkS4class{GRanges}} object.}
-	    \item{\code{old.counts}}{A matrix of counts before any adjustment.}
 	    \item{\code{mappability}}{A numeric vector of mappability. Elements
                                       between 0 and 1.}
 	    \item{\code{gc}}{A numeric vector of GC content Elements between 0 and 1.}
-	    \item{\code{models}}{The polynomial model that was fit to the counts.}
-	    \item{\code{cn}}{A matrix of GC-adjusted absolute copy number estimates.}
+	    \item{\code{unadj.CN}}{A matrix of estimated copy numbers after mappability
+                                   adjustment, but before GC content adjustment.}
+	    \item{\code{models}}{The polynomial models that were fit to the counts.}
+	    \item{\code{adj.CN}}{A matrix of estimated copy numbers after mappability
+                                   adjustment and GC content adjustment.}
 	}
     }
+
+    Note that \code{mappability} and \code{gc} become metadata columns of \code{windows}
+    when the object is created.
   }
 }
 \section{Additional Slots}{
   \describe{
       These are added to by \code{\link{absoluteCN}} or \code{\link{relativeCN}}
-    \item{seg.CN}{A matrix of copy number estimates after segmentation has been done.}
+    \item{seg.CN}{A \code{\linkS4class{GRangesList}} of copy number segmentations
+                  for each sample.}
   }
 }

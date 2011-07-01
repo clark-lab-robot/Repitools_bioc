@@ -188,25 +188,24 @@ setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
 setClass("CopyEstimate", representation(
                                     ploidy = "numeric",
                                     windows = "GRanges",
-                                    raw.counts = "matrix",
-                                    mappability = "numeric",
-                                    gc = "numeric",
+                                    unadj.CN = "matrix",
                                     models = "list",
-                                    cn = "matrix",
-                                    seg.cn = "matrix")
+                                    adj.CN = "matrix",
+                                    seg.CN = "GRangesList")
 )
-setGeneric("CopyEstimate", function(ploidy, windows, raw.counts, mappability, gc, model, cn, seg.cn)
+setGeneric("CopyEstimate", function(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN)
            {standardGeneric("CopyEstimate")})
 
-setMethod("CopyEstimate", c("numeric", "GRanges", "matrix", "numeric", "numeric", "list", "matrix"),
-    function(ploidy, windows, raw.counts, mappability, gc, model, cn)
+setMethod("CopyEstimate", c("numeric", "GRanges", "numeric", "numeric", "matrix", "list", "matrix"),
+    function(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN)
 {
-    if(length(ploidy) < ncol(raw.counts))
-        ploidy <- rep(ploidy, ncol(raw.counts))
+    if(length(ploidy) < ncol(unadj.CN))
+        ploidy <- rep(ploidy, ncol(unadj.CN))
 
-    new("CopyEstimate", ploidy = ploidy, windows = windows, raw.counts = raw.counts,
-                        mappability = round(mappability, 2), gc = round(gc, 2),
-                        models = models, cn = round(cn, 2))
+    elementMetadata(windows) <- DataFrame(mappability, GC = gc)
+
+    new("CopyEstimate", ploidy = ploidy, windows = windows, unadj.CN = unadj.CN,
+        models = models, adj.CN = adj.CN)
 })
 
 setMethod("show", "CopyEstimate", function(object) {
@@ -214,19 +213,16 @@ setMethod("show", "CopyEstimate", function(object) {
     cat("Genome Ploidy: ", paste(object@ploidy, collapse = ", "), '\n', sep = '')
     cat("Windows:\n")
     print(object@windows)
-    cat("Raw Counts (first 6):\n")
-    print(head(object@raw.counts))
-    cat("Mappability: ", paste(head(object@mappability), collapse = ", "), ", ...\n", sep = '')
-    cat("GC content: ", paste(head(object@gc), collapse = ", "), ", ...\n", sep = '')
-
+    cat("Unadjusted Copy Number (first 6):\n")
+    print(head(object@unadj.CN))
     cat("Model Fits:\n")
-    invisible(lapply(object@models, print))
-    cat("Copy Number Estimates (first 6):\n")
-    print(head(object@cn))
-    if(length(object@seg.cn) > 0)
+    print(object@models)
+    cat("Adjusted Copy Number (first 6):\n")
+    print(head(round(object@adj.CN, 2)))
+    if(length(object@seg.CN) > 0)
     {
-        cat("Segmented Copy Number Estimates (first 6):\n")
-        print(head(object@seg.cn))
+        cat("Segmented Copy Number Estimates:\n")
+        print(object@seg.CN)
     }
 })
 

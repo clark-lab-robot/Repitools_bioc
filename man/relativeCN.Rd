@@ -5,14 +5,13 @@
 \title{Calculate and Segment Relative Copy Number From Sequencing Counts}
 \description{This function uses the \code{\link{GCadjustCopy}} function to convert
   a matrix of count data into absolute copy number estimates, then calculates the log2
-  fold change ratio and segments these values, and reports the copy number of either
-  the input regions or user-defined regions of interest.
+  fold change ratio and segments these values.
 }
 \usage{
   \S4method{relativeCN}{data.frame,matrix}(input.windows, input.counts, gc.params = NULL,
-                             regions = input.windows[NULL, ], ..., verbose = TRUE)
+                                          ..., verbose = TRUE)
   \S4method{relativeCN}{GRanges,matrix}(input.windows, input.counts, gc.params = NULL,
-                                       regions = input.windows[NULL], ..., verbose = TRUE)
+                                        ..., verbose = TRUE)
 }
 \arguments{
   \item{input.windows}{A \code{data.frame} with (at least) columns \code{chr},
@@ -22,8 +21,6 @@
   \item{gc.params}{A \code{\linkS4class{GCAdjustParams}} object, holding parameters
                    related to mappability and GC content correction of read counts, or NULL,
                    if GC content correction is not desired.}
-  \item{regions}{A \code{data.frame} with (at least) columns \code{chr},
-                    \code{start}, and \code{end}, or a GRanges object.}
   \item{...}{Further parameters passed to \code{\link{segment}} function in \code{DNAcopy}
              package, and also the \code{segment.sqrt} parameter to \code{\link{absoluteCN}}.}
   \item{verbose}{Whether to print the progess of processing.}
@@ -44,9 +41,8 @@
 }
 \value{
   If \code{gc.params} was given, then a \code{\linkS4class{CopyEstimate}} object. Otherwise,
-  a vector of copy number ratios only. If \code{regions} is \code{NULL}, the object will
-  describe the input windows, otherwise the user-defined regions. The copy number ratios are
-  on the linear scale, not log2.
+  a \code{\linkS4class{GRanges}} object, with the ratio as the only column of the metadata.
+  The copy number ratios are on the linear scale, not log2.
 }
 \author{Dario Strbenac}
 \references{Olshen, A. B., Venkatraman, E. S., Lucito, R., and Wigler, M. (2004).
@@ -56,10 +52,7 @@
   inputs <- data.frame(chr = c("chr1", "chr1", "chr1", "chr2", "chr2"),
                      start = c(1, 50001, 100001, 1, 10001),
                        end = c(50000, 100000, 150000, 10000, 20000))
-  enriched <- data.frame(chr = c("chr1", "chr1", "chr1", "chr1", "chr1", "chr2", "chr2"),
-                       start = c(1, 1001, 2001, 10000001, 10005001, 9001, 9501),
-                         end = c(1000, 2000, 3000, 10001000, 10006000, 9500, 10000))
   counts <- matrix(c(25, 39, 3, 10, 22, 29, 38, 5, 19, 31), nrow = 5)
   colnames(counts) <- c("Control", "Treatment")
-  relativeCN(inputs, input.counts = counts, regions = enriched, p.method = "perm")
+  relativeCN(inputs, input.counts = counts, p.method = "perm")
 }

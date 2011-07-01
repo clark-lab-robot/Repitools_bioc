@@ -9,18 +9,15 @@
   interest.
 }
 \usage{
-  \S4method{absoluteCN}{data.frame,matrix,GCAdjustParams}(input.windows, input.counts, gc.params,
-                                                          regions = input.windows[NULL, ], ...)
+  \S4method{absoluteCN}{data.frame,matrix,GCAdjustParams}(input.windows, input.counts, gc.params, ...)
   \S4method{absoluteCN}{GRanges,matrix,GCAdjustParams}(input.windows, input.counts, gc.params,
-                        segment.sqrt = TRUE, regions = input.windows[NULL], ..., verbose = TRUE)
+                                                       segment.sqrt = TRUE, ..., verbose = TRUE)
 }
 \arguments{
   \item{input.windows}{A \code{data.frame} with (at least) columns \code{chr},
                        \code{start}, and \code{end}, or a GRanges object.}
   \item{input.counts}{A matrix of counts. Rows are genomic windows and columns are
                       samples.}
-  \item{regions}{A \code{data.frame} with (at least) columns \code{chr},
-                       \code{start}, and \code{end}, or a GRanges object.}
   \item{gc.params}{A \code{\linkS4class{GCAdjustParams}} object, holding parameters
                    related to mappability and GC content correction of read counts.}
   \item{segment.sqrt}{Whether to square root the absolute copy number estimates before

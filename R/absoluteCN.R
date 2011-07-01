@@ -2,52 +2,34 @@ setGeneric("absoluteCN", function(input.windows, input.counts, gc.params, ...)
                                  {standardGeneric("absoluteCN")})
 
 setMethod("absoluteCN", c("GRanges", "matrix", "GCAdjustParams"),
-    function(input.windows, input.counts, gc.params, segment.sqrt = TRUE,
-            regions = input.windows[NULL], ..., verbose = TRUE)
+    function(input.windows, input.counts, gc.params, segment.sqrt = TRUE, ...,
+             verbose = TRUE)
 {
     require(GenomicRanges)
     require(DNAcopy)
 
-    adj.CN <- GCadjustCopy(input.windows, input.counts, gc.params, verbose = verbose)
-    if(segment.sqrt) transformed.cn <- sqrt(adj.CN@cn) else transformed.cn <- adj.CN@cn
+    CN.result <- GCadjustCopy(input.windows, input.counts, gc.params, verbose = verbose)
+    if(segment.sqrt) CN <- sqrt(CN.result@adj.CN) else CN <- CN.result@adj.CN
 
     # Do segmentation.
-    if(verbose) message("Segmenting absolute copy number estimates and matching to input windows.")
-    adj.CN@seg.cn <- apply(transformed.cn, 2, function(x)
-                 {
-                     cn <- CNA(chrom = as.character(seqnames(input.windows)),
-                               maploc = as.numeric(start(input.windows)),
-                               genomdat = x)
-                     cn <- segment(smooth.CNA(cn), ..., verbose = 0)
-                     cn$out[, "loc.end"] <- cn$out[, "loc.end"] + width(input.windows)[1]
-                     CNV.windows <- GRanges(cn$out[, "chrom"],
-                                            IRanges(cn$out[, "loc.start"], cn$out[, "loc.end"]))
-                    map <- findOverlaps(input.windows, CNV.windows, select = "first")			   
-                    cn$out[map, "seg.mean"]   
-                 })
-    if(verbose) message("Done segmenting and matching.")
-    
-    if(segment.sqrt) adj.CN@seg.cn <- adj.CN@seg.cn^2
-
-    if(length(regions) > 0)
-    {
-        if(verbose) 
-            message("Mapping copy number windows to regions.")
-        map <- findOverlaps(regions, input.windows, select = "first")
-        
-        adj.CN@raw.counts <- adj.CN@raw.counts[map, ]
-        adj.CN@cn <- adj.CN@cn[map, ]
-        adj.CN@seg.cn <- adj.CN@seg.cn[map, ]
-        adj.CN@windows <- regions
-        adj.CN@gc <- adj.CN@gc[map]
-        adj.CN@mappability <- adj.CN@mappability[map]
-    }
-
-    adj.CN
+    if(verbose) message("Smoothing and segmenting absolute copy number estimates.")
+    CN.result@seg.CN <- GRangesList(apply(CN, 2, function(x)
+                        {
+                            cna <- CNA(chrom = as.character(seqnames(input.windows)),
+                                      maploc = as.numeric(start(input.windows)),
+                                      genomdat = x)
+                            cna <- segment(smooth.CNA(cna), ..., verbose = 0)
+                            if(segment.sqrt) cna$out[, "seg.mean"] <- cna$out[, "seg.mean"]^2
+                            cna$out[, "loc.end"] <- cna$out[, "loc.end"] + width(input.windows)[1]
+                            GRanges(cna$out[, "chrom"],
+                                    IRanges(cna$out[, "loc.start"], cna$out[, "loc.end"]),
+                                    CN = cna$out[, "seg.mean"])
+                        }))
+    CN.result
 })
 
 setMethod("absoluteCN", c("data.frame", "matrix", "GCAdjustParams"),
-    function(input.windows, input.counts, gc.params, regions = input.windows[NULL, ], ...)
+    function(input.windows, input.counts, gc.params, ...)
 {
-    absoluteCN(annoDF2GR(input.windows), input.counts, gc.params, regions = annoDF2GR(regions), ...)
+    absoluteCN(annoDF2GR(input.windows), input.counts, gc.params, ...)
 })
