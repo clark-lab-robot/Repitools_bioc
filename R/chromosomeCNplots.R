@@ -46,5 +46,5 @@ setMethod("chromosomeCNplots", c("CopyEstimate"),
                   lines(segment[1:2], rep(segment[3], 2),
                   col = seg.col, lty = lty, lwd = lwd))
         })
-    }, IDs, unadj.CN, adj.CN, sample.segs))
+    }, IDs, unadj.CN, adj.CN, as.list(sample.segs)))
 })
