@@ -8,7 +8,7 @@ setGeneric("GCbiasPlots", function(copy, ...)
     lines(lowess(GC, CN), lty = lty, lwd = lwd, col = line.col)    
 }
 
-setMethod("GCbiasPlots", c("CopyEstimate"),
+setMethod("GCbiasPlots", c("AdjustedCopyEstimate"),
     function(copy, y.max = NULL, pch = 19, cex = 0.2,
              pch.col = "black", line.col = "red", lty = 1, lwd = 2, verbose = TRUE)
 {

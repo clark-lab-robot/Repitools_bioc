@@ -186,44 +186,78 @@ setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
 })
 
 setClass("CopyEstimate", representation(
-                                    ploidy = "numeric",
                                     windows = "GRanges",
                                     unadj.CN = "matrix",
-                                    models = "list",
-                                    adj.CN = "matrix",
-                                    seg.CN = "GRangesList")
+                                    unadj.CN.seg = "GRangesList",
+                                    type = "character")
 )
-setGeneric("CopyEstimate", function(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN)
+setGeneric("CopyEstimate", function(windows, unadj.CN, unadj.CN.seg, type)
            {standardGeneric("CopyEstimate")})
 
-setMethod("CopyEstimate", c("numeric", "GRanges", "numeric", "numeric", "matrix", "list", "matrix"),
-    function(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN)
+setMethod("CopyEstimate", c("GRanges", "matrix", "GRangesList", "character"),
+    function(windows, unadj.CN, unadj.CN.seg, type = "relative")
+{
+    new("CopyEstimate", windows = windows, unadj.CN = unadj.CN, unadj.CN.seg = unadj.CN.seg, type = type)
+})
+
+setMethod("show", "CopyEstimate", function(object) {
+    cat("Object of class 'CopyEstimate'.\n")
+    cat("Windows:\n")
+    print(object@windows)
+    cat("Unadjusted Copy Number (first 6):\n")
+    print(head(object@unadj.CN))
+    cat("Data Type: ", object@type, "\n", sep = '')
+    if(length(object@unadj.CN.seg) > 0)
+    {
+        cat("Segmented Copy Number Estimates:\n")
+        print(object@unadj.CN.seg)
+    }
+})
+
+setClass("AdjustedCopyEstimate", representation(
+                                    ploidy = "numeric",
+                                    models = "list",
+                                    adj.CN = "matrix",
+                                    adj.CN.seg = "GRangesList"),
+                                contains = "CopyEstimate"
+)
+setGeneric("AdjustedCopyEstimate", function(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN, type)
+           {standardGeneric("AdjustedCopyEstimate")})
+
+setMethod("AdjustedCopyEstimate", c("numeric", "GRanges", "numeric", "numeric", "matrix", "list", "matrix", "character"),
+    function(ploidy, windows, mappability, gc, unadj.CN, models, adj.CN, type)
 {
     if(length(ploidy) < ncol(unadj.CN))
         ploidy <- rep(ploidy, ncol(unadj.CN))
 
     elementMetadata(windows) <- DataFrame(mappability, GC = gc)
 
-    new("CopyEstimate", ploidy = ploidy, windows = windows, unadj.CN = unadj.CN,
-        models = models, adj.CN = adj.CN)
+    new("AdjustedCopyEstimate", ploidy = ploidy, windows = windows, unadj.CN = unadj.CN,
+        models = models, adj.CN = adj.CN, type = type)
 })
 
-setMethod("show", "CopyEstimate", function(object) {
-    cat("Object of class 'CopyEstimate'.\n")
+setMethod("show", "AdjustedCopyEstimate", function(object) {
+    cat("Object of class 'AdjustedCopyEstimate'.\n")
     cat("Genome Ploidy: ", paste(object@ploidy, collapse = ", "), '\n', sep = '')
     cat("Windows:\n")
     print(object@windows)
     cat("Unadjusted Copy Number (first 6):\n")
     print(head(object@unadj.CN))
+    if(length(object@unadj.CN.seg) > 0)
+    {
+        cat("Segmented Unadjusted Copy Number Estimates:\n")
+        print(object@unadj.CN.seg)
+    }
     cat("Model Fits:\n")
     print(object@models)
     cat("Adjusted Copy Number (first 6):\n")
     print(head(round(object@adj.CN, 2)))
-    if(length(object@seg.CN) > 0)
+    if(length(object@adj.CN.seg) > 0)
     {
-        cat("Segmented Copy Number Estimates:\n")
-        print(object@seg.CN)
+        cat("Segmented Adjusted Copy Number Estimates:\n")
+        print(object@adj.CN.seg)
     }
+    cat("Data Type: ", object@type, "\n", sep = '')
 })
 
 # container for output of regionStats()    

@@ -41,7 +41,7 @@
   If the sample ploidys were omitted, then no scaling for ploidy is done.
 }
 \value{
-  A \code{\linkS4class{CopyEstimate}} object describing the input windows and their
+  A \code{\linkS4class{AdjustedCopyEstimate}} object describing the input windows and their
   estimates.
 }
 \author{Dario Strbenac}

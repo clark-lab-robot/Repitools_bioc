@@ -18,43 +18,58 @@ setMethod("relativeCN", c("GRanges", "matrix"),
         CN.result <- GCadjustCopy(input.windows, input.counts, gc.params,
                                      verbose = verbose)
         input.scores <- CN.result@adj.CN
-    } else { 
-        input.scores <- input.counts
+        usable.windows <- !is.na(rowSums(input.scores))
+        usable.scores <- input.scores[usable.windows, ]
+        usable.locs <- input.windows[usable.windows]
+        Mvalues <- list(log2((input.counts[, 2]) / (input.counts[, 1])),
+                       log2((usable.scores[, 2]) / (usable.scores[, 1])))
+        loc.list <- list(input.windows, usable.locs)
+        scores.list <- list(CN.result@unadj.CN, usable.scores)
+    } else {
+        Mvalues <- list(log2((input.counts[, 2] / sum(input.counts[, 2])) /
+                        (input.counts[, 1] / sum(input.counts[, 1]))))
+        loc.list <- list(input.windows)
+        scores.list <- list(input.counts)
     }
 
-    usable.windows <- !is.na(rowSums(input.scores))
-    usable.scores <- input.scores[usable.windows, ]
-    usable.locs <- input.windows[usable.windows]
+    segments.list <- mapply(function(x, y, z)
+    {
+        cn <- CNA(chrom = as.character(seqnames(x)),
+                 maploc = as.numeric(start(x)),
+              data.type = "logratio",
+             genomdat = z,
+             sampleid = "Fold Change")
+        totals <- colSums(na.omit(y))
+        wts <- ((totals[2] - y[, 2]) / (y[, 2] * totals[2])
+              + (totals[1] - y[, 1]) / (y[, 1] * totals[1]))^-1
+        non0 <- which(wts > 0)
+        cn <- cn[non0, ]
+        wts <- wts[non0]
+        if(verbose == TRUE) message("Smoothing and segmenting copy number ratio.")
+        cn <- segment(smooth.CNA(cn), weights = wts, verbose = 0)
+        # Extend CNV region to the end of the interval, since all positions are starts.
+        cn$out[, "loc.end"] <- cn$out[, "loc.end"] + width(x)[1] - 1
+        CNV.windows <- GRanges(cn$out[, "chrom"],
+                               IRanges(cn$out[, "loc.start"], cn$out[, "loc.end"]),
+                               `relative CN` = 2^cn$out[, "seg.mean"])        
+    }, loc.list, scores.list, Mvalues)
 
-    if(is.null(gc.params))
-        Mvalues <- log2((input.counts[, 2] / sum(input.counts[, 2])) /
-                        (input.counts[, 1] / sum(input.counts[, 1])))
-    else
-        Mvalues <- log2((usable.scores[, 2]) / (usable.scores[, 1]))
-
-    cn <- CNA(chrom = as.character(seqnames(usable.locs)),
-             maploc = as.numeric(start(usable.locs)),
-          data.type = "logratio",
-           genomdat = Mvalues,
-           sampleid = "Fold Change")
-    totals <- colSums(usable.scores)
-    wts <- ((totals[2] - usable.scores[, 2]) / (usable.scores[, 2] * totals[2])
-          + (totals[1] - usable.scores[, 1]) / (usable.scores[, 1] * totals[1]))^-1
-    non0 <- which(wts > 0)
-    cn <- cn[non0, ]
-    wts <- wts[non0]
-    if(verbose == TRUE) message("Smoothing and segmenting copy number ratio.")
-    cn <- segment(smooth.CNA(cn), weights = wts, ..., verbose = 0)
-    # Extend CNV region to the end of the interval, since all positions are starts.
-    cn$out[, "loc.end"] <- cn$out[, "loc.end"] + width(input.windows)[1] - 1
-    CNV.windows <- GRanges(cn$out[, "chrom"],
-                           IRanges(cn$out[, "loc.start"], cn$out[, "loc.end"]),
-                           `relative CN` = 2^cn$out[, "seg.mean"])
-
+    fc.label <- paste(colnames(input.counts)[2], '/', colnames(input.counts)[1])
     if(!is.null(gc.params))
-        CN.result@seg.CN <- GRangesList(CNV.windows)
-
-    if(is.null(gc.params)) CNV.windows else CN.result
+    {
+        CN.result@unadj.CN.seg <- GRangesList(segments.list[[1]])
+        CN.result@adj.CN.seg <- GRangesList(segments.list[[2]])
+        CN.result@unadj.CN <- CN.result@unadj.CN[, 2, drop = FALSE] / CN.result@unadj.CN[, 1, drop = FALSE]
+        colnames(CN.result@unadj.CN) <- fc.label
+        CN.result@adj.CN <- CN.result@adj.CN[, 2, drop = FALSE] / CN.result@adj.CN[, 1, drop = FALSE]
+        colnames(CN.result@adj.CN) <- fc.label
+        CN.result@type <- "relative"
+        CN.result
+    } else {
+        fc.matrix <- matrix(2^Mvalues[[1]])
+        colnames(fc.matrix) <- fc.label
+        CopyEstimate(input.windows, fc.matrix, GRangesList(segments.list[[1]]), type = "relative")
+    }
 })
 
 setMethod("relativeCN", c("data.frame", "matrix"),

@@ -1,6 +1,6 @@
 \name{GCbiasPlots}
 \alias{GCbiasPlots}
-\alias{GCbiasPlots,CopyEstimate-method}
+\alias{GCbiasPlots,AdjustedCopyEstimate-method}
 \title{Plot GC content vs. Read Counts Before Normalising, and GC content vs. Copy Estimates
        After Normalising.}
 \description{
@@ -9,7 +9,7 @@
   plot shows the copy number estimates after GC correction was applied.
 }
 \usage{
-  \S4method{GCbiasPlots}{CopyEstimate}(copy, y.max = NULL, pch = 19,
+  \S4method{GCbiasPlots}{AdjustedCopyEstimate}(copy, y.max = NULL, pch = 19,
             cex = 0.2, pch.col = "black", line.col = "red", lty = 1, lwd = 2, verbose = TRUE)
 }
 \arguments{

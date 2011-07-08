@@ -53,8 +53,8 @@ setMethod("GCadjustCopy", c("GRanges", "matrix", "GCAdjustParams"),
     # Adjust the real counts by dividing by expected counts.
     adj.CN <- t(t(unadj.CN / single.CNs) * gc.params@ploidy)
 
-    CopyEstimate(gc.params@ploidy, input.windows, input.win.mappability, gc,
-                 unadj.CN, models, adj.CN)
+    AdjustedCopyEstimate(gc.params@ploidy, input.windows, input.win.mappability, gc,
+                         unadj.CN, models, adj.CN, type = "absolute")
 })
 
 setMethod("GCadjustCopy", c("data.frame", "matrix", "GCAdjustParams"),

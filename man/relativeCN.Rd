@@ -40,9 +40,9 @@
   calculate relative copy numbers.
 }
 \value{
-  If \code{gc.params} was given, then a \code{\linkS4class{CopyEstimate}} object. Otherwise,
-  a \code{\linkS4class{GRanges}} object, with the ratio as the only column of the metadata.
-  The copy number ratios are on the linear scale, not log2.
+  If \code{gc.params} was given, then a \code{\linkS4class{AdjustedCopyEstimate}} object.
+  Otherwise, a \code{\linkS4class{CopyEstimate}} object. The copy number ratios are
+  on the linear scale, not log2.
 }
 \author{Dario Strbenac}
 \references{Olshen, A. B., Venkatraman, E. S., Lucito, R., and Wigler, M. (2004).

@@ -1,19 +1,20 @@
 \name{chromosomeCNplots}
 \alias{chromosomeCNplots}
 \alias{chromosomeCNplots,CopyEstimate-method}
-\title{Plot GC content vs. Read Counts Before Normalising, and GC content vs. Copy Estimates
-       After Normalising.}
+\alias{chromosomeCNplots,AdjustedCopyEstimate-method}
+\title{Plot copy number by chromosome}
 \description{
-  Two plots on the same plotting page are made for each sample. The top plot has estimates
-  of copy number for a chromosome before any GC correction was applied. The bottom
-  plot shows the copy number estimates for a chromosome after GC correction was applied.
+  Generates plots of position along chromosomes vs. estimated copy number. If GC adjustment was
+  performed, then there are two plots per page; one before adjustment and one after adjustment.
 }
 \usage{
   \S4method{chromosomeCNplots}{CopyEstimate}(copy, y.max = NULL, pch = 19, cex = 0.2,
              pch.col = "black", seg.col = "red", lty = 1, lwd = 2, verbose = TRUE)
+  \S4method{chromosomeCNplots}{AdjustedCopyEstimate}(copy, y.max = NULL, pch = 19, cex = 0.2,
+             pch.col = "black", seg.col = "red", lty = 1, lwd = 2, verbose = TRUE)
 }
 \arguments{
-  \item{copy}{A \code{\linkS4class{CopyEstimate}} object.}
+  \item{copy}{A \code{\linkS4class{CopyEstimate}} or \code{\linkS4class{AdjustedCopyEstimate}} object.}
   \item{y.max}{The maximum value of the y-axis of the scatter plots.}
   \item{pch}{Style of points in the scatter plots.}
   \item{cex}{Whether to square root the absolute copy number estimates before
@@ -26,12 +27,11 @@
 }
 \details{
   See \code{\link{absoluteCN}} or \code{\link{relativeCN}} for how to do the GC adjusted
-  copy number estimates. The segmentation line plotted in the bottom figure on each page
-  is the segmentation regions found.
+  copy number estimates, if this is required. The segmentation line plotted
+  is of the segmentation regions found by circular binary segmentation.
 }
 \value{
-  A number of pages of scatterplots. Each page has two plots for a chromosome,
-  one for before GC correction and one for after. The output should, therefore, be sent
+  A number of pages of scatterplots. The output should, therefore, be sent
   to a PDF device.
 }
 \author{Dario Strbenac}
