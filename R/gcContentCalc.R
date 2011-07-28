@@ -8,9 +8,15 @@ setMethod("gcContentCalc", c("GRanges", "BSgenome"),
     
     if(verbose) message("Calculating GC content.")
     strand(x) <- "+"
-    temp <- getSeq(organism, x, as.character=FALSE)
-    tempAlphabet <- alphabetFrequency(temp, as.prob=TRUE)
-    (tempAlphabet[,"C"]+tempAlphabet[,"G"])
+    chrs <- as.character(seqnames(x))
+    regionsByChr <- split(x, chrs)
+    gcByChr <- lapply(regionsByChr, function(y)
+    {
+        temp <- getSeq(organism, y, as.character = FALSE)
+        tempAlphabet <- alphabetFrequency(temp, as.prob = TRUE)
+        tempAlphabet[, "C"] + tempAlphabet[, "G"]
+    })
+    unsplit(gcByChr, chrs)
 })
 
 setMethod("gcContentCalc", c("data.frame", "BSgenome"),

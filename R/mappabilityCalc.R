@@ -6,9 +6,15 @@ setMethod("mappabilityCalc", "GRanges", function(x, organism, verbose = TRUE)
 
     if(verbose) message("Calculating mappability.")
     strand(x) <- "+"
-    temp <- getSeq(organism, x, as.character = FALSE)
-    tempAlphabet <- alphabetFrequency(temp, as.prob = TRUE)
-    1 - tempAlphabet[, "N"]
+    chrs <- as.character(seqnames(x))
+    regionsByChr <- split(x, chrs)
+    mappabilityByChr <- lapply(regionsByChr, function(y)
+    {
+        temp <- getSeq(organism, y, as.character = FALSE)
+        tempAlphabet <- alphabetFrequency(temp, as.prob = TRUE)
+        1 - tempAlphabet[, "N"]
+    })
+    unsplit(mappabilityByChr, chrs)
 })
     
 setMethod("mappabilityCalc", "data.frame", function(x, organism, window = NULL, ...)
