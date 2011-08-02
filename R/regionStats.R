@@ -227,7 +227,7 @@ setMethod("regionStats","matrix",
     pos <- nrow(.getRegions(realScore, ch, sp, min.probes, max.gap, cuts[i], two.sides, doJoin=FALSE))
     neg <- nrow(.getRegions(permScore, ch, sp, min.probes, max.gap, cuts[i], two.sides, doJoin=FALSE))
     fdr[i,] <- c(cuts[i],neg,pos,min(neg/pos,1))
-    if (verbose) message(".")
+    if (verbose) message(".", appendLF = FALSE)
   }
   if (verbose) message("")
   as.data.frame(fdr)
