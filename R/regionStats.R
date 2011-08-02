@@ -35,7 +35,7 @@ setGeneric("regionStats", function(x, ...){standardGeneric("regionStats")})
 	      tmeanPerms[[col]][w,j] <- gsmoothr::tmeanC(sp[w], diffs[s,col][w], probeWindow=window, 
                                                    trim=mean.trim, nProbes=min.probes)
 		    if( verbose )
-	        message(".")
+	        message(".", appendLF = FALSE)
 
 	    }
 	  }
