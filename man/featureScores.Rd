@@ -6,10 +6,11 @@
 \description{
   Given a \code{GRanges} / \code{GRangesList} object, or BAM file paths, of reads
   for each experimental condition, or a \code{matrix} or an \code{AffynetrixCelSet},
-  and an anntotation of features of interest, scores at regularly spaced positions
-  around the features is calculated. In the case of sequencing data, it is the smoothed
-  coverage of reads divided by the library size. In the case of array data, it is array
-  intensity.
+  or a numeric matrix of array data, where the rows are probes and the columns are
+  the different samples,and an anntotation of features of interest, scores at
+  regularly spaced positions around the features is calculated. In the case of
+  sequencing data, it is the smoothed coverage of reads divided by the library size.
+  In the case of array data, it is array intensity.
 }
 \section{Usage}{
   \describe{
@@ -21,8 +22,8 @@
 }
 \section{Arguments}{
   \describe{
-    \item{x:}{If it is a \code{character} vector, then paths to BAM files, otherwise
-             a collection of mapped short reads.}
+    \item{x:}{Paths to BAM files, a collection of mapped short reads, or a collection of
+              microarray data.}
     \item{anno:}{Annotation of the features to sample around.}
     \item{p.anno:}{A \code{data.frame} with columns \code{chr}, \code{position}, an
                   optionally \code{index}. Only provide this if \code{x} is array
@@ -44,6 +45,11 @@
     \item{s.width:}{The width of smoothing to apply to the coverage. Only provide this
                    if \code{x} is sequencing data. This argument is optional. If
                    not provided, then no smoothing is done.}
+    \item{mappability:}{A \code{\linkS4class{BSgenome}} object that has bases for which
+                        no mappable reads start at masked by N.}
+    \item{map.cutoff:}{The percentage of bases in a window around each sampling position
+                       that must be mappable. Otherwise, the score at that position is
+                       repalced by NA. Default: 0.5}
     \item{use.strand:}{Whether to only consider reads on the same strand as the
                        feature. Useful for RNA-seq applications.}
     \item{verbose:}{Whether to print the progess of processing. Default: TRUE.}
@@ -97,10 +103,13 @@
   representative score of that window. On the other hand, when analysing sequencing
   data, the sequence of positions refer to the positions that coverage is taken for. 
 
-  Read coverage sampling points that are off the edge of a chromosome (e.g. for a
-  gene that has a TSS very near to the edge of a chromosome) are given a coverage
-  of 0. Coverage is normalised by dividing the raw coverage by the total number of
-  reads in a sample.
+  Providing a mappability object for sequencing data is recommended. Otherwise, it is
+  not possible to know if a score of 0 is because the window around the sampling position
+  is unmappable, or if there were really no reads mapping there in the experiment.
+  Coverage is normalised by dividing the raw coverage by the total number of
+  reads in a sample. The coverage at a sampling position is multiplied by 1 / mappability.
+  Any positions that have mappabilty below the mappability cutoff will have their
+  score set to NA.
 }}
 
 \section{Value}{

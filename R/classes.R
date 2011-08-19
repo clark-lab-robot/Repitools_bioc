@@ -5,7 +5,8 @@
 setClass(".CoverageSamples",
          representation(
                         pos.labels = "ANY", # character or numeric.
-                        cvg.samps = "GRanges"
+                        cvg.samps = "GRanges",
+                        marks.samps.map = "ANY"# NULL or BSgenome.
 			))
 
 setClass("ScoresList", representation(

@@ -6,7 +6,8 @@ setGeneric(".featureScores", signature = c("x", "y"), function(x, y, ...)
 setClassUnion(".SequencingData", c("character", "GRanges", "GRangesList"))
 
 setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
-    function(x, y, anno, up, down, dist, freq, s.width, use.strand = FALSE, verbose)
+    function(x, y, anno, up, down, dist, freq, s.width, map.cutoff, use.strand = FALSE,
+             verbose)
 {
     require(GenomicRanges)
 
@@ -21,7 +22,7 @@ setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
     seqlevels(x) <- seqlevels(anno)
 
     # Qualitatively near identical to running mean smoothing.
-    if(verbose) message("Extending all reads to smoothing width.")
+    if(verbose) message("Extending all reads to smoothing width of ", s.width)
     seqlengths(x) <- rep(NA, length(seqlengths(x)))
     if(!is.null(s.width))
         x <- resize(x, s.width)
@@ -32,6 +33,17 @@ setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
     cvg.mat <- matrix(countOverlaps(cvg.samps, x) / length(x),
                       ncol = length(pos.labels),
                       byrow = TRUE)
+
+    map.list <- y@marks.samps.map
+    if(!is.null(map.list))
+    {
+        if(verbose)
+            message("Scaling coverage for mappability.")
+        # Scale for mappability, and make NA any regions that are below the cutoff
+        map.matrix <- map.list[[match(s.width, names(map.list))]]
+        cvg.mat[map.matrix < map.cutoff] <- NA
+        cvg.mat <- cvg.mat * 1 / map.matrix
+    }
 
     # Precision sometimes means 0 is represented as very small negative numbers.
     cvg.mat[cvg.mat < 0] = 0
@@ -90,11 +102,15 @@ setMethod(".featureScores", c("character", ".CoverageSamples"),
 })
 
 setMethod(".featureScores", c(".SequencingData", "GRanges"),
-    function(x, y, up, down, dist = c("base", "percent"), freq, s.width, ...,
-             verbose = TRUE)
+    function(x, y, up, down, dist = c("base", "percent"), freq, s.width, mappability = NULL,
+             map.cutoff = 0.5, ..., verbose = TRUE)
 {
     require(IRanges)
     dist <- match.arg(dist)
+
+    if(is.null(mappability))
+        warning("Genome mappability object not provided. Positions of no signal could",
+                "\nbe due to being in unmappable regions of the genome.")
 
     str <- strand(y)
     st <- start(y)
@@ -126,9 +142,27 @@ setMethod(".featureScores", c(".SequencingData", "GRanges"),
                                                    ),
                                      width = 1)
 
-    samp.info <- new(".CoverageSamples", pos.labels = pos.labels, cvg.samps = cvg.samps)
+    marks.samps.map <- NULL
+    if(!is.null(mappability))
+    {
+        unique.widths <- unique(s.width)
+        marks.samps.map <- lapply(unique.widths, function(w)
+                           {
+                                if(verbose)
+                                    message("Calculating mappability for smoothing width ", w)
+                                cvg.proxim <- resize(cvg.samps, w * 2, fix = "center")
+                                m.scores <- mappabilityCalc(cvg.proxim, mappability, verbose = FALSE)
+                                matrix(m.scores, ncol = n.pos, byrow = TRUE)
+                           })
 
-    .featureScores(x, samp.info, y, up, down, dist, freq, s.width, ..., verbose = verbose)
+        names(marks.samps.map) <- unique.widths
+    }
+
+    samp.info <- new(".CoverageSamples", pos.labels = pos.labels, cvg.samps = cvg.samps,
+                     marks.samps.map = marks.samps.map)
+
+    .featureScores(x, samp.info, y, up, down, dist, freq, s.width, map.cutoff = map.cutoff,
+                   ..., verbose = verbose)
 })
 
 setMethod(".featureScores", c("matrix", "GRanges"),

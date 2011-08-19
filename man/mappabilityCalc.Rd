@@ -24,6 +24,9 @@
   \code{windowSize/2-1} bases downstream of the given position, for each position.
   The value returned for each region is a percentage of bases in that region that
   are not N (any base in IUPAC nomenclature).
+
+  For any positions of a window that are off the end of a chromosome, they will be
+  considered as being N.
 }
 \value{
   A vector of mappability percentages, one for each region.
