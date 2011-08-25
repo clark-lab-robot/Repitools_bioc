@@ -10,18 +10,17 @@
 }
 \usage{
   \S4method{clusterPlots}{ClusteredScoresList}(
-     c.list, plot.ord = 1:length(c.list), plot.type = c("heatmap", "line", "by.cluster"),
+     scores.list, plot.ord = 1:length(scores.list), plot.type = c("heatmap", "line", "by.cluster"),
      heat.bg.col = "black", summarize = c("mean", "median"), symm.scale = FALSE, cols = NULL, t.name = NULL,
      verbose = TRUE, ...)
-  \S4method{clusterPlots}{ScoresList}(c.list, scale = function(x) x,
+  \S4method{clusterPlots}{ScoresList}(scores.list, scale = function(x) x,
     cap.q = 0.95, cap.type = c("sep", "all"), n.clusters = NULL,
-    plot.ord = 1:length(c.list), expr = NULL, expr.name = NULL, sort.data = NULL,
+    plot.ord = 1:length(scores.list), expr = NULL, expr.name = NULL, sort.data = NULL,
     sort.name = NULL, plot.type = c("heatmap", "line", "by.cluster"),
     summarize = c("mean", "median"), cols = NULL, t.name = NULL, verbose = TRUE, ...)
 }
 \arguments{
-  \item{c.list}{A \linkS4class{ScoresList} or \linkS4class{ClusteredScoresList}
-                object.}
+  \item{scores.list}{A \linkS4class{ScoresList} or \linkS4class{ClusteredScoresList} object.}
   \item{scale}{A function to scale all the coverages by. Default : No scaling.}
   \item{cap.q}{The quantile of coverages above which to make any bigger coverages
               equal to the quantile.}

@@ -1,6 +1,6 @@
 Package: Repitools
-Version: 0.99.20
-Date: 2011/8/2
+Version: 0.99.21
+Date: 2011/8/25
 Title: Epigenomic tools
 Author: Mark Robinson <mrobinson@wehi.edu.au>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>
 Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
@@ -9,6 +9,49 @@ Depends: R (>= 2.13.0), methods
 Imports: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, zoo
 Suggests: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, zoo, ShortRead, BSgenome.Hsapiens.UCSC.hg18
 Description: Tools for the analysis of enrichment-based epigenomic data.  Features include summarization and visualization of epigenomic data across promoters according to gene expression context, finding regions of differential methylation/binding, etc. 
+Collate: classes.R
+         multiHeatmap.R
+         BAM2GRanges.R
+         FastQC-class.R
+         closeClusterFeatures.R
+         plotClusters.R
+         annoDF2GR.R
+         summarizeScores.R
+         GCbiasPlots.R
+         doSeqStats.R
+         featureScores.R
+         profilePlots.R
+         findClusters.R
+         mergeReplicates.R
+         processNimblegenArrays.R
+         regionStats.R
+         cpgDensityPlot.R
+         featureBlocks.R
+         getProbePositionsDf.R
+         genomeBlocks.R
+         mappabilityCalc.R
+         ChromaBlocks.R
+         writeWig.R
+         makeWindowLookup.R
+         sequenceCalc.R
+         genQC.R
+         annoGR2DF.R
+         gcContentCalc.R
+         clusterPlots.R
+         GCadjustCopy.R
+         enrichmentPlot.R
+         cpgBoxplots.R
+         GDL2GRL.R
+         utils.R
+         absoluteCN.R
+         annotationLookup.R
+         cpgDensityCalc.R
+         blocksStats.R
+         binPlots.R
+         chromosomeCNplots.R
+         checkProbes.R
+         relativeCN.R
+         enrichmentCalc.R
 License: LGPL (>= 2)
 biocViews: DNAmethylation, GeneExpression, Methylseq
 

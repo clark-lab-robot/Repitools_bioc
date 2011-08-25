@@ -1,16 +1,16 @@
-setGeneric("clusterPlots", function(c.list, ...){standardGeneric("clusterPlots")})
+setGeneric("clusterPlots", function(scores.list, ...){standardGeneric("clusterPlots")})
 
 setMethod("clusterPlots", "ClusteredScoresList",
-	function(c.list, plot.ord = 1:length(c.list), plot.type =
+	function(scores.list, plot.ord = 1:length(scores.list), plot.type =
                  c("heatmap", "line", "by.cluster"), heat.bg.col = "black",
                  summarize = c("mean", "median"), symm.scale = FALSE, cols = NULL,
                  t.name = NULL, verbose = TRUE, ...)
 {
-    c.list <- c.list[plot.ord]
+    scores.list <- scores.list[plot.ord]
     plot.type <- match.arg(plot.type)
     summarize <- match.arg(summarize)
 
-    n.marks <- length(c.list)
+    n.marks <- length(scores.list)
 
     if(is.null(cols) == TRUE)
     {
@@ -23,12 +23,12 @@ setMethod("clusterPlots", "ClusteredScoresList",
 	}
     }
 
-    cvgs <- tables(c.list)
+    cvgs <- tables(scores.list)
 
     # Get summary expression for each cluster. Find descending order.
-    expr <- c.list@expr
-    expr.name <- c.list@expr.name
-    cl.id <- c.list@cluster.id
+    expr <- scores.list@expr
+    expr.name <- scores.list@expr.name
+    cl.id <- scores.list@cluster.id
     cl.levels <- levels(factor(cl.id))
     n.clusters <- length(cl.levels)
 
@@ -82,7 +82,7 @@ setMethod("clusterPlots", "ClusteredScoresList",
            
 	    par(mai = c(1, 0, 0.8, 0))
 	    plot.new()
-            legend("topleft", legend = names(c.list), title = "Mark", col = cols, ...)
+            legend("topleft", legend = names(scores.list), title = "Mark", col = cols, ...)
 	    par(mai = c(1, 1, 0.8, 0.1))
             if(!is.na(cl.expr[y]))
             {
@@ -98,15 +98,15 @@ setMethod("clusterPlots", "ClusteredScoresList",
 	    axis(2, at = c(y.min, (y.min + y.max) / 2, y.max), label = score.labels)
 
             mtext(paste("Within Cluster Coverage", cl.text), outer = TRUE, line = -2)
-	}, profiles, as.list(cl.ord)))
+	}, profiles, ascores.list(cl.ord)))
     } else if(plot.type == "line") # Plot a table of lineplots.
     {
         old.par <- par(no.readonly = TRUE)
         par(oma = c(5, 6, 5, 2), mar = c(0, 0, 0, 0), xpd = NA)
-        if(is.null(c.list@.old.ranges))
+        if(is.null(scores.list@.old.ranges))
             ranges <- lapply(cvgs, range, na.rm = TRUE)
         else
-            ranges <- c.list@.old.ranges
+            ranges <- scores.list@.old.ranges
 
 	      profiles <- lapply(cvgs, function(x)
                            {
@@ -144,7 +144,7 @@ setMethod("clusterPlots", "ClusteredScoresList",
                     mtext("Score", 2, 3)
                 }
                 if(row.index == 1)
-                    title(names(c.list)[col.index], line = 2)
+                    title(names(scores.list)[col.index], line = 2)
             }    
         }
 
@@ -174,10 +174,10 @@ setMethod("clusterPlots", "ClusteredScoresList",
         mtext(t.name, font = 2, line = 3, outer = TRUE)
         par(old.par)
     } else { # Plot a heatmap.
-        if(is.null(c.list@.old.ranges))
+        if(is.null(scores.list@.old.ranges))
             ranges <- lapply(cvgs, range, na.rm = TRUE)
         else
-            ranges <- c.list@.old.ranges
+            ranges <- scores.list@.old.ranges
 
         plot.ranges <- lapply(ranges, function(x)
                                       {
@@ -188,8 +188,8 @@ setMethod("clusterPlots", "ClusteredScoresList",
                                       })
 	
         par(oma = c(1, 1, 3, 1))
-	sort.data <- c.list@sort.data
-	sort.name <- c.list@sort.name
+	sort.data <- scores.list@sort.data
+	sort.name <- scores.list@sort.name
 	# Get order of all features next.
 	if(length(sort.data) == 0)
 	    ord <- order(factor(cl.id, levels = cl.levels[rev(cl.ord)]))
@@ -228,7 +228,7 @@ setMethod("clusterPlots", "ClusteredScoresList",
 
 	    # Add lines delimiting the cluster boundaries.
 	    abline(h = bounds[-n.clusters], lwd = 3)
-	}, cvgs, names(c.list), plot.ranges)
+	}, cvgs, names(scores.list), plot.ranges)
 
         cl.midpts <- bounds - cl.sizes / 2
         plot.new()
@@ -248,20 +248,20 @@ setMethod("clusterPlots", "ClusteredScoresList",
     }
 })
 
-setMethod("clusterPlots", "ScoresList", function(c.list, scale = function(x) x,
+setMethod("clusterPlots", "ScoresList", function(scores.list, scale = function(x) x,
           cap.q = 0.95, cap.type = c("sep", "all"), n.clusters = NULL,
-          plot.ord = 1:length(c.list), expr = NULL, expr.name = NULL,
+          plot.ord = 1:length(scores.list), expr = NULL, expr.name = NULL,
           sort.data = NULL, sort.name = NULL, plot.type = c("heatmap", "line", "by.cluster"),
           summarize = c("mean", "median"), cols = NULL, t.name = NULL,
           verbose = TRUE, ...)
 {
     require(cluster)
     
-    c.list <- c.list[plot.ord]
+    scores.list <- scores.list[plot.ord]
     plot.type <- match.arg(plot.type)
     cap.type <- match.arg(cap.type)
     summarize <- match.arg(summarize)
-    cvgs <- tables(c.list)
+    cvgs <- tables(scores.list)
 
     if(is.null(n.clusters))
 	stop("Number of clusters not given.\n")
@@ -298,7 +298,7 @@ setMethod("clusterPlots", "ScoresList", function(c.list, scale = function(x) x,
     if(any.na)
     {
         if(verbose) message("Doing PAM clustering.")
-        cl.id <- rep(NA, length(c.list@anno))
+        cl.id <- rep(NA, length(scores.list@anno))
         cl.id[!drop] <- pam(all, n.clusters, cluster.only = TRUE, do.swap = FALSE)
     } else { # No NAs in the data. Use k-means for speed.
         if(verbose) message("Doing k-means clustering.")
@@ -316,7 +316,7 @@ setMethod("clusterPlots", "ScoresList", function(c.list, scale = function(x) x,
         cl.id <- sapply(cl.id, function(x) match(x, cl.ord))
     }
 
-    csl <- ClusteredScoresList(c.list, scores = cvgs, cluster.id = cl.id,
+    csl <- ClusteredScoresList(scores.list, scores = cvgs, cluster.id = cl.id,
                                  expr = expr, expr.name = expr.name,
                                  sort.data = sort.data, sort.name = sort.name)
     clusterPlots(csl, plot.type = plot.type, summarize = summarize, cols = cols,
