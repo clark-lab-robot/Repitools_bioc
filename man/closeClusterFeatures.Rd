@@ -10,7 +10,7 @@
 }
 \usage{
   \S4method{closeClusterFeatures}{ClusteredScoresList}(c.list, n.consec = NULL,
-                                 n.perm = 100, name.col = NULL, verbose = TRUE)
+                                 n.perm = 100, verbose = TRUE)
 }
 \arguments{
     \item{c.list}{A \code{\linkS4class{ClusteredScoresList}} object.}
@@ -19,8 +19,6 @@
                       mandatory.}
     \item{n.perm}{The number of times to re-order the cluster IDs and perform block
                    finding.}
-    \item{name.col}{The column of the element metadata of \code{c.list} which has the
-                    feature IDs. This argument is optional.}
     \item{verbose}{Whether to print the progess of processing. Default: TRUE.}
 }
 
@@ -50,6 +48,6 @@
 
   fs <- featureScores(samplesList[1:2], chr21genes, up = 2000, down = 1000, freq = 500, s.width = 500)
   ccl <- clusterPlots(fs, n.clusters = 4, expr = expr, expr.name = "Expression")
-  closeClusterFeatures(ccl, n.consec = 5, n.perm = 10, name.col = 2)
+  closeClusterFeatures(ccl, n.consec = 5, n.perm = 10)
 }
 
