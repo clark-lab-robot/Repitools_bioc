@@ -25,7 +25,7 @@
 \details{
   The algorithm works by first finding all genomic regions where a cluster is present
   in disperse way. These disperse blocks have features of a cluster that are not
-  separated by more than one feature from a different cluster. The disperse blocksS are
+  separated by more than one feature from a different cluster. The disperse blocks are
   only kept if there is a run of features belonging to the cluster at least \code{n.consec}
   long.
 
@@ -34,12 +34,12 @@
 }
 
 \value{
-    A \code{\linkS4class{ClusteredScoresList}} object, that holds a list of score
-    matrices, one for each experiment type, and the parameters that were used
-    to create the score matrices.
+  A list with elements:
+  \item{blocks}{A \code{\linkS4class{GRangesList}} of the blocks.}
+  \item{p.value}{The p-value based on the randomisation procedure.}
 }
 
-\seealso{\code{\linkS4class{ClusteredScoresList}} for how to create the appropriate object.}
+\seealso{\code{\link{clusterPlots}} for how to create the appropriate object.}
 \author{Dario Strbenac.}
 \examples{
   data(chr21genes)
@@ -50,4 +50,3 @@
   ccl <- clusterPlots(fs, n.clusters = 4, expr = expr, expr.name = "Expression")
   closeClusterFeatures(ccl, n.consec = 5, n.perm = 10)
 }
-

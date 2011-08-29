@@ -313,7 +313,7 @@ setMethod("clusterPlots", "ScoresList", function(scores.list, scale = function(x
         else
             cl.expr <- tapply(expr, factor(cl.id), median, na.rm = TRUE)
         cl.ord <- order(cl.expr, decreasing = TRUE)
-        cl.id <- sapply(cl.id, function(x) match(x, cl.ord))
+        cl.id <- factor(sapply(cl.id, function(x) match(x, cl.ord)))
     }
 
     csl <- ClusteredScoresList(scores.list, scores = cvgs, cluster.id = cl.id,

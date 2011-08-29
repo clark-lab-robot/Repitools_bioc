@@ -78,7 +78,7 @@ setMethod("subsetRows", "ScoresList",
 })
 
 setClass("ClusteredScoresList", representation(
-                                    cluster.id = "numeric",
+                                    cluster.id = "factor",
 				    expr = "ANY",
                                     expr.name = "ANY",
 				    sort.data = "ANY",

@@ -9,21 +9,27 @@ setGeneric("closeClusterFeatures", function(c.list, ...){standardGeneric("closeC
                         id.levels <- sort(unique(x))
                         chr.blocks <- lapply(id.levels, function(y)
                         {
-                            which.id <- IRanges(as.numeric(names(which(x == y))), width = 1)
+                            which.id <- IRanges(as.numeric(names(x[x == y])), width = 1)
                             which.consec <- reduce(which.id)
-                            which.consec <- which.consec[width(which.consec) >= 3]
+                            which.consec <- which.consec[width(which.consec) >= n.consec]
                             which.dispersed <- reduce(which.id, min.gapwidth = 2)
                             blocks.inds <- as.list(unique(which.dispersed[subjectHits(findOverlaps(which.consec, which.dispersed))]))
-                            sapply(blocks.inds, function(z)
+                            if(length(blocks.inds) > 0)
                             {
-                                cluster.block <- GRanges(tx.df[z, "seqnames"],
-                                                         IRanges(tx.df[z, "start"], tx.df[z, "end"]), 
-                                                         tx.df[z, "strand"])
-                                values(cluster.block) <- DataFrame(tx.df[z, anno.cols], cluster = cluster.IDs[z])
-                                cluster.block
-                            })
+                                sapply(blocks.inds, function(z)
+                                {
+                                    cluster.block <- GRanges(tx.df[z, "seqnames"],
+                                                             IRanges(tx.df[z, "start"], tx.df[z, "end"]), 
+                                                             tx.df[z, "strand"])
+                                    values(cluster.block) <- DataFrame(tx.df[z, anno.cols], cluster = cluster.IDs[z])
+                                    cluster.block
+                                })
+                            } else {
+                                GRanges()
+                            }
                         })
                     }), use.names = FALSE)
+    blocks <- blocks[sapply(blocks, function(x) length(x) > 0)]
 }
 
 setMethod("closeClusterFeatures", "ClusteredScoresList", function(c.list, n.consec = NULL, n.perm = 100, verbose = TRUE)
@@ -41,15 +47,16 @@ setMethod("closeClusterFeatures", "ClusteredScoresList", function(c.list, n.cons
     
     if(verbose)
         message("Finding blocks in experimental clusters.")
-    blocks <- .clusterBlocks(tx.df, cluster.IDs, n.consec)
+    blocks <- GRangesList(.clusterBlocks(tx.df, cluster.IDs, n.consec))
+    metadata(blocks) <- list(clusters = levels(cluster.IDs), range = c(c.list@up, c.list@down))
 
     if(verbose)
         message("Finding blocks in randomly ordered clusters.")
     rand.blocks <- lapply(1:n.perm, function(x)
                          {
                              rand.IDs <- sample(cluster.IDs, length(cluster.IDs))
-                             .clusterBlocks(tx.df, rand.IDs, n.consec)
+                             length(.clusterBlocks(tx.df, rand.IDs, n.consec))
                          })
-    
-    list(blocks = blocks, p.value = length(which(sapply(rand.blocks, length) >= length(blocks))) / n.perm)
+    result <- list(blocks = blocks, p.value = length(which(rand.blocks >= length(blocks))) / n.perm)
+    result
 })
