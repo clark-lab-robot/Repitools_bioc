@@ -33,6 +33,12 @@
                    \code{annotationLookup}. Avoids re-computing the mapping if it
                    has already been done.  Only provide this if \code{x} is array
                    data.}
+    \item{chrs:}{A mapping between chromosome names in an ACP file to the user's
+                 feature annotation. Only provide this if \code{x} is an
+                 \code{AffymetrixCelSet}. There is no need to provide this if
+                 the feature annotation uses the same chromosome names as the ACP
+                 files do. Element \code{i} of this vector is the name to give to
+                 the chromosome numbered \code{i} in the ACP information.}
     \item{up:}{How far to go from the features' reference points in one direction.}
     \item{down:}{How far to go from the features' reference points in the opposite
                 direction.}

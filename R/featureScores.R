@@ -210,6 +210,11 @@ setMethod(".featureScores", c("AffymetrixCelSet", "GRanges"),
     if(is.null(mapping) && is.null(p.anno))
         p.anno <- getProbePositionsDf(getCdf(x), chrs, verbose = verbose)
 
+    if(length(intersect(p.anno$chr, seqlevels(y))) == 0)
+        stop("Chromosome names of probe annotation are all different to ", 
+             "chromosome names of the feature annotation. Provide a mapping ", 
+             "with the 'chrs' argument.")
+
     intens <- extractMatrix(x, cells = p.anno$index, verbose = verbose)
     p.anno$index <- 1:nrow(p.anno)
 
