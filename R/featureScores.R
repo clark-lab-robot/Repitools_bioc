@@ -181,7 +181,7 @@ setMethod(".featureScores", c("matrix", "GRanges"),
         p.used <- unique(unlist(mapping$indexes, use.names = FALSE))
         p.anno <- p.anno[p.used, ]
         mapping <- annotationLookup(p.anno[, !ind.col], y, up, down, verbose)
-        intens <- x[p.anno$index, ]
+        intens <- x[p.anno$index, , drop = FALSE]
     } else {
         intens <- x
     }
