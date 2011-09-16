@@ -102,11 +102,14 @@ setMethod(".featureScores", c("character", ".CoverageSamples"),
 })
 
 setMethod(".featureScores", c(".SequencingData", "GRanges"),
-    function(x, y, up, down, dist = c("base", "percent"), freq, s.width, mappability = NULL,
-             map.cutoff = 0.5, ..., verbose = TRUE)
+    function(x, y, up, down, dist = c("base", "percent"), freq, s.width = NULL, mappability = NULL,
+             map.cutoff = 0.5, tag.len = NULL, ..., verbose = TRUE)
 {
     require(IRanges)
     dist <- match.arg(dist)
+
+    if(is.null(s.width) && !is.null(mappability) && is.null(tag.len))
+        stop("'mappability' provided. Provide one of either 's.width' or 'tag.len'.")
 
     if(is.null(mappability))
         warning("Genome mappability object not provided. Positions of no signal could",
@@ -145,8 +148,9 @@ setMethod(".featureScores", c(".SequencingData", "GRanges"),
     marks.samps.map <- NULL
     if(!is.null(mappability))
     {
-        unique.widths <- unique(s.width)
-        marks.samps.map <- lapply(unique.widths, function(w)
+        tag.winds <- if(is.null(s.width)) tag.len else s.width
+        tag.winds <- unique(tag.winds)
+        marks.samps.map <- lapply(tag.winds, function(w)
                            {
                                 if(verbose)
                                     message("Calculating mappability for smoothing width ", w)
@@ -155,7 +159,7 @@ setMethod(".featureScores", c(".SequencingData", "GRanges"),
                                 matrix(m.scores, ncol = n.pos, byrow = TRUE)
                            })
 
-        names(marks.samps.map) <- unique.widths
+        names(marks.samps.map) <- tag.winds
     }
 
     samp.info <- new(".CoverageSamples", pos.labels = pos.labels, cvg.samps = cvg.samps,

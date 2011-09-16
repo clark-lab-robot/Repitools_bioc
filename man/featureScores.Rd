@@ -52,10 +52,14 @@
                    if \code{x} is sequencing data. This argument is optional. If
                    not provided, then no smoothing is done.}
     \item{mappability:}{A \code{\linkS4class{BSgenome}} object that has bases for which
-                        no mappable reads start at masked by N.}
+                        no mappable reads start at masked by N. If this was provided, then
+                        either \code{s.width} or \code{tag.len} must be provided (but not
+                        both).}
     \item{map.cutoff:}{The percentage of bases in a window around each sampling position
                        that must be mappable. Otherwise, the score at that position is
                        repalced by NA. Default: 0.5}
+    \item{tag.len:}{Provide this if \code{mappability} was provided, but \code{s.width}
+                    was not.}
     \item{use.strand:}{Whether to only consider reads on the same strand as the
                        feature. Useful for RNA-seq applications.}
     \item{verbose:}{Whether to print the progess of processing. Default: TRUE.}
