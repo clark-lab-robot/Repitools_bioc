@@ -51,7 +51,8 @@
     \item{s.width:}{The width of smoothing to apply to the coverage. Only provide this
                    if \code{x} is sequencing data. This argument is optional. If
                    not provided, then no smoothing is done.}
-    \item{mappability:}{A \code{\linkS4class{BSgenome}} object that has bases for which
+    \item{mappability:}{A \code{\linkS4class{BSgenome}} object, or list of such objects,
+                        the same length as \code{x} that has bases for which
                         no mappable reads start at masked by N. If this was provided, then
                         either \code{s.width} or \code{tag.len} must be provided (but not
                         both).}

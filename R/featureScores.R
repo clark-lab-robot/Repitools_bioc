@@ -6,8 +6,8 @@ setGeneric(".featureScores", signature = c("x", "y"), function(x, y, ...)
 setClassUnion(".SequencingData", c("character", "GRanges", "GRangesList"))
 
 setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
-    function(x, y, anno, up, down, dist, freq, s.width, map.cutoff, use.strand = FALSE,
-             verbose)
+    function(x, y, anno, up, down, dist, freq, s.width, adj.par.index = 1, map.cutoff,
+             use.strand = FALSE, verbose)
 {
     require(GenomicRanges)
 
@@ -22,10 +22,10 @@ setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
     seqlevels(x) <- seqlevels(anno)
 
     # Qualitatively near identical to running mean smoothing.
-    if(verbose) message("Extending all reads to smoothing width of ", s.width)
+    if(verbose) message("Extending all reads to smoothing width of ", s.width[adj.par.index])
     seqlengths(x) <- rep(NA, length(seqlengths(x)))
-    if(!is.null(s.width))
-        x <- resize(x, s.width)
+    if(!is.null(s.width[adj.par.index]))
+        x <- resize(x, s.width[adj.par.index])
 
     # Get coverage.
     if(verbose) message("Calculating coverage at sample points.")
@@ -34,15 +34,14 @@ setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
                       ncol = length(pos.labels),
                       byrow = TRUE)
 
-    map.list <- y@marks.samps.map
-    if(!is.null(map.list))
+    map.sample <- y@marks.samps.map[[adj.par.index]]
+    if(!is.null(map.sample))
     {
         if(verbose)
             message("Scaling coverage for mappability.")
         # Scale for mappability, and make NA any regions that are below the cutoff
-        map.matrix <- map.list[[match(s.width, names(map.list))]]
-        cvg.mat[map.matrix < map.cutoff] <- NA
-        cvg.mat <- cvg.mat * 1 / map.matrix
+        cvg.mat[map.sample < map.cutoff] <- NA
+        cvg.mat <- cvg.mat * 1 / map.sample
     }
 
     # Precision sometimes means 0 is represented as very small negative numbers.
@@ -52,21 +51,19 @@ setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
     rownames(cvg.mat) <- .getNames(anno)
 
     new("ScoresList", names = "Undefined", scores = list(cvg.mat), anno = anno,
-         up = up, down = down, dist = dist, freq = freq, s.width = s.width,
+         up = up, down = down, dist = dist, freq = freq, s.width = s.width[adj.par.index],
          .samp.info = y)
 })
 
 setMethod(".featureScores", c("GRangesList", ".CoverageSamples"),
     function(x, y, anno, up, down, dist, freq, s.width, ..., verbose)
 {
-    if(length(s.width) == 1)
-        s.width <- rep(s.width, length(x))
     scores <- mapply(function(z, i)
 	           {
                         if(verbose && !is.null(names(x)))
                             message("Processing sample ", names(x)[i])
 		   	.featureScores(z, y, anno, up, down, dist,
-                                        freq, s.width[i], ..., verbose = verbose)
+                                        freq, s.width, i, ..., verbose = verbose)
 		   }, x, IntegerList(as.list(1:length(x))), SIMPLIFY = FALSE)
 
     if(!is.null(names(x)))
@@ -81,16 +78,13 @@ setMethod(".featureScores", c("GRangesList", ".CoverageSamples"),
 setMethod(".featureScores", c("character", ".CoverageSamples"),
     function(x, y, anno, up, down, dist, freq, s.width, ..., verbose)
 {
-    if(length(s.width) == 1)
-        s.width <- rep(s.width, length(x))
-
     scores <- mapply(function(z, i)
 	           {
                         if(verbose && !is.null(names(x)))
                             message("Processing sample ", names(x)[i])
 		   	
 		   	.featureScores(BAM2GRanges(z), y, anno, up, down, dist, freq,
-                                        s.width[i], ..., verbose = verbose)
+                                        s.width, i, ..., verbose = verbose)
 		   }, x, 1:length(x), SIMPLIFY = FALSE)
     if(!is.null(names(x)))
 	names <- x
@@ -112,8 +106,11 @@ setMethod(".featureScores", c(".SequencingData", "GRanges"),
         stop("'mappability' provided. Provide one of either 's.width' or 'tag.len'.")
 
     if(is.null(mappability))
-        warning("Genome mappability object not provided. Positions of no signal could",
+        warning("Genome mappability not provided. Positions of no signal could",
                 "\nbe due to being in unmappable regions of the genome.")
+
+    if(length(s.width) == 1)
+        s.width <- rep(s.width, length(x))
 
     str <- strand(y)
     st <- start(y)
@@ -148,18 +145,31 @@ setMethod(".featureScores", c(".SequencingData", "GRanges"),
     marks.samps.map <- NULL
     if(!is.null(mappability))
     {
+        
+        if(length(tag.len) == 1 & length(x) > 1)
+            tag.len <- rep(tag.len, length(x))
+        if(length(mappability) == 1 || class(mappability) == "BSgenome")
+            mappability <- replicate(length(x), mappability)
         tag.winds <- if(is.null(s.width)) tag.len else s.width
-        tag.winds <- unique(tag.winds)
-        marks.samps.map <- lapply(tag.winds, function(w)
+        map.names <- sapply(mappability, function(x) x@seqs_pkgname)
+        read.lengths <- sapply(map.names, function(x)
+                                          {
+                                              bp.loc <- regexpr("[0-9]+bp", x)
+                                              substr(x, bp.loc, (bp.loc + attr(bp.loc, "match.length") - 3))
+                                          })
+        frags.smooths <- factor(paste(read.lengths, tag.winds, sep = '.'))
+        marks.samps.map <- lapply(levels(frags.smooths), function(x)
                            {
+                                frag.smooth <- as.numeric(strsplit(x, '\\.')[[1]])
                                 if(verbose)
-                                    message("Calculating mappability for smoothing width ", w)
-                                cvg.proxim <- resize(cvg.samps, w * 2, fix = "center")
-                                m.scores <- mappabilityCalc(cvg.proxim, mappability, verbose = FALSE)
+                                    message("Calculating mappability for fragment length ",
+                                             frag.smooth[1], " and smoothing width ", frag.smooth[2])
+                                cvg.proxim <- resize(cvg.samps, frag.smooth[2] * 2, fix = "center")
+                                m.scores <- mappabilityCalc(cvg.proxim, mappability[[match(x, frags.smooths)]], verbose = FALSE)
                                 matrix(m.scores, ncol = n.pos, byrow = TRUE)
                            })
 
-        names(marks.samps.map) <- tag.winds
+        marks.samps.map <- marks.samps.map[match(frags.smooths, levels(frags.smooths))]
     }
 
     samp.info <- new(".CoverageSamples", pos.labels = pos.labels, cvg.samps = cvg.samps,
