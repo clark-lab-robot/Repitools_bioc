@@ -6,7 +6,7 @@ setClass(".CoverageSamples",
          representation(
                         pos.labels = "ANY", # character or numeric.
                         cvg.samps = "GRanges",
-                        marks.samps.map = "ANY"# NULL or BSgenome.
+                        marks.samps.map = "ANY" # NULL or BSgenome.
 			))
 
 setClass("ScoresList", representation(
@@ -115,10 +115,10 @@ setMethod("show", "ClusteredScoresList",
 setGeneric("ClusteredScoresList", function(x, ...)
            {standardGeneric("ClusteredScoresList")})
 setMethod("ClusteredScoresList", "ScoresList",
-    function(x, scores = tables(x), expr = NULL, expr.name = NULL, cluster.id, sort.data = NULL,
+    function(x, anno = x@anno, scores = tables(x), expr = NULL, expr.name = NULL, cluster.id, sort.data = NULL,
              sort.name = NULL)
 {
-	new("ClusteredScoresList", names = x@names, scores = scores, anno = x@anno,
+	new("ClusteredScoresList", names = x@names, scores = scores, anno = anno,
 	    up = x@up, down = x@down, dist = x@dist,
 	    freq = x@freq, s.width = x@s.width, cluster.id = cluster.id,
 	    expr = expr, expr.name = expr.name, sort.data = sort.data,

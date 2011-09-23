@@ -23,12 +23,16 @@
 \section{Constructor}{
   \describe{
     \item{}{
-    	\code{ClusteredScoresList(x, cvgs = tables(x), expr = NULL, expr.name = NULL,
-                                    cluster.id, sort.name = NULL, sort.data = NULL)}
+    	\code{ClusteredScoresList(x, anno = x@anno, scores = tables(x),
+                                  expr = NULL, expr.name = NULL,
+                                  cluster.id, sort.name = NULL, sort.data = NULL)}
 	Creates a ClusteredScoresList object.
 	\describe{
 	    \item{\code{x}}{A \code{\linkS4class{ScoresList}} object.}
-	    \item{\code{scores}}{A list of coverage matrices.}
+	    \item{\code{anno}}{A \code{\linkS4class{GRanges}} object. Give this value
+                               if only a subset of features was used for clustering.}
+	    \item{\code{scores}}{A list of coverage matrices. Give this if the matrices
+                                 in \code{x} were modified before clustering.}
 	    \item{\code{expr}}{A numeric vector, same length as number of
                                rows of every coverage matrix.}
 	    \item{\code{expr.name}}{A label, describing the expression data.}
