@@ -1,9 +1,9 @@
 Package: Repitools
-Version: 0.99.31
-Date: 2011/9/23
+Version: 0.99.32
+Date: 2011/10/13
 Title: Epigenomic tools
-Author: Mark Robinson <mrobinson@wehi.edu.au>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>
-Maintainer: Mark Robinson <mrobinson@wehi.edu.au>
+Author: Mark Robinson <mark.robinson@imls.uzh.ch>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>
+Maintainer: Mark Robinson <mark.robinson@imls.uzh.ch>
 LazyLoad: Yes
 Depends: R (>= 2.13.0), methods
 Imports: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, zoo
