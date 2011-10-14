@@ -31,10 +31,10 @@ setMethod("featureBlocks", "GRanges",
 	ends = as.numeric(ifelse(pos, ref.points + down,
                                       ref.points + up))
     }
-    f.names <- .getNames(anno)
 
-    GRanges(seqnames(anno), IRanges(starts, ends), if(keep.strand) str else '*',
-            name = f.names)
+    regs.anno <- GRanges(seqnames(anno), IRanges(starts, ends), if(keep.strand) str else '*')
+    values(regs.anno) <- values(anno)
+    regs.anno
 })
 
 setMethod("featureBlocks", "data.frame",

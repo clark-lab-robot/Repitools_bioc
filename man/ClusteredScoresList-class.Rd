@@ -14,11 +14,15 @@
   Contains a list of coverage matrices, the parameters that were used to
   generate them origin, and also cluster membership and expression data.
 
-  This allows \code{\link{clusterPlots}} to be called multiple times without
-  having to redo the clustering each time. It also allows the user to take
-  the \code{\linkS4class{ScoresList}} output of \code{\link{featureScores}},
-  and do their own custom clustering on the coverage matrices, then save the
-  clustering results in this container.
+  %This allows \code{\link{clusterPlots}} to be called multiple times without
+  %having to redo the clustering each time. It also allows the user to take
+  %the \code{\linkS4class{ScoresList}} output of \code{\link{featureScores}},
+  %and do their own custom clustering on the coverage matrices, then save the
+  %clustering results in this container.
+
+  It also allows the user to take the \code{\linkS4class{ScoresList}} output of
+  \code{\link{featureScores}}, and do their own custom clustering on the coverage matrices,
+  then save the clustering results in this container.
 }
 \section{Constructor}{
   \describe{
