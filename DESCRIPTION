@@ -1,5 +1,5 @@
 Package: Repitools
-Version: 1.1.0
+Version: 1.1.1
 Date: 2011/10/31
 Title: Epigenomic tools
 Author: Mark Robinson <mark.robinson@imls.uzh.ch>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>
@@ -48,6 +48,8 @@ Collate: classes.R
          checkProbes.R
          relativeCN.R
          enrichmentCalc.R
+         clusterPlots.R
+         summarizeScores.R
 License: LGPL (>= 2)
 biocViews: DNAmethylation, GeneExpression, Methylseq
 
