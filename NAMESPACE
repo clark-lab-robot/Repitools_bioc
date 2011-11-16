@@ -1,7 +1,7 @@
 #.onLoad <- function(lib, pkg) require(methods)
 
 #  All functions exported other than those starting with "."
-import(methods, BSgenome, IRanges, GenomicRanges)
+import(methods, BiocGenerics, IRanges, GenomicRanges, BSgenome)
 exportClasses(FastQC, SequenceQC, SequenceQCSet, ScoresList, ClusteredScoresList)
 exportMethods(show)
 exportPattern("^[^\\.]")
