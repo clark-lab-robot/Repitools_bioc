@@ -8,7 +8,7 @@
         and prostate cancer cells. The DNA was immunoprecipitated by a DNA
         methylation binding antibody.
     }
-    \usage{samplesList}
+    \usage{samples.list.subset}
     \format{A \code{\linkS4class{GRangesList}}.}
     \keyword{datasets}
 

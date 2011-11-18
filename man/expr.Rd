@@ -6,6 +6,6 @@
         The t-statistics of differences in expression for genes on chromosome 21
         between prostate cancer and normal epithelial cells.
     }
-    \usage{expr}
+    \usage{expr.subset}
     \format{A numeric matrix, 309 rows and 1 column.}
     \keyword{datasets}

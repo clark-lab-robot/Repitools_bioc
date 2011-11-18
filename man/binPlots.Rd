@@ -42,14 +42,14 @@ If \code{plotType = "terrain"}, a series of bins are plotted as a 3D-terrain map
 \author{Mark Robinson}
 \examples{
   data(chr21genes)
-  data(samplesList)
-  data(expr)
+  data(samplesList)  # Loads 'samples.list.subset'.
+  data(expr)  # Loads 'expr.subset'.
 
-  fs <- featureScores(samplesList, chr21genes, up = 5000, down = 1000, dist = "base", freq = 1000,
+  fs <- featureScores(samples.list.subset, chr21genes, up = 5000, down = 1000, dist = "base", freq = 1000,
                       s.width = 500)
   fs@scores <- list(tables(fs)[[2]] - tables(fs)[[4]])
   names(fs) <- "PC-Norm"
 
-  binPlots(fs, ordering = expr, ord.label = "expression", plot.type = "line", n.bins = 4)
-  binPlots(fs, ordering = expr, ord.label = "expression", plot.type = "heatmap", n.bins = 8)
+  binPlots(fs, ordering = expr.subset, ord.label = "expression", plot.type = "line", n.bins = 4)
+  binPlots(fs, ordering = expr.subset, ord.label = "expression", plot.type = "heatmap", n.bins = 8)
 }

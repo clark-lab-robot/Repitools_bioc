@@ -108,11 +108,12 @@
 \seealso{\code{\link{featureScores}} for generating coverage matrices.}
 \author{Dario Strbenac}
 \examples{
-  data(samplesList)
-  data(expr)
+  data(samplesList)  # Loads 'samples.list.subset'.
+  data(expr)  # Loads 'expr.subset'.
   data(chr21genes)
 
-  fs <- featureScores(samplesList[1:2], chr21genes, up = 2000, down = 1000, freq = 500, s.width = 500)
-  clusterPlots(fs, function(x) sqrt(x), n.clusters = 5, expr = as.numeric(expr),
+  fs <- featureScores(samples.list.subset[1:2], chr21genes, up = 2000, down = 1000,
+                      freq = 500, s.width = 500)
+  clusterPlots(fs, function(x) sqrt(x), n.clusters = 5, expr = as.numeric(expr.subset),
                plot.type = "heatmap", pch = 19, cex = 0.5)
 }

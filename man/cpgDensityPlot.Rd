@@ -29,10 +29,7 @@
 \examples{
 if(require(BSgenome.Hsapiens.UCSC.hg18))
 {
-  readsFile <- system.file("data","samplesList.RData", package="Repitools")
-  load(readsFile)  # GRangesList of reads 'samplesList'
-
-  cpgDensityPlot(samplesList, seq.len=300, organism=Hsapiens, lwd=4, verbose=TRUE)
+  data(samplesList) # Loads 'samples.list.subset'.
+  cpgDensityPlot(samples.list.subset, seq.len=300, organism=Hsapiens, lwd=4, verbose=TRUE)
 }
-
 }

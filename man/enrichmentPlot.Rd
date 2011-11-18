@@ -33,7 +33,6 @@
 
 \author{Aaron Statham}
 \examples{
-  readsFile <- system.file("data", "samplesList.RData", package = "Repitools")
-  load(readsFile)  # GRangesList of reads 'samplesList'
-  enrichmentPlot(samplesList, seq.len = 300, total.lib.size = FALSE)
+  data(samplesList)  # GRangesList of reads 'samples.list.subset'
+  enrichmentPlot(samples.list.subset, seq.len = 300, total.lib.size = FALSE)
 }

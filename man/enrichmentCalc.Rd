@@ -30,9 +30,8 @@
 \author{Aaron Statham}
 \examples{
   require(GenomicRanges)
-  readsFile <- system.file("data", "samplesList.RData", package = "Repitools")
-  load(readsFile)  # GRangesList of reads 'samplesList'
-  seqlengths(samplesList)
+  data(samplesList)  # Loads 'samples.list.subset'.
+  seqlengths(samples.list.subset)
 
-  tc <- enrichmentCalc(samplesList, seq.len = 300)
+  tc <- enrichmentCalc(samples.list.subset, seq.len = 300)
 }

@@ -22,10 +22,10 @@
 \author{Dario Strbenac}
 \examples{
   data(chr21genes)
-  data(samplesList)
-  data(expr)
+  data(samplesList)  # Loads 'samples.list.subset'.
 
-  fs <- featureScores(samplesList[1:2], chr21genes, up = 2000, down = 1000, freq = 500, s.width = 500)
+  fs <- featureScores(samples.list.subset[1:2], chr21genes, up = 2000, down = 1000,
+                      freq = 500, s.width = 500)
   d.matrix <- matrix(c(-1, 1))
   colnames(d.matrix) <- "IP-input"
   summarizeScores(fs, d.matrix)
