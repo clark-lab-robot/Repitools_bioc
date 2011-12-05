@@ -6,9 +6,8 @@ setGeneric("regionStats", function(x, ...){standardGeneric("regionStats")})
   uch <- unique(ch)
 
   tmeanReal <- matrix(,nr=nrow(diffs),nc=ncol(diffs))
-  tmeanPerms <- lapply( as.list(colnames(design)), FUN=function(u) {
-    matrix(NA,nr=nrow(diffs),nc=n.perm)
-  })
+  tmeanPerms <- lapply(1:ncol(design), function(u) matrix(NA, nr=nrow(diffs), nc=n.perm))
+  if(length(colnames(design)) > 0) names(tmeanPerms) <- colnames(design)
   regions <- fdrTabs <- vector("list", length(tmeanPerms))
   names(regions) <- names(fdrTabs) <- colnames(design)
   
@@ -212,7 +211,7 @@ setMethod("regionStats","matrix",
     regTable <- rbind(regTable, .getRegionsChr(chrInds[[i]], score, sp, min.probes, max.gap, cutoff, doJoin))
   if (two.sides)
     for (i in 1:length(chrInds))
-      regTable <- rbind(regTable, .getRegionsChr(chrInds[[i]], -score, sp,  min.probes, max.gap, cutoff, doJoin))
+      regTable <- rbind(regTable, .getRegionsChr(chrInds[[i]], -score, sp, min.probes, max.gap, cutoff, doJoin))
   return(regTable)
 }
 
