@@ -5,8 +5,8 @@
 \title{Calculate The Mappability of a Region}
 \description{Function to calculate mappability of windows}
 \usage{
-  \S4method{mappabilityCalc}{GRanges}(x, organism, verbose = TRUE)
-  \S4method{mappabilityCalc}{data.frame}(x, organism, window = NULL, ...)
+  \S4method{mappabilityCalc}{GRanges}(x, organism, window = NULL, verbose = TRUE)
+  \S4method{mappabilityCalc}{data.frame}(x, organism, ...)
 }
 \arguments{
   \item{x}{A \code{GRanges} object or a \code{data.frame}, with columns \code{chr} and
@@ -16,7 +16,7 @@
                 bases downstream.}
   \item{organism}{The \code{BSgenome} object to calculate mappability upon.}
   \item{verbose}{Whether to print the progess of processing.}
-  \item{...}{The \code{verbose} variable for the \code{data.frame} method,
+  \item{...}{The \code{verbose} and \code{window} variable for the \code{data.frame} method,
              passed onto the \code{GRanges} method.}
 }
 \details{
@@ -33,8 +33,10 @@
 }
 \author{Aaron Statham}
 \examples{
-# require(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
-# TSSTable <- data.frame(chr = paste("chr", c(1,2), sep = ""), position = c(100000, 200000))
-# mappabilityCalc(TSSTable, 200, organism=Hsapiens36bp)
+  \dontrun{
+    require(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
+    TSSTable <- data.frame(chr = paste("chr", c(1,2), sep = ""), position = c(100000, 200000))
+    mappabilityCalc(TSSTable, 200, organism=Hsapiens36bp)
+  }
 }
 
