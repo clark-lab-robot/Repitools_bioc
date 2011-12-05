@@ -17,18 +17,17 @@ setMethod("mappabilityCalc", "GRanges", function(x, organism, window = NULL,
     strand(x) <- "+"
     chrs <- as.character(seqnames(x))
     regions.by.chr <- split(x, chrs)
+    chr.maxs <- seqlengths(organism)[names(regions.by.chr)]
     
-    mappability.by.chr <- lapply(regions.by.chr, function(y)
+    mappability.by.chr <- mapply(function(y, z)
     {
         # Handle case of windows overlapping past ends of chromosome.
-        chr.name <- as.character(seqnames(y))[1]
-        chr.max <- length(organism[[chr.name]])
-        inside.regions <- restrict(y, 1, chr.max, keep.all.ranges = TRUE)
-        window.seqs <- getSeq(organism, inside.regions)
+        inside.regions <- restrict(y, 1, z, keep.all.ranges = TRUE)
+        window.seqs <- suppressWarnings(getSeq(organism, inside.regions))
         unmap.counts <- alphabetFrequency(DNAStringSet(window.seqs))[, 'N']
         unmap.counts <- unmap.counts + width(y) - width(inside.regions)
         1 - (unmap.counts / width(y))
-    })
+    }, as.list(regions.by.chr), as.list(chr.maxs), SIMPLIFY = FALSE)
     unsplit(mappability.by.chr, chrs)
 })
     
