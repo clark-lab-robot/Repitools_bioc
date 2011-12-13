@@ -1,7 +1,7 @@
 setGeneric("mappabilityCalc", function(x, ...){standardGeneric("mappabilityCalc")})
     
 setMethod("mappabilityCalc", "GRanges", function(x, organism, window = NULL,
-          type = c("TSS", "center", "block"), verbose = TRUE)
+          type = c("block", "TSS", "center"), verbose = TRUE)
 {
     require(GenomicRanges)
 
@@ -12,7 +12,12 @@ setMethod("mappabilityCalc", "GRanges", function(x, organism, window = NULL,
     if(type %in% c("TSS", "center") && is.null(window))
         stop("Using a reference point but window size around it was not specified.")
 
-    if(verbose) message("Calculating mappability.")
+    info <- "Calculating mappability"
+    if(type == "block") info <- paste(info, "in supplied blocks.")
+    if(type == "TSS") info <- paste(info, window, "bases around TSSs.")
+    if(type == "center") info <- paste(info, window, "bases around feature centres.")
+    
+    if(verbose) message(info)
 
     if(type %in% c("TSS", "center"))
     {
@@ -44,7 +49,7 @@ setMethod("mappabilityCalc", "GRanges", function(x, organism, window = NULL,
 })
     
 setMethod("mappabilityCalc", "data.frame", function(x, organism, window = NULL,
-          type = c("TSS", "center", "block"), ...)
+          type = c("block", "TSS", "center"), ...)
 {
     require(GenomicRanges)
 
@@ -72,4 +77,3 @@ setMethod("mappabilityCalc", "data.frame", function(x, organism, window = NULL,
 
     mappabilityCalc(x, organism, window = NULL, type = "block", ...)
 })
-

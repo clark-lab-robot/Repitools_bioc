@@ -6,9 +6,9 @@
 \description{Function to calculate mappability of windows}
 \usage{
   \S4method{mappabilityCalc}{GRanges}(x, organism, window = NULL,
-              type = c("TSS", "center", "block"), verbose = TRUE)
+              type = c("block", "TSS", "center"), verbose = TRUE)
   \S4method{mappabilityCalc}{data.frame}(x, organism, window = NULL,
-                                         type = c("TSS", "center", "block"), ...)
+                                         type = c("block", "TSS", "center"), ...)
 }
 \arguments{
   \item{x}{A \code{GRanges} object or a \code{data.frame}, with columns \code{chr} and
@@ -46,7 +46,7 @@
   \dontrun{
     require(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
     TSSTable <- data.frame(chr = paste("chr", c(1,2), sep = ""), position = c(100000, 200000))
-    mappabilityCalc(TSSTable, Hsapiens36bp, 200)
+    mappabilityCalc(TSSTable, Hsapiens36bp, window = 200, type = "TSS")
   }
 }
 
