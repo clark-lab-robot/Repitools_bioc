@@ -87,7 +87,7 @@ setMethod(".featureScores", c("character", ".CoverageSamples"),
                                         s.width, i, ..., verbose = verbose)
 		   }, x, 1:length(x), SIMPLIFY = FALSE)
     if(!is.null(names(x)))
-	names <- x
+	names <- names(x)
     else
 	names <- unname(sapply(scores, names))
     new("ScoresList", names = names, anno = anno, scores = unname(sapply(scores, tables)),
