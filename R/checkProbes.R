@@ -24,7 +24,7 @@ setMethod("checkProbes", c("GRanges", "GRanges"),
     hits <- table(pr.names)
     strand(regs) <- '*'
 
-    map <- findOverlaps(regs, probes)@matchMatrix
+    map <- matchMatrix(findOverlaps(regs, probes))
     inds <- split(map[, 2], factor(map[, 1], levels = 1:length(regs)))
 
     invisible(mapply(function(x, y) {

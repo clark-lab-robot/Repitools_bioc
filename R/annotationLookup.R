@@ -15,7 +15,7 @@ setMethod("annotationBlocksLookup", c("data.frame", "GRanges"),
     g.names <- .getNames(anno)
 
     if(verbose) message("Processing mapping between probes and features.")
-    mapping <- suppressWarnings(findOverlaps(anno, probesGR)@matchMatrix)
+    mapping <- suppressWarnings(matchMatrix(findOverlaps(anno, probesGR)))
     inds <- split(p.inds[mapping[, 2]], factor(mapping[, 1],
                                 levels = 1:length(g.names)))
     pos.list <- split(start(probesGR[mapping[, 2]]), factor(mapping[, 1],
