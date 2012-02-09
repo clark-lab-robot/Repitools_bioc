@@ -43,17 +43,13 @@ setMethod("profilePlots", "ScoresList",
                       } else {
                           if(any(is.na(u)))
                               stop("Numeric gene indices mixed with NAs not allowed.")
+                          numeric(0)    
                       }
                   })
 
-    scores <- mapply(function(u, v, w)
-                     {
-                         if(class(w) == "logical")
-                             u[v, ]
-                         else
-                             u
-                     }, scores, keep, gene.lists, SIMPLIFY = FALSE)
-
+    n.logical.lists <- sum(sapply(gene.lists, function(u) class(u) == "logical"))
+    keep <- as.numeric(names(table(unlist(keep)))[table(unlist(keep)) == n.logical.lists])
+    scores <- lapply(scores, function(u) u[keep, ])
     gene.lists <- lapply(gene.lists, na.omit)
 
     # Pick a size for random gene sets.

@@ -16,7 +16,8 @@
   \item{x}{A \code{\linkS4class{ScoresList}} object. See \code{\link{featureScores}}.}
   \item{summarize}{How to summarise the scores for each bin into a single value.}
   \item{gene.lists}{Named \code{list} of \code{logical} or \code{integer} vectors, specifying
-                    the genes to be averaged and plotted.}
+                    the genes to be averaged and plotted. NAs are allowed if the vector is
+                    \code{logical}.}
   \item{n.samples}{The number of times to randomly sample from all genes.}
   \item{confidence}{A percentage confidence interval to be plotted (must be > 0.5 and < 1.0).}
   \item{legend.plot}{Where to plot the legend - directly passed to \code{\link{legend}}.
