@@ -28,8 +28,8 @@ setMethod("summarizeScores", c("ScoresList", "matrix"),
 
     weights.matrix <- apply(design, 2, function(x)
                            {
-                               x[x == 1] <- 1 / sum(x[x == 1])
-                               x[x == -1] <- -1 / sum(x[x == -1])
+                               x[x == 1] <- 1 / sum(x == 1)
+                               x[x == -1] <- -1 / sum(x == -1)
                                x
                            })
 
