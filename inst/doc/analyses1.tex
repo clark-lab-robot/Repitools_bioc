@@ -3,8 +3,7 @@ The \texttt{blocksStats} function is a convenient way to do statistical tests of
 
 \begin{Schunk}
 \begin{Sinput}
- design.matrix <- matrix(c(0, -1, 0, 1), dimnames = list(names(samples.list), 
-     "C-N"))
+ design.matrix <- matrix(c(0, -1, 0, 1), dimnames = list(names(samples.list), "C-N"))
  design.matrix
 \end{Sinput}
 \begin{Soutput}
@@ -15,8 +14,8 @@ LNCaP input   0
 LNCaP IP      1
 \end{Soutput}
 \begin{Sinput}
- stats <- blocksStats(samples.list, gene.anno, up = 2000, down = 0, 
-     seq.len = 300, design = design.matrix)
+ stats <- blocksStats(samples.list, gene.anno, up = 2000, down = 0, seq.len = 300,
+                      design = design.matrix)
 \end{Sinput}
 \begin{Soutput}
 Comparison of groups:  1 - -1 
@@ -41,12 +40,12 @@ Comparison of groups:  1 - -1
 8115391       4          28       95       4.026631      94.3841477   -18.97912
 7976848      75          33        1      75.489482       0.9929602   -20.14963
         logFC_C-N  p.value_C-N adj.p.vals_C-N
-8019804 -2.793764 2.911512e-64   7.268881e-60
-8015798  2.468516 1.091971e-43   1.363108e-39
-7904879  3.538199 3.102111e-31   2.581577e-27
-7908529  5.203643 2.378716e-29   1.484676e-25
+8019804 -2.793764 1.662518e-64   4.150642e-60
+8015798  2.468516 6.449624e-44   8.051066e-40
+7904879  3.538199 1.681848e-31   1.399634e-27
+7908529  5.203643 1.220924e-29   7.620397e-26
 8115391  4.551106 1.238883e-23   6.185989e-20
-7976848 -6.247568 2.038173e-21   8.480838e-18
+7976848 -6.247568 1.032321e-21   4.295489e-18
 \end{Soutput}
 \end{Schunk}
 

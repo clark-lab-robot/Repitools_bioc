@@ -2,8 +2,8 @@
 
 \begin{Schunk}
 \begin{Sinput}
- annotationCounts(samples.list, head(gene.anno, 10), up = 2000, 
-     down = 500, seq.len = 300)
+ annotationCounts(samples.list, head(gene.anno, 10), up = 2000, down = 500,
+                  seq.len = 300)
 \end{Sinput}
 \begin{Soutput}
         PrEC input PrEC IP LNCaP input LNCaP IP
@@ -28,12 +28,13 @@ It would be useful to know when seeing a lack of reads in some windows, if the m
 \begin{Schunk}
 \begin{Sinput}
  library(BSgenome.Hsapiens36bp.UCSC.hg18mappability)
- locations <- data.frame(chr = c("chr4", "chr9"), position = c(5e+07, 
-     1e+08))
- mappabilityCalc(locations, window = 500, organism = Hsapiens36bp)
+ locations <- data.frame(chr = c("chr4", "chr9"),
+                         position = c(50000000, 100000000))
+ mappabilityCalc(locations, organism = Hsapiens36bp, window = 500, type = "center")
 \end{Sinput}
 \begin{Soutput}
-[1] 0.000 0.998
+ <NA>  <NA> 
+0.000 0.998 
 \end{Soutput}
 \end{Schunk}
 

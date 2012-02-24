@@ -1,11 +1,11 @@
 \subsection{Finding enriched regions in a single sample}
-Repitools contains an implementation of \texttt{ChromaBlocks} (described in \href{http://www.ncbi.nlm.nih.gov/pubmed/20452322}{Hawkins RD et al}), designed to discover regions of the genome which are enriched for epigenetic marks, such as H3K27me3.  Briefly, ChromaBlocks counts the number of sequencing reads aligned to adjacent bins in the genome in both Immunoprecipitated and Input samples, determines which bins exceed a cutoff for IP-Input enrichment (either specified or set at a supplied FDR by permutation) and returns regions of the genome where multiple adjacent bins are enriched.
+Repitools contains an implementation of \texttt{ChromaBlocks} (described in \href{http://www.ncbi.nlm.nih.gov/pubmed/20452322}{Hawkins RD et al}), designed to discover regions of the genome which are enriched for epigenetic marks, such as H3K27me3. Briefly, ChromaBlocks counts the number of sequencing reads aligned to adjacent bins in the genome in both Immunoprecipitated and Input samples, determines which bins exceed a cutoff for IP-Input enrichment (either specified or set at a supplied FDR by permutation) and returns regions of the genome where multiple adjacent bins are enriched.
 
 \noindent Data from the Human Reference Epigenome Mapping Project is used to demonstrate \texttt{ChromaBlocks}. The data was downloaded from \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16256}{here}. Samples \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM466734}{GSM466734}, \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM466737}{GSM466737}, \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM466739}{GSM466739}, and \href{http://www.ncbi.nlm.nih.gov/projects/geo/query/acc.cgi?acc=GSM450270}{GSM450270} are used here.
 
 \begin{Schunk}
 \begin{Sinput}
- load("H1samples.RData")
+ data(H1samples)
  class(H1samples)
 \end{Sinput}
 \begin{Soutput}
@@ -27,9 +27,10 @@ attr(,"package")
  1201402  8673675  4151895 15289957 
 \end{Soutput}
 \begin{Sinput}
- H3K27me3.blocks <- ChromaBlocks(rs.ip = H1samples["H3K27me3"], 
-     rs.input = H1samples["Input"], organism = Hsapiens, chrs = "chr20", 
-     preset = "small", seq.len = 300)
+ H3K27me3.blocks <- ChromaBlocks(rs.ip = H1samples["H3K27me3"],
+                                 rs.input = H1samples["Input"],
+                                 organism = Hsapiens, chrs = "chr20",
+                                 preset = "small", seq.len = 300)
 \end{Sinput}
 \begin{Soutput}
 Permutation 1.

@@ -1,5 +1,7 @@
-A small \texttt{GRangesList} of mapped short reads (four samples run on an Illumina Genome Analyser) is included with the package (for example, see \texttt{?binPlots}). This data has been published and is available \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE24546}{here}. LNCaP is a prostate cancer cell line, and PrEC is a (normal) prostate epithelial cell line.  Here, the ``IP" represents an MBD capture experiment, whereby a population of DNA fragments containing methylated DNA (generally in the CpG context) and ``input" represents fragmented genomic DNA from the same cell lines. \\
-
+Caution : All data distributed with the package is a reduced version of the full dataset presented here. Also, all variable names have \texttt{.subset} appended to them. Therefore, the code presented here cannot simply be copied and pasted into \textbf{R}.
+\\ \\
+A small \texttt{GRangesList} of mapped short reads (four samples run on an Illumina Genome Analyser) is included with the package (for example, see \texttt{?binPlots}). This data has been published and is available \href{http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE24546}{here}. LNCaP is a prostate cancer cell line, and PrEC is a (normal) prostate epithelial cell line.  Here, the ``IP" represents an MBD capture experiment, whereby a population of DNA fragments containing methylated DNA (generally in the CpG context) and ``input" represents fragmented genomic DNA from the same cell lines.
+\\ \\
 Note that \texttt{GRanges} objects of mapped reads from many popular aligners can be created in \textbf{R} using the \texttt{readAligned} function in the \texttt{ShortRead} package, then coerced with \texttt{as(alnRdObj, "GRanges")}. Alternatively, two convenience methods \texttt{BAM2GRanges} and \texttt{BAM2GRangesList} in \texttt{Repitools} could also be used, if the reads were stored on disk in BAM format (this uses the \texttt{scanBam} function from the \texttt{Rsamtools} package). By default, these two methods read in only the uniquely-mapping reads. See the \texttt{ShortRead} package documentation for ideas about how to read other sequencing data into \texttt{GRanges} or \texttt{GRangesList} objects.
 
 \begin{Schunk}
@@ -30,32 +32,32 @@ attr(,"package")
  samples.list[[1]]
 \end{Sinput}
 \begin{Soutput}
-GRanges with 11061279 ranges and 1 elementMetadata value
-           seqnames         ranges strand   | pData.alignData.from...notNA...
-              <Rle>      <IRanges>  <Rle>   |                       <integer>
-       [1]     chr1   [ 248,  283]      +   |                               0
-       [2]     chr1   [ 447,  482]      -   |                              16
-       [3]     chr1   [ 602,  637]      -   |                              16
-       [4]     chr1   [3182, 3217]      +   |                               0
-       [5]     chr1   [4783, 4818]      -   |                              16
-       [6]     chr1   [6287, 6322]      -   |                              16
-       [7]     chr1   [6310, 6345]      +   |                               0
-       [8]     chr1   [7340, 7375]      -   |                              16
-       [9]     chr1   [9103, 9138]      -   |                              16
-       ...      ...            ...    ... ...                             ...
-[11061271]     chrM [16531, 16566]      +   |                               0
-[11061272]     chrM [16532, 16567]      +   |                               0
-[11061273]     chrM [16532, 16567]      -   |                              16
-[11061274]     chrM [16533, 16568]      -   |                              16
-[11061275]     chrM [16533, 16568]      +   |                               0
-[11061276]     chrM [16534, 16569]      -   |                              16
-[11061277]     chrM [16535, 16570]      -   |                              16
-[11061278]     chrM [16536, 16571]      +   |                               0
-[11061279]     chrM [16536, 16571]      -   |                              16
-
-seqlengths
-      chr1      chr2      chr3      chr4 ...      chrX      chrY      chrM
- 247249719 242951149 199501827 191273063 ... 154913754  57772954     16571
+GRanges with 11061279 ranges and 0 elementMetadata values:
+             seqnames         ranges strand
+                <Rle>      <IRanges>  <Rle>
+         [1]     chr1   [ 248,  283]      +
+         [2]     chr1   [ 447,  482]      -
+         [3]     chr1   [ 602,  637]      -
+         [4]     chr1   [3182, 3217]      +
+         [5]     chr1   [4783, 4818]      -
+         [6]     chr1   [6287, 6322]      -
+         [7]     chr1   [6310, 6345]      +
+         [8]     chr1   [7340, 7375]      -
+         [9]     chr1   [9103, 9138]      -
+         ...      ...            ...    ...
+  [11061271]     chrM [16531, 16566]      +
+  [11061272]     chrM [16532, 16567]      +
+  [11061273]     chrM [16532, 16567]      -
+  [11061274]     chrM [16533, 16568]      -
+  [11061275]     chrM [16533, 16568]      +
+  [11061276]     chrM [16534, 16569]      -
+  [11061277]     chrM [16535, 16570]      -
+  [11061278]     chrM [16536, 16571]      +
+  [11061279]     chrM [16536, 16571]      -
+  ---
+  seqlengths:
+        chr1      chr2      chr3      chr4 ...      chrX      chrY      chrM
+   247249719 242951149 199501827 191273063 ... 154913754  57772954     16571
 \end{Soutput}
 \end{Schunk}
 
@@ -63,7 +65,8 @@ Also, an annotation of genes will be used. The annotation used here is based on 
  
 \begin{Schunk}
 \begin{Sinput}
- gene.anno <- read.csv("geneAnno.csv", stringsAsFactors = FALSE)
+ gene.anno <- read.csv(system.file("data/geneAnno.csv", package = "Repitools"),
+                       stringsAsFactors = FALSE)
  head(gene.anno)
 \end{Sinput}
 \begin{Soutput}
@@ -87,7 +90,7 @@ Also, an annotation of genes will be used. The annotation used here is based on 
 
 \begin{Schunk}
 \begin{Sinput}
- load("expr.RData")
+ data(expr)
  head(expr)
 \end{Sinput}
 \begin{Soutput}

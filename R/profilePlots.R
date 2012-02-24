@@ -48,7 +48,9 @@ setMethod("profilePlots", "ScoresList",
                   })
 
     n.logical.lists <- sum(sapply(gene.lists, function(u) class(u) == "logical"))
-    keep <- as.numeric(names(table(unlist(keep)))[table(unlist(keep)) == n.logical.lists])
+    keep = 1:nrow(scores[[1]])
+    if(n.logical.lists > 0)
+        keep <- as.numeric(names(table(unlist(keep)))[table(unlist(keep)) == n.logical.lists])
     scores <- lapply(scores, function(u) u[keep, ])
     gene.lists <- lapply(gene.lists, na.omit)
 

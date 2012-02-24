@@ -8,30 +8,31 @@ We can visualize the (log) frequencies of normalized coverage to get an idea of 
 \end{Sinput}
 \begin{Soutput}
 Seqinfo of length 25
-seqnames seqlengths isCircular
-chr1      247249719       <NA>
-chr2      242951149       <NA>
-chr3      199501827       <NA>
-chr4      191273063       <NA>
-chr5      180857866       <NA>
-chr6      170899992       <NA>
-chr7      158821424       <NA>
-chr8      146274826       <NA>
-chr9      140273252       <NA>
-...             ...        ...
-chr17      78774742       <NA>
-chr18      76117153       <NA>
-chr19      63811651       <NA>
-chr20      62435964       <NA>
-chr21      46944323       <NA>
-chr22      49691432       <NA>
-chrX      154913754       <NA>
-chrY       57772954       <NA>
-chrM          16571       <NA>
+seqnames seqlengths isCircular genome
+chr1      247249719       <NA>   hg18
+chr2      242951149       <NA>   hg18
+chr3      199501827       <NA>   hg18
+chr4      191273063       <NA>   hg18
+chr5      180857866       <NA>   hg18
+chr6      170899992       <NA>   hg18
+chr7      158821424       <NA>   hg18
+chr8      146274826       <NA>   hg18
+chr9      140273252       <NA>   hg18
+...             ...        ...    ...
+chr17      78774742       <NA>   hg18
+chr18      76117153       <NA>   hg18
+chr19      63811651       <NA>   hg18
+chr20      62435964       <NA>   hg18
+chr21      46944323       <NA>   hg18
+chr22      49691432       <NA>   hg18
+chrX      154913754       <NA>   hg18
+chrY       57772954       <NA>   hg18
+chrM          16571       <NA>   hg18
 \end{Soutput}
 \begin{Sinput}
- enrichmentPlot(samples.list, seq.len = 300, cols = c("black", 
-     "green", "orange", "red"), xlim = c(0, 10), lwd = 2)
+ enrichmentPlot(samples.list, seq.len = 300,
+                cols = c("black", "green", "orange", "red"),
+                xlim = c(0, 10), lwd = 2)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{qc-enrPlot}
@@ -43,9 +44,8 @@ An alternative comparative visualization, which is somewhat specific to methylat
 \begin{Schunk}
 \begin{Sinput}
  library(BSgenome.Hsapiens.UCSC.hg18)
- cpgDensityPlot(samples.list, organism = Hsapiens, w.function = "none", 
-     seq.len = 300, cols = c("black", "green", "orange", "red"), 
-     xlim = c(0, 30), lwd = 2)
+ cpgDensityPlot(samples.list, organism = Hsapiens, w.function = "none", seq.len = 300,
+                cols = c("black", "green", "orange", "red"), xlim = c(0, 30), lwd = 2)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{qc-cpgPlot}

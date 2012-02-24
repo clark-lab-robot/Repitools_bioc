@@ -2,40 +2,40 @@ The visualisations in the following two subsections manipulate matrices of score
 
 \begin{Schunk}
 \begin{Sinput}
- prostateCvgs <- featureScores(samples.list[c("PrEC IP", "LNCaP IP")], 
-     gene.anno, up = 5000, down = 1000, freq = 1000, s.width = 500)
+ prostateCvgs <- featureScores(samples.list[c("PrEC IP", "LNCaP IP")], gene.anno,
+                               up = 5000, down = 1000, freq = 1000, s.width = 500)
  prostateCvgs
 \end{Sinput}
 \begin{Soutput}
 An object of class 'ScoresList'.
 Tables: PrEC IP, LNCaP IP.
 Features:
-GRanges with 24966 ranges and 2 elementMetadata values
-        seqnames               ranges strand   |      name      symbol
-           <Rle>            <IRanges>  <Rle>   | <integer> <character>
-    [1]     chr1   [ 781253,  783614]      +   |   7896759   LOC643837
-    [2]     chr1   [ 850983,  869824]      +   |   7896761      SAMD11
-    [3]     chr1   [ 885829,  890958]      +   |   7896779      KLHL17
-    [4]     chr1   [ 891739,  900345]      +   |   7896798     PLEKHN1
-    [5]     chr1   [ 938709,  939782]      +   |   7896817       ISG15
-    [6]     chr1   [ 945365,  981355]      +   |   7896822        AGRN
-    [7]     chr1   [1092346, 1092441]      +   |   7896859         ---
-    [8]     chr1   [1093105, 1093195]      +   |   7896861         ---
-    [9]     chr1   [1094247, 1094330]      +   |   7896863         ---
-    ...      ...                  ...    ... ...       ...         ...
-[24958]     chrY [19611913, 19614093]      -   |   8177222        CD24
-[24959]     chrY [19640262, 19640361]      -   |   8177227         ---
-[24960]     chrY [20076704, 20124427]      -   |   8177229      BCORL2
-[24961]     chrY [20326698, 20366197]      -   |   8177232     JARID1D
-[24962]     chrY [21036941, 21090502]      -   |   8177261      TTTY10
-[24963]     chrY [21954227, 21957634]      -   |   8177273         ---
-[24964]     chrY [22001970, 22008519]      -   |   8177280         ---
-[24965]     chrY [22154873, 22165940]      -   |   8177282      TTTY13
-[24966]     chrY [22852332, 22854411]      -   |   8177344       TTTY5
-
-seqlengths
-  chr1 chr10 chr11 chr12 chr13 chr14 ...  chr6  chr7  chr8  chr9  chrX  chrY
-    NA    NA    NA    NA    NA    NA ...    NA    NA    NA    NA    NA    NA
+GRanges with 24966 ranges and 2 elementMetadata values:
+          seqnames               ranges strand   |      name      symbol
+             <Rle>            <IRanges>  <Rle>   | <integer> <character>
+      [1]     chr1   [ 781253,  783614]      +   |   7896759   LOC643837
+      [2]     chr1   [ 850983,  869824]      +   |   7896761      SAMD11
+      [3]     chr1   [ 885829,  890958]      +   |   7896779      KLHL17
+      [4]     chr1   [ 891739,  900345]      +   |   7896798     PLEKHN1
+      [5]     chr1   [ 938709,  939782]      +   |   7896817       ISG15
+      [6]     chr1   [ 945365,  981355]      +   |   7896822        AGRN
+      [7]     chr1   [1092346, 1092441]      +   |   7896859         ---
+      [8]     chr1   [1093105, 1093195]      +   |   7896861         ---
+      [9]     chr1   [1094247, 1094330]      +   |   7896863         ---
+      ...      ...                  ...    ... ...       ...         ...
+  [24958]     chrY [19611913, 19614093]      -   |   8177222        CD24
+  [24959]     chrY [19640262, 19640361]      -   |   8177227         ---
+  [24960]     chrY [20076704, 20124427]      -   |   8177229      BCORL2
+  [24961]     chrY [20326698, 20366197]      -   |   8177232     JARID1D
+  [24962]     chrY [21036941, 21090502]      -   |   8177261      TTTY10
+  [24963]     chrY [21954227, 21957634]      -   |   8177273         ---
+  [24964]     chrY [22001970, 22008519]      -   |   8177280         ---
+  [24965]     chrY [22154873, 22165940]      -   |   8177282      TTTY13
+  [24966]     chrY [22852332, 22854411]      -   |   8177344       TTTY5
+  ---
+  seqlengths:
+    chr1 chr10 chr11 chr12 chr13 chr14 ...  chr6  chr7  chr8  chr9  chrX  chrY
+      NA    NA    NA    NA    NA    NA ...    NA    NA    NA    NA    NA    NA
 Region: 5000 bases up to 1000 bases down.
 Smoothing: 500, 500 bases.
 Sampling : 1000 bases.
@@ -53,8 +53,8 @@ This object will be used in the next few visualisation functions.
 
 \begin{Schunk}
 \begin{Sinput}
- binPlots(prostateCvgs, ordering = expr, ord.label = "Cancer-Normal t-stat", 
-     plot.type = "heatmap", n.bins = 50)
+ binPlots(prostateCvgs, ordering = expr, ord.label = "Cancer-Normal t-stat",
+          plot.type = "heatmap", n.bins = 50)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{visualisations-binPlotsHeatmap}
@@ -63,8 +63,8 @@ This object will be used in the next few visualisation functions.
 
 \begin{Schunk}
 \begin{Sinput}
- binPlots(prostateCvgs, ordering = expr, ord.label = "Cancer-Normal t-stat", 
-     plot.type = "line", n.bins = 10)
+ binPlots(prostateCvgs, ordering = expr, ord.label = "Cancer-Normal t-stat",
+          plot.type = "line", n.bins = 10)
 \end{Sinput}
 \end{Schunk}
 \includegraphics{visualisations-binPlotsLine}
@@ -78,8 +78,9 @@ Sets of genes (e.g. genes disrupted in a certain type of cancer, or differential
 \begin{Schunk}
 \begin{Sinput}
  which.loss <- which(expr < -3)
- profilePlots(prostateCvgs, gene.list = list(`Downregulated Genes` = which.loss), 
-     cols = "red")
+ profilePlots(prostateCvgs,
+              gene.lists = list(`Downregulated Genes` = which.loss),
+              cols = "red")
 \end{Sinput}
 \end{Schunk}
 \includegraphics{visualisations-profPlots}
@@ -94,23 +95,23 @@ Sets of genes (e.g. genes disrupted in a certain type of cancer, or differential
 
 \begin{Schunk}
 \begin{Sinput}
- cvgs <- featureScores(H1samples[1:3], gene.anno, up = 5000, down = 2000, 
-     dist = "base", freq = 200, s.width = 500)
+ cvgs <- featureScores(H1samples[1:3], gene.anno, up = 5000, down = 2000, dist = "base",
+                       freq = 200, s.width = 500)
 \end{Sinput}
 \end{Schunk}
 
 
 \begin{Schunk}
 \begin{Sinput}
- cp <- clusterPlots(cvgs, scale = function(x) sqrt(x), plot.type = "heatmap", 
-     t.name = "H1 Cells", n.clusters = 10)
+ cp <- clusterPlots(cvgs, scale = function(x) sqrt(x), plot.type = "heatmap",
+              t.name = "H1 Cells", n.clusters = 10)
 \end{Sinput}
 \end{Schunk}
 
 \begin{Schunk}
 \begin{Soutput}
-pdf 
-  2 
+null device 
+          1 
 \end{Soutput}
 \end{Schunk}
 
@@ -130,7 +131,7 @@ Note that we have saved the output of \texttt{clusterPlots} (a \texttt{Clustered
 \end{Sinput}
 \begin{Soutput}
    1    2    3    4    5    6    7    8    9   10 
- 742 1754  773 2176 4400 1883 2419 7442 1414 1963 
+ 950 5399 1187 1770 2175 2450 5675 1698 1892 1770 
 \end{Soutput}
 \begin{Sinput}
  clusterPlots(cp, plot.type = "line", t.name = "H1 Cells")
@@ -138,4 +139,4 @@ Note that we have saved the output of \texttt{clusterPlots} (a \texttt{Clustered
 \end{Schunk}
 \includegraphics{visualisations-cluPlots3}
 
-Also, this allows users to do there own clustering and use \texttt{clusterPlots} for the plotting, or to extract the cluster identifiers for downstream analyses (e.g. functional category analysis).  Furthermore, in addition to specifying a vector of expression values and plotting it alongside the clustered epigenetic signal, users can give an additional vector in the \texttt{sort.data} argument to sort on within a cluster (e.g. gene length, CpG density, etc.).
+Also, this allows users to do their own clustering and use \texttt{clusterPlots} for the plotting, or to extract the cluster identifiers for downstream analyses (e.g. functional category analysis).  Furthermore, in addition to specifying a vector of expression values and plotting it alongside the clustered epigenetic signal, users can give an additional vector in the \texttt{sort.data} argument to sort on within a cluster (e.g. gene length, CpG density, etc.).
