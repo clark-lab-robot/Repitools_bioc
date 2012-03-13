@@ -9,7 +9,7 @@ setMethod("sequenceCalc", c("GRanges", "BSgenome"),
     hits <- as(RangesList(lapply(chrs, function(x) IRanges(start(matchPattern(pattern, organism[[x]], fixed=fixed)), width=1))), "GRanges")
     if (!positions) return(countOverlaps(x, hits))
     scores <- vector(mode='list', length=length(x))
-    temp <- matchMatrix(findOverlaps(x, hits))
+    temp <- as.matrix(findOverlaps(x, hits))
     temp[,2] <- start(hits)[temp[,2]]-start(x)[temp[,1]]
     scores[unique(temp[,1])] <- split(temp[,2], temp[,1])
     scores

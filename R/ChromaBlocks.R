@@ -3,7 +3,7 @@ setGeneric("ChromaBlocks", function(rs.ip, rs.input, ...){standardGeneric("Chrom
 setMethod("ChromaBlocks", c("GRangesList", "GRangesList"), function(rs.ip, rs.input, organism, chrs, ipWidth=100, inputWidth=500, preset=NULL, blockWidth=NULL, minBlocks=NULL, extend=NULL, cutoff=NULL, FDR=0.01, nPermutations=5, nCutoffs=20, cutoffQuantile=0.98, verbose=TRUE, seq.len=NULL) {
 
     .mergeOverlaps <- function (query, subject) {
-        ov <- matchMatrix(findOverlaps(query, subject, select="all"))
+        ov <- as.matrix(findOverlaps(query, subject, select="all"))
         query.ov <- unique(ov[,1])
         subjectStarts <- tapply(ov[,2], ov[,1], function(x) min(start(subject[x])))
         subjectEnds <- tapply(ov[,2], ov[,1], function(x) max(end(subject[x])))

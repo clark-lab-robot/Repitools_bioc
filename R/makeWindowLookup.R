@@ -18,7 +18,7 @@ makeWindowLookupTable <- function(indexes = NULL, offsets = NULL, starts = NULL,
     genes <- unlist(mapply(rep, 1:length(indexes), sapply(indexes, length)))
 
     off.IRanges <- IRanges(start=off, width=1)
-    o <- matchMatrix(findOverlaps(query=off.IRanges, subject=IRanges(start=starts, end=ends)))
+    o <- as.matrix(findOverlaps(query=off.IRanges, subject=IRanges(start=starts, end=ends)))
     o <- tapply(o[,1], o[,2], list)
 
     for (i in 1:length(o)) {
