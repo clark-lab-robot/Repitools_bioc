@@ -11,10 +11,11 @@
 
     clusterScores <- function(x)
     {
-        med.scores <- rollmedian(x, k = w.size, na.pad = TRUE)
+        n.pad <- (w.size - 1) / 2
+        med.scores <- apply(embed(x, w.size), 1, median)
         med.cut <- med.scores > cut
-        med.cut[is.na(med.cut)] <- FALSE
-        med.cut.n <- rollmean(as.integer(med.cut), k = w.size, na.pad = TRUE) > (n.med / w.size)
+        med.cut <- c(rep(FALSE, n.pad), med.cut, rep(FALSE, n.pad))
+        med.cut.n <- as.numeric(filter(med.cut, rep(1/w.size, w.size), sides = 2, circular = FALSE)) > (n.med / w.size)
         med.cut.n[is.na(med.cut.n)] <- FALSE
         score.cut <- x > 0
 
@@ -38,15 +39,16 @@
     	clusterScores(scores.chr[, 1])
 }
 
-findClusters <- function(stats, score.col = NULL, w.size = NULL, n.med = NULL, n.consec = NULL, cut.samps = NULL,
-                         maxFDR = 0.05, trend = c("down", "up"), n.perm = 100,
+findClusters <- function(stats, score.col = NULL, w.size = NULL, n.med = NULL, n.consec = NULL,
+                         cut.samps = NULL, maxFDR = 0.05, trend = c("down", "up"), n.perm = 100,
                          getFDRs = FALSE, verbose = TRUE)
 {
-
     if(is.null(score.col))
         stop("Score column not given.")
     if(is.null(w.size))
         stop("Window size not given.")
+    if(w.size %% 2 == 0)
+        stop("Window size must be an odd number.")
     if(is.null(n.med))
         stop("Minimum median scores in window above cutoff not given.")
     if(is.null(n.consec))
@@ -55,7 +57,6 @@ findClusters <- function(stats, score.col = NULL, w.size = NULL, n.med = NULL, n
         stop("Cutoffs to try not given.")
 
     require(IRanges)
-    require(zoo)
     trend <- match.arg(trend)
     
     # Do check in case users pass in some rows with NA scores.

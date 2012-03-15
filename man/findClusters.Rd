@@ -15,7 +15,8 @@
                of scores. Genes must be sorted in positional order.}
   \item{score.col}{A number that gives the column in \code{stats} which contains
                    the scores.}
-  \item{w.size}{The number of consecutive genes to consider windows over.}
+  \item{w.size}{The number of consecutive genes to consider windows over. Must be
+                odd.}
   \item{n.med}{Minimum number of genes in a window, that have median score
                centred around them above a cutoff.}
   \item{n.consec}{Minimum cluster size.}
