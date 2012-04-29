@@ -51,5 +51,5 @@ Collate: classes.R
          clusterPlots.R
          summarizeScores.R
 License: LGPL (>= 2)
-biocViews: DNAmethylation, GeneExpression, Methylseq
+biocViews: DNAMethylation, GeneExpression, Methylseq
 
