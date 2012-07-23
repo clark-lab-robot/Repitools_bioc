@@ -297,3 +297,43 @@ setMethod("regions", "ChromaResults", function(x) x@regions)
 setMethod("FDRTable", "ChromaResults", function(x) x@FDRTable)
 setMethod("cutoff", "ChromaResults", function(x) x@cutoff)
 
+
+# container for abcdDNA stuff
+setClass("QdnaData",representation("list"))
+
+#    counts="matrix", 
+#    regions="GRanges",
+#    offsets="matrix",
+#    neutral="logical",
+#    design="matrix",
+#    cnv="matrix"
+#  )
+#)
+
+#setMethod("show", "QdnaData", function(object) {
+#	cat("Object of class 'QdnaData'.\n")
+#	cat(nrow(object@counts), "regions for", ncol(object@counts),"samples\n")
+#	cat("Slots:", slotNames(object),"\n")
+#})
+
+setMethod("show", "QdnaData", function(object) {
+	cat("Object of class 'QdnaData'.\n")
+	cat(nrow(object$DGEList$counts), "regions for", ncol(object$DGEList$counts),"samples\n")
+	cat("Slots:", names(object),"\n")
+})
+
+
+#cat("\nCounts:\n")
+#	print(head(object@counts))
+#	cat("\nRegions:\n")
+#	print(object@regions)
+#	cat("\nOffsets:\n")
+#	print(head(object@offsets))
+
+#setGeneric("QdnaData", function(counts,regions,design,cnv,offsets,neutral) { standardGeneric("QdnaData") })
+#setMethod("QdnaData", c("GRanges", "matrix", "GRangesList", "character"),
+#function(counts,regions,design,cnv,offsets,neutral) {
+#    new("CopyEstimate", windows = windows, unadj.CN = unadj.CN, unadj.CN.seg = unadj.CN.seg, type = type)
+#})
+
+
