@@ -5,8 +5,8 @@ setGeneric("regionStats", function(x, ...){standardGeneric("regionStats")})
 
   uch <- unique(ch)
 
-  tmeanReal <- matrix(,nr=nrow(diffs),nc=ncol(diffs))
-  tmeanPerms <- lapply(1:ncol(design), function(u) matrix(NA, nr=nrow(diffs), nc=n.perm))
+  tmeanReal <- matrix(,nrow=nrow(diffs),ncol=ncol(diffs))
+  tmeanPerms <- lapply(1:ncol(design), function(u) matrix(NA, nrow=nrow(diffs), ncol=n.perm))
   if(length(colnames(design)) > 0) names(tmeanPerms) <- colnames(design)
   regions <- fdrTabs <- vector("list", length(tmeanPerms))
   names(regions) <- names(fdrTabs) <- colnames(design)
@@ -46,7 +46,7 @@ setGeneric("regionStats", function(x, ...){standardGeneric("regionStats")})
 
 
     z <- apply(tmeanPerms[[col]], 2, FUN=function(u) .fdrTable(tmeanReal[,col], u, ch, sp, 40, min.probes, max.gap, 
-                                                               two.sides, maxCut=mx, verbose=verbose))
+                                                               two.sides, maxCutoff=mx, verbose=verbose))
     fdrTabs[[col]] <- z[[1]]
 	  for(i in 2:length(n.perm))
 	    fdrTabs[[col]][,2:3] <- fdrTabs[[col]][,2:3] + z[[i]][,2:3]
@@ -220,7 +220,7 @@ setMethod("regionStats","matrix",
   require(gsmoothr)
   cuts <- seq(minCutoff,maxCutoff,length=cutsLength)
 
-  fdr <- matrix(,nr=length(cuts),nc=4)
+  fdr <- matrix(,nrow=length(cuts),ncol=4)
   colnames(fdr) <- c("cutoff","neg","pos","fdr")
   for(i in 1:length(cuts)) {
     pos <- nrow(.getRegions(realScore, ch, sp, min.probes, max.gap, cuts[i], two.sides, doJoin=FALSE))

@@ -1,11 +1,15 @@
 \name{QdnaData}
 \alias{QdnaData}
+\alias{QdnaData-class}
+\alias{class:QdnaData}
+\alias{show,QdnaData-method}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-A container for doing ABCD-DNA analyses
+A container for quantitative DNA sequencing data for ABCD-DNA analyses
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+\code{QdnaData} objects form the basis for differential analyses of quantitative DNA sequencing data(i.e. ABCD-DNA).  A user is required to specify the minimum elements: a count table, a list of regions and a design matrix.  For copy-number-aware analyses, a table of offsets and the set of neutral regions needs to be given.
 }
 \usage{
 QdnaData(counts, regions, design, cnv.offsets = NULL, neutral = NULL)
@@ -13,71 +17,45 @@ QdnaData(counts, regions, design, cnv.offsets = NULL, neutral = NULL)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{counts}{
-%%     ~~Describe \code{counts} here~~
+table of counts for regions of interest across all samples
 }
   \item{regions}{
-%%     ~~Describe \code{regions} here~~
+a \code{GRanges} object giving the regions
 }
   \item{design}{
-%%     ~~Describe \code{design} here~~
+a design matrix
 }
   \item{cnv.offsets}{
-%%     ~~Describe \code{cnv.offsets} here~~
+a table of offsets.  If unspecified (or \code{NULL}), a matrix of 1s (i.e. no CNV) is used
 }
   \item{neutral}{
-%%     ~~Describe \code{neutral} here~~
+a logical vector, or indices, of the regions deemed to be neutral. If unspecified (or \code{NULL}), all regions are used
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+\code{QdnaData} objects are geared for general differential analyses of qDNA-seq data.  If CNV is present and prominent, the objects and methods available with \code{QdnaData} perform adjustments and spot checks before the differential analysis.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+a \code{\link{QdnaData}} object (effectively a list) is returned
 }
 \references{
-%% ~put references to the literature/web site here ~
+http://imlspenticton.uzh.ch/robinson_lab/ABCD-DNA/ABCD-DNA.html
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Mark Robinson
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{getSampleOffsets}}, \code{\link{plotQdnaByCN}}, \code{\link{setCNVOffsets}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (counts, regions, design, cnv.offsets = NULL, neutral = NULL) 
-{
-    require(edgeR)
-    stopifnot(!is.null(counts) | !is.null(regions) | !is.null(design))
-    stopifnot(length(regions) == nrow(counts))
-    stopifnot(nrow(design) == ncol(counts))
-    stopifnot(is(regions, "GRanges"))
-    if (is.null(cnv.offsets)) 
-        cnv.offsets <- matrix(1, nrow = nrow(counts), ncol = ncol(counts))
-    if (is.null(neutral)) 
-        neutral <- rep(TRUE, nrow(counts))
-    stopifnot(all(dim(counts) == dim(cnv.offsets)))
-    stopifnot(length(neutral) == nrow(counts))
-    suppressMessages(d <- DGEList(counts = counts, genes = as.data.frame(regions)[, 
-        -c(4:5)]))
-    new("QdnaData", list(DGEList = d, design = as.matrix(design), 
-        cnv.offsets = as.matrix(cnv.offsets), neutral = as.logical(neutral), 
-        sample.specific.calculated = FALSE))
-  }
+require(GenomicRanges)
+cnt <- matrix(rpois(20,lambda=10),ncol=4)
+gr <- GRanges("chr1",IRanges(seq(2e3,6e3,by=1e3), width=500))
+des <- model.matrix(~c(0,0,1,1))
+qd <- QdnaData( counts=cnt, regions=gr, design=des)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

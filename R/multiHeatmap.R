@@ -44,7 +44,7 @@ multiHeatmap <- function(dataList, colourList, titles=NULL, main="", showColour=
 
     # data heatmap
     vp1 <- viewport(x=start[i],y=ystarts[1],
-                    w=(end[i]-start[i]),h=diff(ystarts[1:2]),
+                    width=(end[i]-start[i]),height=diff(ystarts[1:2]),
                     just=c("left","bottom"),name="vp1")
                     
     mn <- min(dataList[[i]],na.rm=TRUE)
@@ -71,7 +71,7 @@ multiHeatmap <- function(dataList, colourList, titles=NULL, main="", showColour=
                                 y=median(ystarts[2:3]), gp=gpar(cex=scalecex))
                                 
       # colour scale
-      vp2 <- viewport(x=end[i],y=ystarts[3],w=min(cwidth*nc/tw),h=diff(ystarts[3:4]),
+      vp2 <- viewport(x=end[i],y=ystarts[3],width=min(cwidth*nc/tw),height=diff(ystarts[3:4]),
                       just=c("right","bottom"),name="vp2")
       h <- .makeImageRect(matrix(colourList[[i]]$breaks,nrow=1),colourList[[i]]$breaks,
                           colourList[[i]]$colors,name="mark")

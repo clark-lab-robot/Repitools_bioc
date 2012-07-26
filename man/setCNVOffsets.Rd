@@ -5,7 +5,7 @@
 Set the CNVOffsets of a \code{QdnaData} object
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+A utility function to manually add CNV offset to a \code{QdnaData} object
 }
 \usage{
 setCNVOffsets(obj, cnv.offsets)
@@ -13,49 +13,29 @@ setCNVOffsets(obj, cnv.offsets)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{obj}{
-%%     ~~Describe \code{obj} here~~
+a \code{QdnaData} object
 }
   \item{cnv.offsets}{
-%%     ~~Describe \code{cnv.offsets} here~~
+a \code{matrix} of offsets (presumably copy number)
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+a \code{QdnaData} object
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Mark Robinson
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{QdnaData}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (obj, cnv.offsets) 
-{
-    stopifnot(all(dim(obj$DGEList$counts) == dim(cnv.offsets)))
-    obj$cnv.offsets <- cnv.offsets
-    obj
-  }
+# library(Repitools)
+# qd <- QdnaData(counts=counts, regions=gb, design=design, 
+#                neutral=(regs=="L=4 P=2"))
+# qd <- setCNVoffsets(qd, cn)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

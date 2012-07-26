@@ -5,63 +5,49 @@
 A wrapper for fitting the offset-adjusted ABCD-DNA GLM
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+This function performs differential analyses, given a \code{QdnaData} object with the sample-specific offsets already calculated (i.e. call \code{getSampleOffsets} before calling \code{abcdDNA}), a coefficient (or set of coefficients) to test and dispersion(s).  In essence, the function is a wrapper for constructing the offset matrix, fitting the generalized linear model and performing a likelihood ratio test.
 }
 \usage{
-abcdDNA(obj, coef = ncol(obj$design), dispersion = 0.05)
+abcdDNA(obj, coef = ncol(obj$design), dispersion = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{obj}{
-%%     ~~Describe \code{obj} here~~
+a \code{QdnaData} object
 }
   \item{coef}{
-%%     ~~Describe \code{coef} here~~
+coefficient (or coefficients) of the design matrix to test
 }
   \item{dispersion}{
-%%     ~~Describe \code{dispersion} here~~
+estimate(s) of dispersion to use for negative binomial testing
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+This function is simply a wrapper for taking the details in an \code{QdnaData} object and perform the differential analyses, adjusting for copy number if specified.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+a \code{DGEGLM} (see the edgeR package) containing the results of the differential comparison
 }
 \references{
-%% ~put references to the literature/web site here ~
+http://imlspenticton.uzh.ch/robinson_lab/ABCD-DNA/ABCD-DNA.html
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Mark Robinson
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{QdnaData}}, 
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (obj, coef = ncol(obj$design), dispersion = 0.05) 
-{
-    d <- obj$DGEList
-    if (!obj$sample.specific.calculated) 
-        message("Sample-specific factors have not been calculated.  First call getSampleOffsets().")
-    o <- outer(rep(1, nrow(d)), getOffset(d)) + log(cn)
-    fit <- glmFit(d, obj$design, offset = o, dispersion = dispersion)
-    glmLRT(fit, coef = coef)
-  }
+# library(Repitools)
+# qd <- QdnaData(counts=counts, regions=gb, design=design, 
+#                cnv.offsets=cn, neutral=(regs=="L=4 P=2"))
+# qd <- getSampleOffsets(qd,ref=1)
+# plotQdnaByCN(qd,cnv.group=regs,idx.ref=3,idx.sam=2)
+# f <- abcdDNA(qd, dispersion=.05, coef=2)
+# topTags(f)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

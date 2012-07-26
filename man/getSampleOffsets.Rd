@@ -5,7 +5,7 @@
 Calculates the sample-specific offsets, using the neutral state
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+ABCD-DNA combines CNV offsets with sample specific factors.  This function calculates the latter, using a set of neutral regions (and corresponding counts in the count table).
 }
 \usage{
 getSampleOffsets(obj, ref = 1, quantile = 0.99, min.n = 100, plot.it = FALSE, force = FALSE, ...)
@@ -13,87 +13,50 @@ getSampleOffsets(obj, ref = 1, quantile = 0.99, min.n = 100, plot.it = FALSE, fo
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{obj}{
-%%     ~~Describe \code{obj} here~~
+a \code{\link{QdnaData}} object
 }
   \item{ref}{
-%%     ~~Describe \code{ref} here~~
+integer index, giving the sample to use as reference
 }
   \item{quantile}{
-%%     ~~Describe \code{quantile} here~~
+  quantile of the A-values to use
 }
   \item{min.n}{
-%%     ~~Describe \code{min.n} here~~
+  minimum number of points to include
 }
   \item{plot.it}{
-%%     ~~Describe \code{plot.it} here~~
+  logical, whether to plot an M-A plot for each sample against the reference (default: \code{FALSE})
 }
   \item{force}{
-%%     ~~Describe \code{force} here~~
+  logical, whether to recalculate the sample-specific offsets (only needed if they are already calculated)
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+  arguments to pass to the \code{maPlot} function
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+  The sample-specific offset is calculated as the median M-value beyond (i.e. to the right) an A-value quantile, using only the copy-number-neutral regions, as specified in the incoming \code{QdnaData} object.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+  returns a \code{QdnaData} object (copied from the \code{obj} argument) and populates the \code{$DGEList$samples$norm.factors} element and sets the \code{$sample.specific.calculated} to \code{TRUE}.
 }
 \references{
-%% ~put references to the literature/web site here ~
+http://imlspenticton.uzh.ch/robinson_lab/ABCD-DNA/ABCD-DNA.html
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Mark Robinson
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{QdnaData}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (obj, ref = 1, quantile = 0.99, min.n = 100, plot.it = FALSE, 
-    force = FALSE, ...) 
-{
-    if (!is(obj, "QdnaData")) 
-        stop("Only operates on 'QdnaData' objects.")
-    if (obj$sample.specific.calculated & !force) 
-        stop("Sample-specific factors have already been calculated. Set force=TRUE to recalculate.")
-    cnt <- obj$DGEList$counts
-    nc <- ncol(cnt)
-    nf <- rep(0, nc)
-    idx <- setdiff(1:nc, ref)
-    rs <- obj$DGEList$samples$lib.size
-    neu <- obj$neutral
-    for (i in idx) {
-        map <- maPlot(cnt[neu, ref], cnt[neu, i], normalize = TRUE, 
-            plot.it = plot.it, ...)
-        q <- .getQuantile(map, min.n, quantile)
-        if (plot.it) {
-            grid()
-            abline(v = q, col = "blue")
-        }
-        nf[i] <- median(map$M[map$A > q])
-        if (plot.it) 
-            abline(h = nf[i], col = "red", lwd = 4)
-    }
-    obj$DGEList$samples$norm.factors <- exp(nf - mean(nf))
-    obj$sample.specific.calculated <- TRUE
-    obj
-  }
+# library(Repitools)
+# qd <- QdnaData(counts=counts, regions=gb, design=design, 
+#               cnv.offsets=cn, neutral=(regs=="L=4 P=2"))
+# qd <- getSampleOffsets(qd,ref=1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

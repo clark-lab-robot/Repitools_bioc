@@ -5,7 +5,7 @@
 Plotting the response of qDNA-seq data by CNV
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Given groupings of relative CNV state, this function produces M-A (log-fold-change versus log-average) plots to compare two samples relative read densities.  In addition, it calculates a scaling factor at a specified quantile and plots the median M value across all the groups.
 }
 \usage{
 plotQdnaByCN(obj, cnv.group, idx.ref = 1, idx.sam = 2, min.n = 100, quantile = 0.99, ylim = c(-5, 5), ...)
@@ -13,88 +13,50 @@ plotQdnaByCN(obj, cnv.group, idx.ref = 1, idx.sam = 2, min.n = 100, quantile = 0
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{obj}{
-%%     ~~Describe \code{obj} here~~
+a \code{QdnaData} object
 }
   \item{cnv.group}{
-%%     ~~Describe \code{cnv.group} here~~
+a \code{character} vector or \code{factor} giving the relative CNV state.  This must be the same length as the number of regions in \code{obj}
 }
   \item{idx.ref}{
-%%     ~~Describe \code{idx.ref} here~~
+index of the reference sample (denominator in the calculation of M values)
 }
   \item{idx.sam}{
-%%     ~~Describe \code{idx.sam} here~~
+index of the sample of interest (numerator in the calculation of M values)
 }
   \item{min.n}{
-%%     ~~Describe \code{min.n} here~~
+  minimum number of points to include
 }
   \item{quantile}{
-%%     ~~Describe \code{quantile} here~~
+  quantile of the A-values to use
 }
   \item{ylim}{
-%%     ~~Describe \code{ylim} here~~
+y-axis limits to impose on all M-A plots
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+further arguments sent to \code{maPlot}
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+a plot to the current graphics device
 }
 \references{
-%% ~put references to the literature/web site here ~
+http://imlspenticton.uzh.ch/robinson_lab/ABCD-DNA/ABCD-DNA.html
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Mark Robinson
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{QdnaData}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (obj, cnv.group, idx.ref = 1, idx.sam = 2, min.n = 100, 
-    quantile = 0.99, ylim = c(-5, 5), ...) 
-{
-    if (!is(obj, "QdnaData")) 
-        stop("Only operates on 'QdnaData' objects.")
-    els <- obj$DGEList$samples$lib.size * obj$DGEList$samples$norm.factors
-    cnt <- obj$DGEList$counts
-    tc <- table(cnv.group)
-    n <- length(tc)
-    f <- rep(NA, n)
-    layout(matrix(c(1:n, rep(n + 1, n)), 2, n, byrow = TRUE))
-    for (i in 1:n) {
-        cn <- names(tc)[i]
-        kk <- cnv.group == cn
-        map <- maPlot(cnt[kk, idx.ref]/els[idx.ref], cnt[kk, 
-            idx.sam]/els[idx.sam], normalize = FALSE, main = cn, 
-            ylim = ylim, ...)
-        grid()
-        q <- .getQuantile(map, min.n, quantile)
-        abline(v = q, col = "blue")
-        f[i] <- median(map$M[map$A > q])
-        abline(h = f[i], col = "red", lwd = 4)
-    }
-    f <- exp(f)
-    plot(1:n, f, pch = 19, ylab = "Relative Depth by CNV", type = "b", 
-        xlab = "", xaxs = "i", xlim = c(1 - 0.5, n + 0.5))
-  }
+# library(Repitools)
+# qd <- QdnaData(counts=counts, regions=gb, design=design, 
+#                cnv.offsets=cn, neutral=(regs=="L=4 P=2"))
+# plotQdnaByCN(qd,cnv.group=regs,idx.ref=3,idx.sam=2)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

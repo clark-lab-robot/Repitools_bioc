@@ -4,9 +4,9 @@ QdnaData <- function(counts,regions,design,cnv.offsets=NULL,neutral=NULL) {
 	require(edgeR)
 # do a slew of checks
 	stopifnot( !is.null(counts) | !is.null(regions) | !is.null(design) )
-	stopifnot( length(regions)==nrow(counts) )
 	stopifnot( nrow(design)==ncol(counts) )
     stopifnot( is(regions,"GRanges") )
+	stopifnot( length(regions)==nrow(counts) )
 	
 # populate offsets/neutral if not already
 	if( is.null(cnv.offsets) )
@@ -96,7 +96,7 @@ plotQdnaByCN <- function(obj, cnv.group, idx.ref=1, idx.sam=2, min.n=100, quanti
 }
 
 
-abcdDNA <- function(obj, coef=ncol(obj$design), dispersion=NULL, verbose=TRUE) {
+abcdDNA <- function(obj, coef=ncol(obj$design), dispersion=NULL) {
 	d <- obj$DGEList
 	if( !obj$sample.specific.calculated )
 	    message("Sample-specific factors have not been calculated.  First call getSampleOffsets().")
