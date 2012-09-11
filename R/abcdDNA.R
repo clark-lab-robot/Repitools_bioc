@@ -102,7 +102,7 @@ abcdDNA <- function(obj, coef=ncol(obj$design), dispersion=NULL) {
 	    message("Sample-specific factors have not been calculated.  First call getSampleOffsets().")
 	stopifnot( !is.null(dispersion) )
 
-	o <- outer( rep(1,nrow(d)), getOffset(d)) + log(cn)	
+	o <- outer( rep(1,nrow(d)), getOffset(d)) + log(obj$cnv.offsets)	
 	fit <- glmFit(d, obj$design, offset=o, dispersion=dispersion)
 	glmLRT(fit, coef=coef)
 }
