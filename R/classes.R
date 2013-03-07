@@ -337,3 +337,259 @@ setMethod("show", "QdnaData", function(object) {
 #})
 
 
+######################################################################
+## Definition of the "BayMethList" class
+######################################################################
+
+setClass("BayMethList", representation(
+    windows="GRanges", ## Info to which genomic windows the data belong to
+    control="matrix",  ## SssI control 
+    sampleInterest="matrix", ## Sample of interest 
+    cpgDens="numeric",  ## CpG density
+    f="matrix", ## Normalizing offset (possibly including CN-variations)
+    priorTab="list", ## List of prior parameters for each sample
+    methEst="list", ## List to save the results
+    maskEmpBayes="logical" ## indicate which bins should be masked out in the empirical Bayes
+    ))
+
+
+######################################################################
+## Constructor for the "BayMethList" class
+######################################################################
+BayMethList <- function(windows, control, sampleInterest, cpgDens,
+f=matrix(), priorTab=list(), methEst=list(), maskEmpBayes=logical())
+{
+    if((class(windows) != "GRanges") || (class(control) != "matrix") ||
+        (class(sampleInterest) != "matrix") || 
+        (class(cpgDens) != "numeric") ){
+            stop("\n\n\t `windows' must be of class `GRanges', `control' and
+                `sampleInterest' of class `matrix' and `cpgDens' a `numeric'
+                vector\n\n")
+    }
+    if(class(f) != "matrix"){
+        stop("\n\n\t 'f' must be a matrix\n\n")
+    }
+    if(class(priorTab) != "list"){
+        stop("\n\n\t 'priorTab' must be a list\n\n")
+    }
+    if(class(methEst) != "list"){
+        stop("\n\n\t 'methEst' must be a list\n\n")
+    }
+    if(class(maskEmpBayes) != "logical"){
+        stop("\n\n\t 'maskEmpBayes' must be a logical vector\n\n")
+    }
+    ## get the object dimensions
+    na <- length(windows)
+    nc <- nrow(control)
+    ns <- nrow(sampleInterest)
+    ncp <- length(cpgDens)
+    nf <- nrow(f)
+    nm <- length(maskEmpBayes)
+
+    ## either control is a matrix with one column or 
+    ## with the same number of columns as sampleInterest
+    if((ncol(control) != 1) && (ncol(control) != ncol(sampleInterest))){
+        stop("\n\n\tNumber of SssI-controls is not correct. 
+                    Either only one control or as many as sample of 
+                    interests need to be provided.\n\n")
+    }
+    if(length(unique(c(na, nc, ns, ncp))) != 1){
+        stop("\n\n\tThe annotation matrix, SssI control matrix, 
+                    sample of interest matrix and CpG density have not 
+                    the same length.\n\n")
+    }
+    if((nf != 1)  && (nf != na)){
+        stop("\n\n\tThe number of offsets per sample must be either one or be
+equal to the length of the annotation matrix.\n\n")
+    }
+    if((nm != 0)  && (nm != na)){
+        stop("\n\n\tThe logical vector to mask bins out from the empirical Bayes approach must be of the same lenth as the number of bins.\n\n")
+    }
+    if(nm == 0){
+        maskEmpBayes <- rep(FALSE, na)
+    }
+    new("BayMethList", windows=windows, control=control, 
+        sampleInterest=sampleInterest, cpgDens=cpgDens, f=f, 
+        priorTab=priorTab, methEst=methEst, maskEmpBayes=maskEmpBayes)
+}
+
+
+######################################################################
+## Show function for the "BayMethList" class
+######################################################################
+
+setMethod("show", "BayMethList", function(object) {
+    cat("Object of class 'BayMethList'.\n\n")
+    cat("- Genomic windows have width:", unique(width(object@windows)), "\n\n")
+    print(seqnames(object@windows))
+    cat("\n- Number of control samples:", ncol(object@control), 
+        "\n")
+    #print(apply(object@control, 2, summary))
+    cat("\n- Number of samples of interest:",
+        ncol(object@sampleInterest), "\n")
+    #print(apply(object@sampleInterest, 2, summary))
+    #cat("\nSummary information for the CpG density:\n")
+    #print(summary(object@cpgDens))
+    if((dim(object@f) != c(1,1)) || (!is.na(object@f[1,1]))){
+        cat("\n- Slot for normalizing offset is filled.\n")
+    } else {
+        cat("\n- Slot for normalizing offset is empty.\n") 
+    }
+    if(length(object@priorTab) > 0){
+        cat("\n- Prior parameters are available.\n")
+    } else {
+        cat("\n- Prior parameters are NOT available.\n")        
+    }
+    if(length(object@methEst) > 0){
+        cat("\n- Methylation estimates are available.\n")
+    } else {
+        cat("\n- Methylation estimates are NOT available.\n")
+    }
+    if(length(object@maskEmpBayes) > 0){
+        cat("\n- ", sum(object@maskEmpBayes), " bins are masked out.\n")
+    }
+})
+
+######################################################################
+## Access functions for the "BayMethList" class
+######################################################################
+
+if(!isGeneric("[")) setGeneric("[", function(object) standardGeneric("["))
+setMethod("[", "BayMethList",
+    function(x, i) {
+
+    message("\n\n\tCAUTION: Slots 'f', 'priorTab' and'methEst' ", 
+        "do not change when taking the subset!\n\n")
+
+    BayMethList(windows=x@windows[i], 
+        control=matrix(x@control[i,], ncol=ncol(x@control)),
+        sampleInterest=matrix(x@sampleInterest[i,], 
+            ncol=ncol(x@sampleInterest)), 
+        cpgDens=x@cpgDens[i],
+        f=x@f,
+        priorTab=x@priorTab,
+        methEst=x@methEst,
+        maskEmpBayes=x@maskEmpBayes[i])
+})
+setMethod("length", "BayMethList",
+    function(x) {
+        length(x@windows)
+})
+if(!isGeneric("windows")) setGeneric("windows", 
+    function(object) standardGeneric("windows"))
+setMethod("windows", "BayMethList", 
+    function(object) {
+        object@windows
+})
+if(!isGeneric("control")) setGeneric("control", 
+    function(object) standardGeneric("control"))
+setMethod("control", "BayMethList", 
+    function(object) {
+        object@control
+})  
+if(!isGeneric("sampleInterest")) setGeneric("sampleInterest", 
+    function(object) standardGeneric("sampleInterest"))
+setMethod("sampleInterest", "BayMethList", 
+    function(object) {
+        object@sampleInterest
+})
+if(!isGeneric("cpgDens")) setGeneric("cpgDens", 
+    function(object) standardGeneric("cpgDens"))
+setMethod("cpgDens", "BayMethList", 
+    function(object) {
+        object@cpgDens
+})
+if(!isGeneric("fOffset")) setGeneric("fOffset", 
+    function(object) standardGeneric("fOffset"))
+setMethod("fOffset", "BayMethList", 
+    function(object) {
+        object@f
+})
+if(!isGeneric("priorTab")) setGeneric("priorTab", 
+    function(object) standardGeneric("priorTab"))
+setMethod("priorTab", "BayMethList", 
+    function(object) {
+        object@priorTab
+})
+if(!isGeneric("methEst")) setGeneric("methEst", 
+    function(object) standardGeneric("methEst"))
+setMethod("methEst", "BayMethList", 
+    function(object) {
+        object@methEst
+})
+if(!isGeneric("maskEmpBayes")) setGeneric("maskEmpBayes", 
+    function(object) standardGeneric("maskEmpBayes"))
+setMethod("maskEmpBayes", "BayMethList", 
+    function(object) {
+        object@maskEmpBayes
+})
+
+
+## Determine some lengths
+if(!isGeneric("ncontrol")) setGeneric("ncontrol", 
+    function(x) standardGeneric("ncontrol"))
+setMethod("ncontrol", "BayMethList", function(x) ncol(x@control))
+if(!isGeneric("nsampleInterest")) setGeneric("nsampleInterest", 
+    function(x) standardGeneric("nsampleInterest"))
+setMethod("nsampleInterest", "BayMethList", function(x) ncol(x@sampleInterest))
+
+######################################################################
+## Replace functions for the "BayMethList" class
+######################################################################
+
+setGeneric("windows<-", function(x, value) standardGeneric("windows<-"))
+setReplaceMethod("windows", "BayMethList", function(x, value) {
+    x@windows <- value
+    x
+})
+setGeneric("control<-", function(x, value) standardGeneric("control<-"))
+setReplaceMethod("control", "BayMethList", function(x, value) {
+    x@control <- value
+    x
+})
+setGeneric("sampleInterest<-", 
+function(x, value) standardGeneric("sampleInterest<-"))
+setReplaceMethod("sampleInterest", "BayMethList", function(x, value) {
+    x@sampleInterest <- value
+    x
+})
+setGeneric("cpgDens<-", function(x, value) standardGeneric("cpgDens<-"))
+setReplaceMethod("cpgDens", "BayMethList", function(x, value) {
+    x@cpgDens <- value
+    x
+})
+setGeneric("fOffset<-", function(x, value) standardGeneric("fOffset<-"))
+setReplaceMethod("fOffset", "BayMethList", function(x, value) {
+    
+    if(class(value) != "matrix"){
+        stop("The offset must be of class matrix with the same number of
+columns as sample of interests.")
+    }
+   
+    if((nrow(value) != 1) && (nrow(value) != length(x))){
+        stop("\n\n\tThe number of offsets per sample must be either one or be
+equal to the length of the annotation matrix.\n\n")
+    }
+
+    x@f <- value
+    x
+})
+setGeneric("priorTab<-", function(x, value) standardGeneric("priorTab<-"))
+setReplaceMethod("priorTab", "BayMethList", function(x, value) {
+    x@priorTab <- value
+    x
+})
+setGeneric("methEst<-", function(x, value) standardGeneric("methEst<-"))
+setReplaceMethod("methEst", "BayMethList", function(x, value) {
+    x@methEst <- value
+    x
+})
+setGeneric("maskEmpBayes<-", function(x, value) standardGeneric("maskEmpBayes<-"))
+setReplaceMethod("maskEmpBayes", "BayMethList", function(x, value) {
+    x@maskEmpBayes <- value
+    x
+})
+
+
+
+
