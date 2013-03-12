@@ -10,10 +10,10 @@
   \code{GenomicRanges} classes.
 }
 \usage{
-  \S4method{BAM2GRanges}{character}(path, what = c("rname", "strand", "pos", "qwidth"),
+  \S4method{BAM2GRanges}{character}(path, what = character(),
       flag = scanBamFlag(isUnmappedQuery = FALSE, isDuplicate = FALSE),
       verbose = TRUE)
-  \S4method{BAM2GRangesList}{character}(paths, what = c("rname", "strand", "pos", "qwidth"),
+  \S4method{BAM2GRangesList}{character}(paths, what = character(),
       flag = scanBamFlag(isUnmappedQuery = FALSE, isDuplicate = FALSE),
       verbose = TRUE)
 }
@@ -21,7 +21,7 @@
   \item{path}{A character vector of length 1. The path of the BAM file.}
   \item{paths}{A character vector of possibly any length. The paths of the
                BAM files.}
-  \item{what}{What attributes of a read to retain. See
+  \item{what}{What optional attributes of a read to retain. See
               \code{\link[Rsamtools]{scanBam}} and the \code{value} section.}
   \item{flag}{What kinds of reads to retain.  See
               \code{\link[Rsamtools]{ScanBamParam}} and the \code{flag} argument.}
