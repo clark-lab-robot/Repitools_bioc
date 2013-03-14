@@ -69,7 +69,6 @@
  * A "singularity" message is printed on overflow or
  * in cases not addressed (such as x < -1).
  */
-
 /*							hyp2f1	*/
 
 
@@ -114,13 +113,13 @@ extern double gamma ( double );
 extern double log ( double );
 extern double exp ( double );
 extern double psi ( double );
- double hyt2f1(double, double, double, double, double *);
- double hys2f1(double, double, double, double, double *);
+double hyt2f1(double, double, double, double, double *);
+double hys2f1(double, double, double, double, double *);
 double hyp2f1(double, double, double, double);
 #else
 double fabs(), pow(), round(), gamma(), log(), exp(), psi();
- double hyt2f1();
- double hys2f1();
+double hyt2f1();
+double hys2f1();
 double hyp2f1();
 #endif
 extern double MAXNUM, MACHEP;

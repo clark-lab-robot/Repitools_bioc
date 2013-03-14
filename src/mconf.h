@@ -61,7 +61,7 @@ Cephes Math Library Release 2.3:  June, 1995
 Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier
 */
 
-
+#define gamma gammafn
 #define psi Rf_digamma
 #define pow R_pow
 #define powi R_pow_di
