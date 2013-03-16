@@ -35,8 +35,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 .getCpu <- function(maxCPU=FALSE){
 
-    numCores <- as.numeric(
-        system("cat /proc/cpuinfo | grep processor | wc -l", intern=TRUE))
+    numCores <- detectCores()
     if(maxCPU){
         message("\n\tInformation: The program will take advantage of ", 
             numCores, " CPUs\n\tIf you would like to change this ",
