@@ -341,6 +341,7 @@ setMethod("show", "QdnaData", function(object) {
 ## Definition of the "BayMethList" class
 ######################################################################
 
+
 setClass("BayMethList", representation(
     windows="GRanges", ## Info to which genomic windows the data belong to
     control="matrix",  ## SssI control 
@@ -393,10 +394,17 @@ f=matrix(), priorTab=list(), methEst=list(), maskEmpBayes=logical())
                     Either only one control or as many as sample of 
                     interests need to be provided.\n\n")
     }
-    if(length(unique(c(na, nc, ns, ncp))) != 1){
-        stop("\n\n\tThe annotation matrix, SssI control matrix, 
-                    sample of interest matrix and CpG density have not 
-                    the same length.\n\n")
+    if(length(unique(c(na, ns, ncp))) != 1){
+        stop("\n\n\tThe annotation matrix, sample of interest matrix and 
+                    CpG density have not the same length.\n\n")
+    }
+    if((nc != 1) && (nc != ns)){
+        stop("\n\n\tThe length of the control must be either equal to the length of
+            the sample of interest or one. If it is one it is assumed that 
+            no control information is available\n\n")
+    }
+    if(nc == 1){
+        control <- matrix(0, nrow=1, ncol=1)
     }
     if((nf != 1)  && (nf != na)){
         stop("\n\n\tThe number of offsets per sample must be either one or be
@@ -461,8 +469,13 @@ setMethod("[", "BayMethList",
     message("\n\n\tCAUTION: Slots 'f', 'priorTab' and'methEst' ", 
         "do not change when taking the subset!\n\n")
 
+   if(nrow(x@control) !=1){
+        controlt <- matrix(x@control[i,], ncol=ncol(x@control))
+   } else {
+        controlt <- x@control
+   }
     BayMethList(windows=x@windows[i], 
-        control=matrix(x@control[i,], ncol=ncol(x@control)),
+        control=controlt,
         sampleInterest=matrix(x@sampleInterest[i,], 
             ncol=ncol(x@sampleInterest)), 
         cpgDens=x@cpgDens[i],

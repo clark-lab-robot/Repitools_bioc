@@ -4,7 +4,6 @@ methylEst <- function(x, controlCI=list(compute=FALSE, method="Wald",
     if(class(x) != "BayMethList"){
         stop("x must be a BayMethList object")
     }
- 
     if(!is.element(controlCI$method, c("Wald"))){
         stop("The method for computing credible intervals must be \"Wald\"")
     }
@@ -32,20 +31,29 @@ methylEst <- function(x, controlCI=list(compute=FALSE, method="Wald",
     myMean <- myVar <- myAl <- myBl <- myW <- matrix(NA, nrow=length(x),
         ncol=nsampleInterest(x))
     ci <- list()
+    control.available <- TRUE
 
     for(j in 1:nsampleInterest(x)){
 
         y1 <- sampleInterest(x)[,j]
-        if(ncontrol(x) == 1){
-            y2 <- control(x)[,1]
+        if(nrow(control(x)) == 1){
+            y2 <- 0
+            w.na <- !is.na(y1)
+            y1 <- y1[w.na]
+            control.available <- FALSE
         } else {
-            y2 <- control(x)[,j]
+            if(ncontrol(x) == 1){
+                y2 <- control(x)[,1]
+            } else {
+                y2 <- control(x)[,j]
+            }
+            # only compute methylation estimates for bins with 
+            # sensible values for control and sample of interest
+            w.na <- !is.na(y1+y2)
+            y1 <- y1[w.na]
+            y2 <- y2[w.na]
         }
-        # only compute methylation estimates for bins with 
-        # sensible values for control and sample of interest
-        w.na <- !is.na(y1+y2)
-        y1 <- y1[w.na]
-        y2 <- y2[w.na]
+
         cpggroup <- paramTab[["CpG groups"]]
         cpggroup <- cpggroup[w.na]
 
@@ -73,7 +81,11 @@ methylEst <- function(x, controlCI=list(compute=FALSE, method="Wald",
         W <- 0
 
         message("\n\t Get mean and variance\n\n")
-        z_arg <- cons/(cons + 1 + bl)
+        if(control.available){
+            z_arg <- cons/(cons + 1 + bl)
+        } else {
+            z_arg <- cons/(cons+bl)
+        }
         a_arg <- y1 + y2 + al
         for(i in 1:ncomp){
             ab <- a[i,] + b[i,]

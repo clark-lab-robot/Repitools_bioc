@@ -4,6 +4,10 @@ determineOffset <- function(x,  quantile=0.998,
     if(class(x) != "BayMethList"){
         stop("x must be a BayMethList object")
     }
+    if(nrow(control(x)) == 1){
+        stop("There is no control information available. Please specify the
+            normalizing offset manually using ``fOffset <- '' ")
+    }
     if(is.null(controlPlot$show)){
         controlPlot$show <- FALSE
     }

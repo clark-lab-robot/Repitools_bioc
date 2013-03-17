@@ -7,10 +7,10 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
         stop("At the moment we do not support ncomp > 1, but it is in progress")
     }
 
+
     f <- fOffset(x)
     cpgdens <- cpgDens(x)
     cpgdens_filtered <- cpgdens[!maskEmpBayes(x)]
-    len_control <- ncontrol(x)
 
     ## find the CpG groups
     lastgroup <- quantile(cpgdens_filtered, prob=0.9999)
@@ -19,7 +19,6 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
 
     ## for the empirical Bayes use only the bins that are not masked out
     sI_filtered <- as.matrix(sampleInterest(x)[!maskEmpBayes(x),])
-    co_filtered <- as.matrix(control(x)[!maskEmpBayes(x),])
     if(nrow(f) > 1){
         f_filtered <- f[!maskEmpBayes(x)]
     } else {
@@ -54,8 +53,18 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
     paramTab[["CpG groups"]] <- cut(cpgdens, cu, include.lowest=TRUE)
     paramTab[["ncomp"]] <- ncomp
 
-    co_tmp <- co_filtered[,1]
-    co_list <- sapply(1:length(red_idx), function(u){co_tmp[red_idx[[u]]]})
+    controlMat <- as.matrix(control(x))
+    if(nrow(controlMat) != 1){
+        co_filtered <- as.matrix(controlMat[!maskEmpBayes(x),])
+        co_tmp <- co_filtered[,1]
+        co_list <- sapply(1:ngroups, function(u){co_tmp[red_idx[[u]]]})
+        len_control <- ncontrol(x)
+    } else {
+        message("\nNOTE: There is no control information that can be taken into account\n")
+        len_control <- 1
+        co_list <- lapply(1:100, function(u){0})
+    }
+        
     for(j in 1:nsampleInterest(x)){
         
         message("Prior parameters are determined for sample of interest: ", j, "\n")
@@ -90,15 +99,10 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
         sfExport("inds")    
         sfExport("len_control")    
 
-            if(len_control == 1){
-                paramTab[[j+2]] <- snowfall:::sfSapply(1:ngroups,
-                Repitools:::.myoptimize, 
-                sI_list, co_list, f_list, ncomp, maxBins)
-            } else {
-                paramTab[[j+2]] <- snowfall:::sfSapply(1:ngroups,
-                Repitools:::.myoptimize, 
-                sI_list, co_list, f_list, ncomp, maxBins)
-            }
+        paramTab[[j+2]] <- snowfall:::sfSapply(1:ngroups,
+        Repitools:::.myoptimize, 
+        sI_list, co_list, f_list, ncomp, maxBins)
+
         sfStop()
         gc()
     }

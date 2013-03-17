@@ -76,7 +76,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         cat("\n")
         f[[i]] <- f[[i]][-w.na]
         sample[[i]] <- sample[[i]][-w.na]
-        control[[i]] <- control[[i]][-w.na]
+        if(length(control[[i]]) != 1){
+            control[[i]] <- control[[i]][-w.na]
+        }
     }
 
 
@@ -114,6 +116,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         stop("\n\tThe proper support of mixtures of beta ",  
             "distributions is in progress.\n\n")
     }
+    no_control <- length(y2) == 1
 
 
     ## parameters for lambda
@@ -126,7 +129,11 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     b <- 1
 
     len <- length(y1)
-    denom <- bl + 1 + cons
+    if(no_control){
+        denom <- bl + cons
+    } else {
+        denom <- bl + 1 + cons
+    }
     ## z-parameter
     argZ <- cons/denom
     ## a-parameter
