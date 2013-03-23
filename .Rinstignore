@@ -1,1 +1,1 @@
-inst/doc/*.tex
+doc/.*[.]tex
