@@ -466,7 +466,7 @@ if(!isGeneric("[")) setGeneric("[", function(object) standardGeneric("["))
 setMethod("[", "BayMethList",
     function(x, i) {
 
-    message("\n\n\tCAUTION: Slots 'f', 'priorTab' and'methEst' ", 
+    message("\n\n\tCAUTION: Slots 'f' and 'priorTab' ", 
         "do not change when taking the subset!\n\n")
 
    if(nrow(x@control) !=1){
@@ -474,6 +474,16 @@ setMethod("[", "BayMethList",
    } else {
         controlt <- x@control
    }
+
+   new_methEst <- list()
+   new_methEst[["mean"]] <- x@methEst$mean[i,, drop=FALSE]
+   new_methEst[["var"]] <- x@methEst$var[i,, drop=FALSE]
+   new_methEst[["W"]] <- x@methEst$W[i, ,drop=FALSE ] 
+   new_methEst[["al"]] <- x@methEst$al[i,,drop=FALSE ]
+   new_methEst[["bl"]] <- x@methEst$bl[i,,drop=FALSE ]
+   new_methEst[["ci"]] <- x@methEst$ci
+   new_methEst[["ci"]] <- lapply(new_methEst[["ci"]], function(x){x[i,]})
+   
     BayMethList(windows=x@windows[i], 
         control=controlt,
         sampleInterest=matrix(x@sampleInterest[i,], 
@@ -481,7 +491,7 @@ setMethod("[", "BayMethList",
         cpgDens=x@cpgDens[i],
         f=x@f,
         priorTab=x@priorTab,
-        methEst=x@methEst,
+        methEst=new_methEst,
         maskEmpBayes=x@maskEmpBayes[i])
 })
 setMethod("length", "BayMethList",

@@ -56,12 +56,7 @@ from the SssI control and the sample of interest, are thereby taken into
 account. We end up with \code{ngroups} parameter sets for shape and rate.
 }
 \value{
-A \code{BayMethList} object where the slot \code{priorTab} is filled with a
-list, where each entry corresponds to one sample of interest and contains 
-a matrix with the optimal shape and scale parameters for all CpG classes. The
-first row contains the optimal shape parameter and the second row the optimal
-scale parameter. The number of columns corresponds to the number of CpG classes
-specified in \code{ngroups}.
+A \code{BayMethList} object where the slot \code{priorTab} represent a list. The first list entry contains the CpG group a bin is assigned to. The second entry contains the number of components that have been used for the prior (at the moment 1).  The following list entries correspond to one sample of interest, respectively, and contain a matrix with the optimal shape and scale parameters for all CpG classes. The first row contains the optimal shape parameter and the second row the optimal scale parameter. The number of columns corresponds to the number of CpG classes specified in \code{ngroups}.
 }
 \author{
     Andrea Riebler

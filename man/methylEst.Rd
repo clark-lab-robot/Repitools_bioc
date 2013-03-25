@@ -64,11 +64,14 @@ numerically from the posterior marginal distribution.
     level for each bin.}
     \item{var }{Matrix where the number of columns equals the number of samples 
         of interest. Each column contains posterior variance for each bin.}
-    \item{ci }{Credible quantiles}
-    \item{W }{Normalisation factor of the posterior marginal distribution 
+    \item{ci }{List with length equal to the number of samples of interest. Each list element contains a matrix where the firstc column contains the lower CI bound, the second column the upper CI bound, and third column the CI width.}
+    \item{W }{Matrix where the number of columns equals the number of
+    samples of interest. Each column contains the normalisation factor of the posterior marginal distribution 
         for each bin.}
-    \item{al }{Prior shape parameter for each bin}
-    \item{bl }{Prior scale parameter for each bin}
+    \item{al }{Matrix where the number of columns equals the number of
+    samples of interest. Each column contains the prior shape parameter for each bin}
+    \item{bl }{Matrix where the number of columns equals the number of
+    samples of interest. Each column contains the prior scale parameter for each bin}
 }
 \author{
   Andrea Riebler
