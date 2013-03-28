@@ -10,13 +10,16 @@ from the posterior marginal distribution or by computing them on logit
 scale and transferring them back.
 }
 \usage{
-methylEst(x, controlCI = list(compute = FALSE, method = "Wald", 
+methylEst(x, verbose=FALSE, controlCI = list(compute = FALSE, method = "Wald", 
     level = 0.95, nmarg = 512, ncpu = NULL))
 }
 \arguments{
   \item{x}{
     Object of class \code{BayMethList}.
     }
+    \item{verbose}{
+    Boolean indicating whether the methylEst function should run in a verbose mode (default 'FALSE').
+    } 
   \item{controlCI}{
     list defining whether credible intervals should be derived. 
     \describe{
@@ -26,10 +29,9 @@ methylEst(x, controlCI = list(compute = FALSE, method = "Wald",
     }
     \item{-}{
         \code{method}
-        'Wald' (default) for Wald-type intervalse computed on logit scale 
-        and transferred back. Two more credible types will come: 'HPD' for 
-        highest posterior density intervals; 'quantile' for quantile-based
-        intervals;
+        There are three possible types of credible intervals that can be chosen:
+        'Wald' (default), 'HPD', 'quantile'. The Wald-type intervals are the fastest to compute. The are calculated on logit scale 
+        and then transferred back. Due to numerical integration of the posterior marginal posterior distributions, the computation of highest posterior density (HPD) interval and quantile-based interval is computationally more expensive. However, in our applications HPD intervals provided best coverage. 
     }
     \item{-}{
         \code{level}

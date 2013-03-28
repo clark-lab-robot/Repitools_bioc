@@ -10,7 +10,7 @@
     thereby determined in a CpG-dependent manner.
 }
 \usage{
-empBayes(x, ngroups = 100, ncomp = 1, maxBins=50000, ncpu = NULL)
+empBayes(x, ngroups = 100, ncomp = 1, maxBins=50000, ncpu = NULL, verbose = FALSE)
 }
 \arguments{
     \item{x}{
@@ -37,6 +37,9 @@ empBayes(x, ngroups = 100, ncomp = 1, maxBins=50000, ncpu = NULL)
     If \code{ncpu} is set to NULL, half of the CPUs will be used on machines
     with a maximum of four CPUs, and 2/3 will be used if more CPUs are available.
 }
+    \item{verbose}{
+    Boolean indicating whether the empirical Bayes function should run in a verbose mode (default 'FALSE').
+} 
 }
 \details{
 BayMeth takes advantage of the relationship between CpG-density and read 

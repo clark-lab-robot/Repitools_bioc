@@ -357,9 +357,15 @@ setClass("BayMethList", representation(
 ######################################################################
 ## Constructor for the "BayMethList" class
 ######################################################################
-BayMethList <- function(windows, control, sampleInterest, cpgDens,
-f=matrix(), priorTab=list(), methEst=list(), maskEmpBayes=logical())
+setGeneric("BayMethList", function(windows, control, sampleInterest, cpgDens, ...)
+           {standardGeneric("BayMethList")})
+
+setMethod("BayMethList", c("GRanges", "matrix", "matrix", "numeric"),
+    function(windows, control, sampleInterest, cpgDens, f=matrix(), priorTab=list(), methEst=list(), maskEmpBayes=logical())
 {
+# BayMethList <- function(windows, control, sampleInterest, cpgDens,
+# f=matrix(), priorTab=list(), methEst=list(), maskEmpBayes=logical())
+# {
     if((class(windows) != "GRanges") || (class(control) != "matrix") ||
         (class(sampleInterest) != "matrix") || 
         (class(cpgDens) != "numeric") ){
@@ -419,7 +425,7 @@ equal to the length of the annotation matrix.\n\n")
     new("BayMethList", windows=windows, control=control, 
         sampleInterest=sampleInterest, cpgDens=cpgDens, f=f, 
         priorTab=priorTab, methEst=methEst, maskEmpBayes=maskEmpBayes)
-}
+})
 
 
 ######################################################################
@@ -470,7 +476,7 @@ setMethod("[", "BayMethList",
         "do not change when taking the subset!\n\n")
 
    if(nrow(x@control) !=1){
-        controlt <- matrix(x@control[i,], ncol=ncol(x@control))
+        controlt <-x@control[i,,drop=FALSE]
    } else {
         controlt <- x@control
    }
@@ -486,8 +492,7 @@ setMethod("[", "BayMethList",
    
     BayMethList(windows=x@windows[i], 
         control=controlt,
-        sampleInterest=matrix(x@sampleInterest[i,], 
-            ncol=ncol(x@sampleInterest)), 
+        sampleInterest=x@sampleInterest[i,,drop=FALSE], 
         cpgDens=x@cpgDens[i],
         f=x@f,
         priorTab=x@priorTab,

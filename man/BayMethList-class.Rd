@@ -1,8 +1,9 @@
-\name{BayMethList-class}
+\name{BayMethList}
 \Rdversion{1.1}
 \docType{class}
 \alias{BayMethList}
 \alias{BayMethList-class}
+\alias{BayMethList,GRanges,matrix,matrix,numeric-method}
 \alias{[,BayMethList-method}
 \alias{length}
 \alias{length,BayMethList-method}
@@ -55,7 +56,8 @@
     Creates a BayMethList object:
     \describe{
     \item{}{
-        \code{BayMethList(windows, control, sampleInterest, cpgDens, fOffset, priorTab, methEst, maskEmpBayes)}
+        \code{BayMethList(windows, control, sampleInterest, cpgDens, 
+                f=matrix(), priorTab=list(), methEst=list(), maskEmpBayes=logical())}
         \describe{
             \item{\code{windows}}{A \code{\linkS4class{GRanges}} object.}
             \item{\code{control}}{A matrix of read counts obtained by an

@@ -31,6 +31,7 @@ determineOffset <- function(x,  quantile=0.998,
         " samples of interest\n")
 
     f <- matrix(NA, ncol=ns, nrow=1)
+    colnames(f) <- colnames(sampleInterest(x))
 
     if(controlPlot$show){
         par(mfrow=controlPlot$mfrow, ask=controlPlot$ask)

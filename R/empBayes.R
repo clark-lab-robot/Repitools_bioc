@@ -1,4 +1,4 @@
-empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
+empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL, verbose=FALSE){
 
     if(!class(x) == "BayMethList"){
         stop("Object must be of class BayMethList.")
@@ -60,15 +60,17 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
         co_list <- sapply(1:ngroups, function(u){co_tmp[red_idx[[u]]]})
         len_control <- ncontrol(x)
     } else {
-        message("\nNOTE: There is no control information that can be taken into account\n")
+        if(verbose){
+            message("\nNOTE: There is no control information that can be taken into account\n")
+        }
         len_control <- 1
         co_list <- lapply(1:100, function(u){0})
     }
         
     for(j in 1:nsampleInterest(x)){
-        
-        message("Prior parameters are determined for sample of interest: ", j, "\n")
- 
+        if(verbose){
+            message(paste0("Sample ",j, ":\tPrior parameters are determined\t"))
+        }
         f_list <- list()
         sI_tmp <- sI_filtered[,j]
         sI_list <-  sapply(1:length(red_idx), function(u){sI_tmp[red_idx[[u]]]})
@@ -106,6 +108,7 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, ncpu=NULL){
         sfStop()
         gc()
     }
+    names(paramTab) <- c("CpG groups", "ncomp", colnames(sampleInterest(x)))
 
     priorTab(x) <- paramTab
     return(x)
