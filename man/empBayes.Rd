@@ -53,13 +53,13 @@ empirical Bayes. For each genomic bin the CpG density is provided in the
 one of \code{ngroups} non-overlapping CpG-density intervals. For each class
 separately, we derive the values for the shape and scale parameter under an
 empirical Bayes framework using maximum likelihood. For CpG classes which
-contain more than 100'000 bins, a random sample drawn with replacement of size
-100'000 is used to derive these prior parameters. Note that both read depths,
+contain more than \code{maxBins} bins, a random sample drawn with replacement of size
+\code{maxBins} is used to derive these prior parameters. Note that both read depths,
 from the SssI control and the sample of interest, are thereby taken into
 account. We end up with \code{ngroups} parameter sets for shape and rate.
 }
 \value{
-A \code{BayMethList} object where the slot \code{priorTab} represent a list. The first list entry contains the CpG group a bin is assigned to. The second entry contains the number of components that have been used for the prior (at the moment 1).  The following list entries correspond to one sample of interest, respectively, and contain a matrix with the optimal shape and scale parameters for all CpG classes. The first row contains the optimal shape parameter and the second row the optimal scale parameter. The number of columns corresponds to the number of CpG classes specified in \code{ngroups}.
+A \code{BayMethList} object where the slot \code{priorTab} is filled. \code{priorTab} represent a list. The first list entry contains the CpG group a bin is assigned to. The second entry contains the number of components that have been used for the prior (at the moment 1).  The following list entries correspond to one sample of interest, respectively, and contain a matrix with the optimal shape and scale parameters for all CpG classes. The first row contains the optimal shape parameter and the second row the optimal scale parameter. The number of columns corresponds to the number of CpG classes specified in \code{ngroups}.
 }
 \author{
     Andrea Riebler

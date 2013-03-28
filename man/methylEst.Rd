@@ -40,8 +40,7 @@ methylEst(x, verbose=FALSE, controlCI = list(compute = FALSE, method = "Wald",
     \item{-}{
         \code{nmarg}
         Number of points at which the posterior marginal is evaluated
-        (only relevant for method="quantile" or method="HPD")
-        TODO: Ooops not good!
+        (only relevant for method="quantile" or method="HPD").
     }
     \item{-}{
         \code{ncpu}
@@ -55,8 +54,9 @@ methylEst(x, verbose=FALSE, controlCI = list(compute = FALSE, method = "Wald",
 }
 \details{
 The posterior mean and the variance are analytically available and therefore 
-straightforward to efficiently compute; credible intervals can be computed
-numerically from the posterior marginal distribution.
+straightforward to efficiently compute; Wald-based credible intervals are obtained
+on logit scale and then back-transferred to ensure values withing 0 and 1. HPD and
+quantile-based credible intervals are computed by numerical integration of the posterior marginal distribution.
 }
 \value{
     A \code{BayMethList} object where the slot \code{methEst} is filled with a
@@ -66,7 +66,7 @@ numerically from the posterior marginal distribution.
     level for each bin.}
     \item{var }{Matrix where the number of columns equals the number of samples 
         of interest. Each column contains posterior variance for each bin.}
-    \item{ci }{List with length equal to the number of samples of interest. Each list element contains a matrix where the firstc column contains the lower CI bound, the second column the upper CI bound, and third column the CI width.}
+    \item{ci }{List with length equal to the number of samples of interest. Each list element contains a matrix where the first column contains the lower CI bound, the second column the upper CI bound, and the third column the CI width.}
     \item{W }{Matrix where the number of columns equals the number of
     samples of interest. Each column contains the normalisation factor of the posterior marginal distribution 
         for each bin.}
