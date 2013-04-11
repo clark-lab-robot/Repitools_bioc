@@ -17,7 +17,7 @@ setMethod("BAM2GRanges", "character",
               if(verbose == TRUE)
                   cat("Reading BAM file ", basename(path), ".\n", sep = '')
               filters <- ScanBamParam(what = what, flag = flag)
-	      aligns <- readGappedAlignments(path, param = filters)
+	      aligns <- readGAlignments(path, param = filters)
 	      aligns.info <- values(aligns)
               aligns.gr <- as(aligns, "GRanges")
 	      values(aligns.gr) <- aligns.info
