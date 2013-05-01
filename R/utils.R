@@ -59,14 +59,16 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     }
 }
 
-## here we assume to get ONE sample of interest, 
-## ONE control, and ONE value or vector for f.
-.myoptimize <- function(i, sample, control, f, ncomp, maxBins){    
+
+
+.myoptimizeDirac <- function(i, sample, control, f, controlMethod){
 
     ## lower bound for parameter values (zero not possible)
     eps <- 10^(-3)
 
+    ## doesn't matter if control[[i]] = 0 (R does automatically enlarge it to a vector)
     sum.tmp <- sample[[i]]+control[[i]]
+    ## get the number of bins included in this group
     len <- length(sample[[i]])
     if(sum(is.na(sum.tmp))){
         w.na <- which(is.na(sum.tmp))
@@ -81,15 +83,311 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         }
     }
 
+    if(controlMethod$mode == "full"){
+        lb <- c(eps, eps, eps, eps, eps, eps)
+        ub <- c(Inf, Inf, Inf, Inf, 1-eps, 1-eps)
 
-    ## solnp is in particular better for mixtures of beta priors as you 
-    ## can give equality constraints so that the weights sum to one
-    ## (not relevant now) 
-    paramVec <- Rsolnp:::solnp(c(2.14,1.34), fun=Repitools:::.marg, 
-        eqfun=NULL, eqB=NULL, LB=c(eps, eps), 
-        UB=c(Inf, Inf), cons=f[[i]], 
-        y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars
+        arg <- c(2.14, 1.3, 0.7,0.7, 0.1, 0.8)
+        paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac, 
+                    ineqfun=Repitools:::.ineqn, ineqLB=eps, ineqUB=1-eps, 
+                    LB=lb, UB=ub,
+                    y1=sample[[i]], y2=control[[i]], 
+                    cons=f[[i]])$pars
+    }
+    if(controlMethod$mode == "fixedWeights"){
+        lb <- c(eps, eps, eps, eps)
+        ub <- c(Inf, Inf, Inf, Inf)
 
+        arg <- c(2.14, 1.3, 0.7,0.7)
+        paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac_fW, 
+                    LB=lb, UB=ub,
+                    y1=sample[[i]], y2=control[[i]], 
+                    cons=f[[i]], weights=controlMethod$weights)$pars
+    }
+    if(controlMethod$mode == "fixedBeta"){
+        lb <- c(eps, eps,  eps, eps)
+        ub <- c(Inf, Inf, 1-eps, 1-eps)
+
+        arg <- c(2.14, 1.3, 0.1, 0.8)
+        paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac_fB, 
+                    ineqfun=Repitools:::.ineqn2, ineqLB=eps, ineqUB=1-eps, 
+                    LB=lb, UB=ub, 
+                    y1=sample[[i]], y2=control[[i]], 
+                    cons=f[[i]], param=controlMethod$param)$pars
+    }
+# system.time(
+# optim(c(2.14,1.34), fn=Repitools:::.marg, method="L-BFGS-B",
+#         lower=c(eps, eps), 
+#         upper=c(Inf, Inf), cons=f[[i]], 
+#         y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$par)
+# system.time(
+# nlminb(start=c(2.14,1.34), objective=Repitools:::.marg, cons=f[[i]], 
+#         y1=sample[[i]], y2=control[[i]], ncomp=ncomp,
+#         lower=c(eps, eps), 
+#         upper=c(Inf, Inf))$par)
+
+
+
+    return(paramVec)
+}
+
+.ineqn <- function(arg, y1, y2, cons){
+    
+    z <- arg[5] + arg[6] 
+
+    return(z)
+}
+
+
+.ineqn2 <- function(arg, y1, y2, cons, param){
+    
+    z <- arg[3] + arg[4] 
+
+    return(z)
+}
+
+.margDirac <- function(arg, y1, y2, cons){
+
+
+    no_control <- length(y2) == 1
+
+    ## parameters for lambda
+    al <- arg[1]
+    bl <- arg[2]
+    ## parameters for beta
+    a <- arg[3]
+    b <- arg[4]
+    ## weights are fixed (for beta component and one point-mass)
+    w2 <- arg[5]
+    w3 <- arg[6]
+
+    len <- length(y1)
+    if(no_control){
+        denom <- bl + cons
+    } else {
+        denom <- bl + 1 + cons
+    }
+
+    ## z-parameter
+    argZ <- cons/denom
+    ## replicate the z parameter to have one for each observation
+    if(length(argZ) != len){
+        argZ <- rep(argZ, len)
+    }
+    ## a-parameter
+    argA <- y1 + y2 + al
+
+    ## evertyhing before the mixture is part 1 (do it on log-scale)
+    part1 <- lgamma(argA) - (lgamma(al) + lgamma(y1 + 1) + lgamma(y2 + 1)) + 
+        al*log(bl/denom) + y1*log(argZ) + y2*log(1/denom)
+
+    argB <- rep(b, len)
+    argC <- y1 + a + b
+
+    part2 <- w3 + exp(log(w2) + 
+        (lgamma(a + b) + lgamma(y1 + a))-
+        (lgamma(a) + lgamma(y1 + a + b)) +
+        log(hyperg2F1_vec(a=argA, b=argB, c=argC, z=argZ)))
+    s_tmp <- part1 + log(part2)
+
+    ## check for problematic bins (usually with extreme high control
+    ## values and low to zero sample of interest counts.
+    w_na <- which(is.na(s_tmp))
+    w_inf <- which(is.infinite(s_tmp))
+    w_rm <- c(w_na, w_inf)
+    
+    if(length(w_rm) > 0){
+        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+        message("The reason might be extreme read density in one of the samples\n")
+        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+        s_tmp <- s_tmp[-w_rm]
+    }
+
+    res <- sum(s_tmp)
+    
+    return(-res)
+}
+
+
+.margDirac_fW <- function(arg, y1, y2, cons, weights){
+
+
+    no_control <- length(y2) == 1
+
+    ## parameters for lambda
+    al <- arg[1]
+    bl <- arg[2]
+    ## parameters for beta
+    a <- arg[3]
+    b <- arg[4]
+    ## weights are fixed (for beta component and one point-mass)
+    w2 <- weights[2]
+    w3 <- weights[3]
+
+    len <- length(y1)
+    if(no_control){
+        denom <- bl + cons
+    } else {
+        denom <- bl + 1 + cons
+    }
+
+    ## z-parameter
+    argZ <- cons/denom
+    ## replicate the z parameter to have one for each observation
+    if(length(argZ) != len){
+        argZ <- rep(argZ, len)
+    }
+    ## a-parameter
+    argA <- y1 + y2 + al
+
+    ## evertyhing before the mixture is part 1 (do it on log-scale)
+    part1 <- lgamma(argA) - (lgamma(al) + lgamma(y1 + 1) + lgamma(y2 + 1)) + 
+        al*log(bl/denom) + y1*log(argZ) + y2*log(1/denom)
+
+    argB <- rep(b, len)
+    argC <- y1 + a + b
+
+    part2 <- w3 + exp(log(w2) + 
+        (lgamma(a + b) + lgamma(y1 + a))-
+        (lgamma(a) + lgamma(y1 + a + b)) +
+        log(hyperg2F1_vec(a=argA, b=argB, c=argC, z=argZ)))
+    s_tmp <- part1 + log(part2)
+
+    ## check for problematic bins (usually with extreme high control
+    ## values and low to zero sample of interest counts.
+    w_na <- which(is.na(s_tmp))
+    w_inf <- which(is.infinite(s_tmp))
+    w_rm <- c(w_na, w_inf)
+    
+    if(length(w_rm) > 0){
+        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+        message("The reason might be extreme read density in one of the samples\n")
+        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+        s_tmp <- s_tmp[-w_rm]
+    }
+
+    res <- sum(s_tmp)
+    
+    return(-res)
+}
+
+
+
+.margDirac_fB <- function(arg, y1, y2, cons, param){
+
+
+    no_control <- length(y2) == 1
+
+    ## parameters for lambda
+    al <- arg[1]
+    bl <- arg[2]
+    ## parameters for beta
+    a <- param[1]
+    b <- param[2]
+    ## weights are fixed (for beta component and one point-mass)
+    w2 <- arg[3]
+    w3 <- arg[4]
+
+    len <- length(y1)
+    if(no_control){
+        denom <- bl + cons
+    } else {
+        denom <- bl + 1 + cons
+    }
+
+    ## z-parameter
+    argZ <- cons/denom
+    ## replicate the z parameter to have one for each observation
+    if(length(argZ) != len){
+        argZ <- rep(argZ, len)
+    }
+    ## a-parameter
+    argA <- y1 + y2 + al
+
+    ## evertyhing before the mixture is part 1 (do it on log-scale)
+    part1 <- lgamma(argA) - (lgamma(al) + lgamma(y1 + 1) + lgamma(y2 + 1)) + 
+        al*log(bl/denom) + y1*log(argZ) + y2*log(1/denom)
+
+    argB <- rep(b, len)
+    argC <- y1 + a + b
+
+    part2 <- w3 + exp(log(w2) + 
+        (lgamma(a + b) + lgamma(y1 + a))-
+        (lgamma(a) + lgamma(y1 + a + b)) +
+        log(hyperg2F1_vec(a=argA, b=argB, c=argC, z=argZ)))
+    s_tmp <- part1 + log(part2)
+
+    ## check for problematic bins (usually with extreme high control
+    ## values and low to zero sample of interest counts.
+    w_na <- which(is.na(s_tmp))
+    w_inf <- which(is.infinite(s_tmp))
+    w_rm <- c(w_na, w_inf)
+    
+    if(length(w_rm) > 0){
+        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+        message("The reason might be extreme read density in one of the samples\n")
+        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+        s_tmp <- s_tmp[-w_rm]
+    }
+
+    res <- sum(s_tmp)
+    
+    return(-res)
+}
+
+
+
+## here we assume to get ONE sample of interest, 
+## ONE control, and ONE value or vector for f.
+.myoptimize <- function(i, sample, control, f, ncomp){    
+
+    ## lower bound for parameter values (zero not possible)
+    eps <- 10^(-3)
+
+    ## doesn't matter if control[[i]] = 0 (R does automatically enlarge it to a vector)
+    sum.tmp <- sample[[i]]+control[[i]]
+    ## get the number of bins included in this group
+    len <- length(sample[[i]])
+    if(sum(is.na(sum.tmp))){
+        w.na <- which(is.na(sum.tmp))
+        message("\nCpG group", i, ":\n\tWe remove ", length(w.na), " bins out of ", len,  " in the empirical Bayes\n")
+        message("\tThe reason is that there are NA's in one of the sample reads")
+        print(head(cbind("sampleInterest"=sample[[i]][w.na], "control"=control[[i]][w.na])))
+        cat("\n")
+        f[[i]] <- f[[i]][-w.na]
+        sample[[i]] <- sample[[i]][-w.na]
+        if(length(control[[i]]) != 1){
+            control[[i]] <- control[[i]][-w.na]
+        }
+    }
+
+    if(ncomp > 1){
+        if(ncomp==2){ 
+            # a_gamma, b_gamma, w_1, w_2, a_1, b_1, a_2, b_2
+            lb <-  c(eps, eps, eps,eps, rep(eps, 4))
+            ub <- c(Inf, Inf, 1-eps, 1-eps, rep(Inf,4))
+            arg <- c(2.14, 1.34, 0.5, 0.5, 1, 1, 1,1)
+            paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.marg, 
+                eqfun=Repitools:::.eqn2, eqB=1, LB=lb, UB=ub, cons=f[[i]], 
+                y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars
+        }
+        if(ncomp==3){
+            lb <- c(eps, eps, eps, eps, eps, rep(eps, 3))
+            ub <- c(Inf, Inf, 1-eps, 1-eps, 1-eps, rep(Inf,3))
+            arg <- c(2.14, 1.34, 0.2, 0.2, 0.6, 1, 1, 1)
+            paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.marg, 
+                eqfun=Repitools:::.eqn3, eqB=1, LB=lb, 
+                UB=ub, cons=f[[i]], 
+                y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars            
+        }
+    } else {
+        ## solnp is in particular better for mixtures of beta priors as you 
+        ## can give equality constraints so that the weights sum to one
+        paramVec <- Rsolnp:::solnp(c(2.14,1.34), fun=Repitools:::.marg, 
+            eqfun=NULL, eqB=NULL, LB=c(eps, eps), 
+            UB=c(Inf, Inf), cons=f[[i]], 
+            y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars
+    }
 # system.time(Rsolnp:::solnp(c(2.14,1.34), fun=Repitools:::.marg, 
 #         eqfun=NULL, eqB=NULL, LB=c(eps, eps), 
 #         UB=c(Inf, Inf), cons=f[[i]], 
@@ -112,9 +410,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 .marg <- function(arg, cons, y1, y2, ncomp){
 
-    if(!(ncomp %in% c(1))){
-        stop("\n\tThe proper support of mixtures of beta ",  
-            "distributions is in progress.\n\n")
+    if(!(ncomp %in% c(1, 2, 3))){
+        stop("\n\tThe number of mixture components ",  
+            "should be 1, 2, or 3.\n\n")
     }
     no_control <- length(y2) == 1
 
@@ -123,10 +421,22 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     al <- arg[1]
     bl <- arg[2]
 
-    ## uniform prior (alternatives in progress)
-    w <- 1
-    a <- 1
-    b <- 1
+    ## weights
+    if(ncomp==3){
+        w <- c(arg[3], arg[4], arg[5])
+        a <- c(arg[6], arg[8], arg[7])
+        b <- c(arg[7], arg[8], arg[6])
+    } else {
+        if(ncomp==2){
+            w <- c(arg[3], arg[4])
+            a <- c(arg[5], arg[7])
+            b <- c(arg[6], arg[8])
+        } else { # assume a uniform prior
+            w <- 1
+            a <- 1
+            b <- 1
+        }
+    }
 
     len <- length(y1)
     if(no_control){
@@ -136,16 +446,16 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     }
     ## z-parameter
     argZ <- cons/denom
+    ## replicate the z parameter to have one for each observation
+    if(length(argZ) != len){
+        argZ <- rep(argZ, len)
+    }
     ## a-parameter
     argA <- y1 + y2 + al
 
     ## evertyhing before the mixture is part 1 (do it on log-scale)
     part1 <- lgamma(argA) - (lgamma(al) + lgamma(y1 + 1) + lgamma(y2 + 1)) + 
         al*log(bl/denom) + y1*log(argZ) + y2*log(1/denom)
-    ## replicate the z parameter to have one for each observation
-    if(length(argZ) != len){
-        argZ <- rep(argZ, len)
-    }
     part2 <- 0
     ## go over the number of mixture components
     for(i in 1:length(a)){
@@ -177,6 +487,56 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 }
 
 
+
+## eqn3(...)
+## Equality constraint function used in the optimization of the empirical Bayes step.
+## For a mixture of three beta distributions it should gurantee that their
+## weights sum up to one
+##
+## Arguments:
+##############
+## arg - parameter vector
+## cons - multiplicative offset
+## y1 - vector containing the read counts for the sample of interest
+## y2 - vector containing the read counts for the SssI control
+## ncomp - number of beta mixture components (using a uniform prior ncomp=1)
+##
+## Value:
+##############
+##
+## The function returns the sum of the three mixture weights
+.eqn3 <- function(arg, cons, y1, y2, ncomp){
+    
+    z <- arg[3] + arg[4] + arg[5]
+
+    return(z)
+}
+
+## eqn2(...)
+## Equality constraint function used in the optimization of the empirical Bayes step.
+## For a mixture of two beta distributions it should guarantee that their
+## weights sum up to one
+##
+## Arguments:
+##############
+## arg - parameter vector
+## cons - multiplicative offset
+## y1 - vector containing the read counts for the sample of interest
+## y2 - vector containing the read counts for the SssI control
+## ncomp - number of beta mixture components (using a uniform prior ncomp=1)
+##
+## Value:
+##############
+##
+## The function returns the sum of the two mixture weights
+.eqn2 <- function(arg, cons, y1, y2, ncomp){
+    
+    z <- arg[3] + arg[4]
+    return(z)
+}
+
+
+
 ## logit function
 .logit <- function(x){
     return(log(x/{1-x}))
@@ -193,15 +553,19 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 }
 
 ## get quantile or HPD based intervals
-.getcredible <-  function(u, method, level, nmarg, y1, y2, al, bl, W, cons, my_sd){
+.getcredible <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons, my_sd){
 
     if(!is.element(method, c("quantile", "HPD"))){
         stop("\n\t Argument 'method' must be either equal to 'quantile' or 'HPD'!\n")
     }
     names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
 
+    w_tmp <- w[,u]
+    a_tmp <- a[,u]
+    b_tmp <- b[,u]
+
     # find the mode
-    my_max <- optimize(Repitools:::.mydmarginal, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], cons=cons[u], maximum=T)$maximum
+    my_max <- optimize(Repitools:::.mydmarginal, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u], maximum=T)$maximum
     # find support points which represent the density 
     # (take nmarg points: nmarg/3 equally spaced between 0 and 1
     #  nmarg/3*2 equally spaced in the higher probability mass, i.e
@@ -211,7 +575,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     x <- sort(c(seq(eps, 1-eps, length.out=n1), seq(max(my_max - 2*my_sd,eps),min(1-eps,my_max + 2*my_sd), 
             length.out=nmarg-n1)))
     # get the density
-    y <- Repitools:::.mydmarginal(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], cons=cons[u])
+    y <- Repitools:::.mydmarginal(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u])
 
     if(method=="quantile"){
         ll <- (1-level)/2
@@ -249,6 +613,36 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 }
 
 
+## get quantile or HPD based intervals
+.getcredibleDBD <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons, my_sd){
+
+    if(!is.element(method, c("quantile"))){
+        stop("\n\t Argument 'method' must be equal to 'quantile'!\n")
+    }
+    names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
+
+
+    # find the mode
+    my_max <- optimize(Repitools:::.mydmarginalDBD, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u], maximum=T)$maximum
+    # find support points which represent the density 
+    # (take nmarg points: nmarg/3 equally spaced between 0 and 1
+    #  nmarg/3*2 equally spaced in the higher probability mass, i.e
+    # (max(0, mode - 2*sd), min(mode+2*sd, 1))
+    n1 <- ceiling(nmarg/3)
+    eps <- 1e-8
+    x <- sort(c(seq(eps, 1-eps, length.out=n1), seq(max(my_max - 2*my_sd,eps),min(1-eps,my_max + 2*my_sd), 
+            length.out=nmarg-n1)))
+    # get the density
+    y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u])
+
+    ll <- (1-level)/2
+    q <- c(rev(ll), 1-ll)
+    my.ci <- Repitools:::.myquantile( q=q, cbind(x,y))
+    names(my.ci) <- names
+    return(my.ci)
+}
+
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
 .myquantile <- function( q, den){
 
@@ -272,20 +666,65 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 
 # for uniform prior for methylation level
-.mydmarginal <- function(mu, y1, y2, al, bl, W, cons, log=F){
+.mydmarginal <- function(mu, y1, y2, al, bl, W, control.available, w, a, b, cons, log=F){
 
-   if(log){
-        if(mu < 0 || mu > 1){
+    if(mu < 0 || mu > 1){
+        if(log){
             return(-Inf)
-        }
-        return(log( mu^{y1}/W* (1- (cons*(1-mu))/(bl + 1 +cons))^{-(al + y1 + y2)}))
-    } else {
-        if(mu < 0 || mu > 1){
+        } else {
             return(0)
         }
-        return(mu^{y1}/W* (1- (cons*(1-mu))/(bl + 1 +cons))^{-(al + y1 + y2)})
+    }
+    denom <- bl + cons
+    if(control.available){
+        denom <- denom + 1
+    } 
+    prior_term <- 1
+    if(length(w) > 1){
+        prior_term <- w*dbeta(mu, shape1=a, shape2=b)
+    }
+
+    res_tmp <- prior_term*mu^{y1}/W* (1- (cons*(1-mu))/(denom))^{-(al + y1 + y2)}
+
+    if(log){
+        return(log(res_tmp))
+    } else {
+        return(res_tmp)
     }
 }
+
+
+# for uniform prior for methylation level
+.mydmarginalDBD <- function(mu, y1, y2, al, bl, W, control.available, w, a, b, cons, log=F){
+
+    if(mu < 0 || mu > 1){
+        if(log){
+            return(-Inf)
+        } else {
+            return(0)
+        }
+    }
+    denom <- bl + cons
+    if(control.available){
+        denom <- denom + 1
+    } 
+    if(mu == 0){
+        prior_term <- w[1]
+    } else if (mu == 1){
+        prior_term <- w[3]
+    } else {
+        prior_term <- w[2] * dbeta(mu, a, b)
+    }
+
+    res_tmp <- prior_term*mu^{y1}/W* (1- (cons*(1-mu))/(denom))^{-(al + y1 + y2)}
+
+    if(log){
+        return(log(res_tmp))
+    } else {
+        return(res_tmp)
+    }
+}
+
 
 .mysmarginal <- function (marginal, log = FALSE, extrapolate = 0, keep.type = FALSE) 
 {
@@ -358,3 +797,370 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     result <- c(rev(result[,1]), result[,2])
     return(result)
 }
+
+## mixture of point mass at zero, beta distribution, and point mass at one:
+## w1*delta_0 + w2*Be(x,a,b) + (1-w1-w2)*delta_1
+.diracBetaDirac <- function(x, w1, w2, a, b){
+
+    y <- w2*dbeta(x, shape1=a, shape2=b)
+    if(x==0){
+        y <- y + w1
+    }
+    if(x==1){
+        y <- y + (1-w1-w2)
+    }
+    return(y)
+}
+
+
+.methylEstbeta <- function(x, verbose=TRUE, controlCI=list(compute=FALSE, method="Wald", 
+    level=0.95, nmarg=512, ncpu=NULL)){
+
+    if(controlCI$compute){
+        # check whether the right CI-type is chosen
+        if(priorTab(x)$ncomp > 1 & controlCI$method != "quantile"){
+            stop("\n\t The CI options \"Wald\" and \"HPD\" are only available when using a uniform prior for the methylation level!\n\t Please choose either the option \"quantile\" or turn the computation of CI intervals off.")
+        }
+    }
+
+    f <- fOffset(x)
+    paramTab <- priorTab(x)
+    cpggroup <- paramTab[["CpG groups"]]
+    ncomp <- paramTab[["ncomp"]]
+
+    myMean <- myVar <- myAl <- myBl <- myW <- matrix(NA, nrow=length(x),
+        ncol=nsampleInterest(x))
+    ci <- list()
+    control.available <- TRUE
+
+    for(j in 1:nsampleInterest(x)){
+
+        y1 <- sampleInterest(x)[,j]
+        if(nrow(control(x)) == 1){
+            w.na <- !is.na(y1)
+            y1 <- y1[w.na]
+            y2 <- rep(0, length(y1))
+            control.available <- FALSE
+        } else {
+            if(ncontrol(x) == 1){
+                y2 <- control(x)[,1]
+            } else {
+                y2 <- control(x)[,j]
+            }
+            # only compute methylation estimates for bins with 
+            # sensible values for control and sample of interest
+            w.na <- !is.na(y1+y2)
+            y1 <- y1[w.na]
+            y2 <- y2[w.na]
+        }
+
+        cpggroup <- paramTab[["CpG groups"]]
+        cpggroup <- cpggroup[w.na]
+        
+        len <- length(y1)
+
+        # the first two entries of paramTab save
+        # cpggroup levels and number of components
+        params <- paramTab[[3+j]]
+        al <- params[1, cpggroup]
+        bl <- params[2, cpggroup]
+
+        if(ncomp==1){
+            ## will change for different mixtures
+            w <- matrix(1, nrow=1, ncol=length(cpggroup))
+            a <- matrix(1, nrow=1, ncol=length(cpggroup))
+            b <- matrix(1, nrow=1, ncol=length(cpggroup))
+        } else {
+            if(ncomp==2){
+                w1 <- params[3,cpggroup]
+                w <- rbind(w1, 1-w1)
+                a <- params[c(5,6),cpggroup]
+                b <- params[c(7,8),cpggroup]
+            } else {
+                w1 <- params[3,cpggroup]
+                w2 <- params[4,cpggroup]
+                w <- rbind(w1, w2, 1-w1-w2)
+                a <- params[c(6, 8, 7),cpggroup]
+                b <- params[c(7, 8, 6),cpggroup]    
+            }
+        }
+
+
+        cons <- f[,j]
+        if(length(cons) > 1){
+            cons <- cons[w.na]
+        } else {
+            cons <- rep(cons, length(y1))
+        }
+
+        # reset for every sample!
+        A <- 0
+        B <- 0
+        W <- 0
+
+        if( verbose )
+            message(paste0("\nSample ",j, ":\tGetting mean and variance\t"))
+
+        if(control.available){
+            z_arg <- cons/(cons + 1 + bl)
+        } else {
+            z_arg <- cons/(cons+bl)
+        }
+        a_arg <- y1 + y2 + al
+        for(i in 1:ncomp){
+            ab <- a[i,] + b[i,]
+            y1a <- y1 + a[i,]
+            y1ab <- y1a + b[i,]
+            A <- A + w[i,]*exp(lgamma(ab) + lgamma(y1a + 1) - 
+                (lgamma(a[i,]) + lgamma(y1ab + 1))) *
+                hyperg2F1_vec(a=a_arg, b=b[i,], c=y1ab + 1, z=z_arg)
+            B <- B + w[i,]*exp(lgamma(ab) + lgamma(y1a + 2) - 
+                (lgamma(a[i,])+lgamma(y1ab + 2))) *
+                hyperg2F1_vec(a=a_arg, b=b[i,], c=y1ab + 2, z=z_arg)
+            W <- W + w[i,]*exp(lgamma(ab) + lgamma(y1a) - 
+                (lgamma(a[i,])+lgamma(y1ab))) *
+                hyperg2F1_vec(a=a_arg, b=b[i,], c=y1ab, z=z_arg)
+        }
+        tmp_mean <- A/W
+        tmp_var <- B/W - (A/W)^2
+
+        if(controlCI$compute){
+
+            if(controlCI$method=="Wald"){
+                if( verbose )
+                    message(paste0("Sample ",j, ":\tGetting Wald-based credible interval.\n"))
+                    
+                ll <- (1-controlCI$level[1])/2
+
+                logit_mean <- .logit(tmp_mean) 
+                logit_sd <- sqrt(.dlogit(tmp_mean)^2*tmp_var)
+
+                lci <- uci <- rep(NA, length(x))
+                lci[w.na] <- .invlogit(logit_mean - abs(qnorm(ll)) * logit_sd)
+                uci[w.na] <- .invlogit(logit_mean + abs(qnorm(ll)) * logit_sd)
+
+                ci[[j]] <- cbind(lci=lci, uci=uci, width=uci-lci)
+            } else {
+                if( verbose )
+                    message(paste0("Sample ",j, ":\tGetting ", controlCI$method, " credible interval.\n"))
+
+                if(is.null(controlCI$ncpu)){
+                    controlCI$ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
+                }
+
+                sfInit(parallel=TRUE, cpus=controlCI$ncpu)
+                sfLibrary("Repitools", character.only=TRUE )
+                sfExport(".getcredible", namespace="Repitools")
+                sfExport(".myquantile", namespace="Repitools")
+                sfExport(".mydmarginal", namespace="Repitools")
+                sfExport(".myhpd", namespace="Repitools")
+                sfExport(".mysfmarginal", namespace="Repitools")
+                sfExport(".mysmarginal", namespace="Repitools")
+                sfExport(".myhpd", namespace="Repitools")
+                sfExport(".mymarginalfix", namespace="Repitools")
+                sfExport("controlCI")
+                sfExport("tmp_var")
+                sfExport("al")
+                sfExport("bl")
+                sfExport("W")
+                sfExport("w")
+                sfExport("a")
+                sfExport("b")
+                sfExport("cons")
+                sfExport("y1")
+                sfExport("y2")
+                sfExport("control.available")
+                        
+                ci_tmp <- sfSapply(1:length(y1), .getcredible, 
+                    method=controlCI$method,
+                    level=controlCI$level[1], 
+                    nmarg=controlCI$nmarg, 
+                    y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
+                    w=w, a=a, b=b, cons=cons, my_sd= sqrt(tmp_var))
+                sfStop()
+
+                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
+
+            }
+        }
+        myMean[w.na,j] <- tmp_mean
+        myVar[w.na,j] <- tmp_var
+        myAl[w.na,j] <- al
+        myBl[w.na,j] <- bl
+        myW[w.na,j] <- W
+    }
+    colnames(myMean) <- colnames(myVar) <- colnames(myAl) <- colnames(myBl) <- colnames(myW) <- colnames(sampleInterest(x))
+    if(controlCI$compute)
+        names(ci) <- colnames(sampleInterest(x))
+
+    methEst(x) <- list(mean=myMean, var=myVar, ci=ci, 
+        W=myW, al=myAl, bl=myBl)
+
+    return(x)
+}
+
+
+
+
+
+.methylEstDBD <- function(x, verbose=TRUE, controlCI=list(compute=FALSE, method="quantile", 
+    level=0.95, nmarg=512, ncpu=NULL)){
+
+    if(controlCI$compute){
+        # check whether the right CI-type is chosen
+        if(controlCI$method != "quantile"){
+            stop("\n\t The CI options \"Wald\" and \"HPD\" are only available when using a uniform prior for the methylation level!\n\t Please choose either the option \"quantile\" or turn the computation of CI intervals off.")
+        }
+    }
+
+
+    f <- fOffset(x)
+    paramTab <- priorTab(x)
+    cpggroup <- paramTab[["CpG groups"]]
+    ncomp <- paramTab[["ncomp"]]
+
+    myMean <- myVar <- myAl <- myBl <- myW <- matrix(NA, nrow=length(x),
+        ncol=nsampleInterest(x))
+    control.available <- TRUE
+
+    for(j in 1:nsampleInterest(x)){
+
+        y1 <- sampleInterest(x)[,j]
+        if(nrow(control(x)) == 1){
+            w.na <- !is.na(y1)
+            y1 <- y1[w.na]
+            y2 <- rep(0, length(y1))
+            control.available <- FALSE
+        } else {
+            if(ncontrol(x) == 1){
+                y2 <- control(x)[,1]
+            } else {
+                y2 <- control(x)[,j]
+            }
+            # only compute methylation estimates for bins with 
+            # sensible values for control and sample of interest
+            w.na <- !is.na(y1+y2)
+            y1 <- y1[w.na]
+            y2 <- y2[w.na]
+        }
+
+        cpggroup <- paramTab[["CpG groups"]]
+        cpggroup <- cpggroup[w.na]
+        
+        len <- length(y1)
+
+        # the first two entries of paramTab save
+        # cpggroup levels and number of components
+        params <- paramTab[[3+j]]
+        al <- params[1, cpggroup]
+        bl <- params[2, cpggroup]
+
+        # beta parameters
+        a <- params[3, cpggroup]
+        b <- params[4, cpggroup]
+    
+        # weights for second and third component
+        w2 <- params[5, cpggroup]
+        w3 <- params[6, cpggroup]
+        w <- rbind(1-w2-w3, w2, w3)
+
+        cons <- f[,j]
+        if(length(cons) > 1){
+            cons <- cons[w.na]
+        } else {
+            cons <- rep(cons, length(y1))
+        }
+
+        # reset for every sample!
+        A <- 0
+        B <- 0
+        W <- 0
+
+        if( verbose )
+            message(paste0("Sample ",j, ":\tGetting mean and variance\t"))
+
+        if(control.available){
+            z_arg <- cons/(cons + 1 + bl)
+        } else {
+            z_arg <- cons/(cons+bl)
+        }
+        a_arg <- y1 + y2 + al
+
+        ab <- a + b
+        y1a <- y1 + a
+        y1ab <- y1a + b
+        W <- w3 + w2*exp(lgamma(ab) + lgamma(y1a) - 
+            (lgamma(a)+lgamma(y1ab))) * hyperg2F1_vec(a=a_arg, b=b, c=y1ab, z=z_arg)
+        A <- w3 + w2*exp(lgamma(ab) + lgamma(y1a + 1) - 
+            (lgamma(a) + lgamma(y1ab + 1))) * hyperg2F1_vec(a=a_arg, b=b, c=y1ab + 1, z=z_arg)
+        B <- w3 + w2*exp(lgamma(ab) + lgamma(y1a + 2) - 
+            (lgamma(a)+lgamma(y1ab + 2))) * hyperg2F1_vec(a=a_arg, b=b, c=y1ab + 2, z=z_arg)
+
+        tmp_mean <- A/W
+        tmp_var <- B/W - (A/W)^2
+
+        if(controlCI$compute){
+               if( verbose )
+                    message(paste0("Sample ",j, ":\tGetting ", controlCI$method, " credible interval.\n"))
+
+                if(is.null(controlCI$ncpu)){
+                    controlCI$ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
+                }
+
+                sfInit(parallel=TRUE, cpus=controlCI$ncpu)
+                sfLibrary("Repitools", character.only=TRUE )
+                sfExport(".getcredible", namespace="Repitools")
+                sfExport(".myquantile", namespace="Repitools")
+                sfExport(".mydmarginal", namespace="Repitools")
+                sfExport(".myhpd", namespace="Repitools")
+                sfExport(".mysfmarginal", namespace="Repitools")
+                sfExport(".mysmarginal", namespace="Repitools")
+                sfExport(".myhpd", namespace="Repitools")
+                sfExport(".mymarginalfix", namespace="Repitools")
+                sfExport("controlCI")
+                sfExport("tmp_var")
+                sfExport("al")
+                sfExport("bl")
+                sfExport("W")
+                sfExport("w")
+                sfExport("a")
+                sfExport("b")
+                sfExport("cons")
+                sfExport("y1")
+                sfExport("y2")
+                sfExport("control.available")
+                        
+                ci_tmp <- sfSapply(1:length(y1), .getcredibleDBD, 
+                    method=controlCI$method,
+                    level=controlCI$level[1], 
+                    nmarg=controlCI$nmarg, 
+                    y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
+                    w=w, a=a, b=b, cons=cons, my_sd= sqrt(tmp_var))
+
+                sfStop()
+
+                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
+        }
+
+        myMean[w.na,j] <- tmp_mean
+        myVar[w.na,j] <- tmp_var
+        myAl[w.na,j] <- al
+        myBl[w.na,j] <- bl
+        myW[w.na,j] <- W
+    }
+    colnames(myMean) <- colnames(myVar) <- colnames(myAl) <- colnames(myBl) <- colnames(myW) <- colnames(sampleInterest(x))
+
+
+    methEst(x) <- list(mean=myMean, var=myVar, ci=NULL, 
+        W=myW, al=myAl, bl=myBl)
+
+    return(x)
+}
+
+
+.belongsTo <- function(value, rangeStart, rangeEnd){
+        
+    res <- (value >= rangeStart) & (value <= rangeEnd)
+    return(res)
+}
+

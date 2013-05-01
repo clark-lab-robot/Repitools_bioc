@@ -29,9 +29,11 @@ methylEst(x, verbose=FALSE, controlCI = list(compute = FALSE, method = "Wald",
     }
     \item{-}{
         \code{method}
-        There are three possible types of credible intervals that can be chosen:
+        There are three possible types of credible intervals that can be chosen if a uniform prior, e.g. Beta(1,1), is chosen:
         'Wald' (default), 'HPD', 'quantile'. The Wald-type intervals are the fastest to compute. The are calculated on logit scale 
         and then transferred back. Due to numerical integration of the posterior marginal posterior distributions, the computation of highest posterior density (HPD) interval and quantile-based interval is computationally more expensive. However, in our applications HPD intervals provided best coverage. 
+
+        Note, using a beta mixture or a Dirac-beta-Dirac (DBD) mixture as prior distribution for the methylation level only \code{method="quantile"} is available.
     }
     \item{-}{
         \code{level}
@@ -91,7 +93,7 @@ quantile-based credible intervals are computed by numerical integration of the p
         bm <- determineOffset(bm)
         # should take about 3 minutes for both samples of interests with 2 CPUs.
         bm <- empBayes(bm) 
-        bm <- methylEst(bm, controlCI = list(compute = TRUE, method = "Wald", 
+        bm <- methylEst(bm, controlCI = list(compute = FALSE, method = "Wald", 
             level = 0.95, nmarg = 512, ncpu = NULL))
     }
 }

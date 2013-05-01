@@ -10,7 +10,7 @@
     thereby determined in a CpG-dependent manner.
 }
 \usage{
-empBayes(x, ngroups = 100, ncomp = 1, maxBins=50000, ncpu = NULL, verbose = FALSE)
+empBayes(x, ngroups = 100, ncomp = 1, maxBins=50000, method="beta", controlMethod=list(mode="full", weights=c(0.1, 0.8, 0.1), param=c(1,1)), ncpu = NULL, verbose = FALSE)
 }
 \arguments{
     \item{x}{
@@ -23,14 +23,48 @@ empBayes(x, ngroups = 100, ncomp = 1, maxBins=50000, ncpu = NULL, verbose = FALS
 }
     \item{ncomp}{
     Number of components of beta distributions in the prior distribution for
-    the methylation level. At the moment only the uniform prior, denoted by
-    ncomp=1, is supported.
+    the methylation level when method is equal to \code{beta}. 
 }
     \item{maxBins}{
     Maximum number of bins in one CpG density group used to derive the 
     parameter estimates. If maxBins is smaller than the number of bins
     that are in one groups than \code{maxBins} bins are sampled with 
     replacement.
+}
+    \item{method}{
+    Either \code{DBD} for a Dirac-Beta-Dirac mixture, representing a mixture
+    a mixture of a point mass at zero, a beta distribution and a point mass at one,
+    or \code{beta} for as Beta mixture with \code{ncomp} components.
+}
+  \item{controlMethod}{
+    list defining settings if the Dirac-Beta-Dirac mixture is chosen. 
+    \describe{
+    \item{-}{
+        \code{mode}
+        Either \code{full}, \code{fixedWeights} or \code{fixedBeta}. 
+        Using the \code{full} both the mixture weights and 
+        beta parameters are estimated. In mode \code{fixedWeights} the weights
+        are fixed given to the values in \code{weights} and only the parameters
+        of the beta component are estimated. 
+        In mode \code{fixedBeta} the parameters of the beta component are 
+        fixed to the values specified in \code{param}. 
+        The default mode is \code{full}.
+    }
+    \item{-}{
+        \code{weights}
+        Numeric vector of length three specifying the weights for the Dirac-Beta-Dirac
+        mixture when mode is equal to \code{fixedWeights}. 
+        The first element specifies the weight for the zero point mass, the
+        second for the beta component and the third for the point mass at one.
+        The three values must sum up to one. The default is c(0.1, 0.8, 0.1).
+    }
+    \item{-}{
+        \code{param}
+        Numeric vector of length two specifying (positive) parameters of the beta distribution 
+        component when mode is equal to \code{fixedBeta}. 
+        The default is c(1,1).
+    }
+  }
 }
     \item{ncpu}{
     Number of CPUs on your machine you would like to use in parallel. 
