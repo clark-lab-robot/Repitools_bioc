@@ -44,7 +44,7 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
     cpgdens_filtered <- cpgdens[!maskEmpBayes(x)]
     sI_filtered <- as.matrix(sampleInterest(x)[!maskEmpBayes(x),])
     if(nrow(f) > 1){
-        f_filtered <- f[!maskEmpBayes(x)]
+        f_filtered <- f[!maskEmpBayes(x),]
     } else {
         ## here we have only one offset independent of the bin
         f_filtered <- f
