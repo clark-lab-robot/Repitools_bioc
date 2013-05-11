@@ -147,7 +147,7 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
         gc()
 
         if(controlMethod$mode=="fixedBeta"){
-            paramTab[[j+3]] <- rbind(paramTab[[j+3]][1:2,], controlMethod$param[1], controlMethod$param[2], paramTab[[j+2]][3:4,])
+            paramTab[[j+3]] <- rbind(paramTab[[j+3]][1:2,], controlMethod$param[1], controlMethod$param[2], paramTab[[j+3]][3:4,])
         }
         if(controlMethod$mode=="fixedWeights"){
             paramTab[[j+3]] <- rbind(paramTab[[j+3]][1:4,], controlMethod$weights[2], controlMethod$weights[3])
