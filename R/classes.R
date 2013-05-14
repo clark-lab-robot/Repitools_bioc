@@ -480,6 +480,11 @@ setMethod("[", "BayMethList",
    } else {
         controlt <- x@control
    }
+   if(nrow(x@f) > 1){
+        f <- x@f[i,,drop=FALSE]
+    } else {
+        f <- x@f
+    }
 
    new_methEst <- list()
    new_methEst[["mean"]] <- x@methEst$mean[i,, drop=FALSE]
@@ -494,7 +499,7 @@ setMethod("[", "BayMethList",
         control=controlt,
         sampleInterest=x@sampleInterest[i,,drop=FALSE], 
         cpgDens=x@cpgDens[i],
-        f=x@f,
+        f=f,
         priorTab=x@priorTab,
         methEst=new_methEst,
         maskEmpBayes=x@maskEmpBayes[i])
