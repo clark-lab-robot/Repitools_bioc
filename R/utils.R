@@ -13,14 +13,14 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     str <- strand(anno)
 
     if(-up > down)
-	stop("'up' and 'down' window boundaries cross over each other.\n")
-	
+    stop("'up' and 'down' window boundaries cross over each other.\n")
+    
     if(any(str == '*') && any(str %in% c('+', '-')))
-	stop("Annotation contains mixed feature types.")
+    stop("Annotation contains mixed feature types.")
 
     # For unstranded features.
     if(any(str %in% '*') && up != down)
-	stop("Different upstream and downstream window distances don't make
+    stop("Different upstream and downstream window distances don't make
               sense for unstranded features.\n")
     NULL
 })
@@ -555,6 +555,14 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 ## get quantile or HPD based intervals
 .getcredible <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons, my_sd){
 
+    names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
+
+    if(is.na(W[u]) || is.infinite(W[u])){
+        my.hpd <- c(NA, NA)
+        names(my.hpd) <- names
+        return(my.hpd)
+    }
+
     if(!is.element(method, c("quantile", "HPD"))){
         stop("\n\t Argument 'method' must be either equal to 'quantile' or 'HPD'!\n")
     }
@@ -565,55 +573,57 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     b_tmp <- b[,u]
 
     # find the mode
-    my_max <- optimize(Repitools:::.mydmarginal, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u], maximum=T)$maximum
+    #my_max <- optimize(Repitools:::.mydmarginal, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u], maximum=T)$maximum
     # find support points which represent the density 
     # (take nmarg points: nmarg/3 equally spaced between 0 and 1
     #  nmarg/3*2 equally spaced in the higher probability mass, i.e
     # (max(0, mode - 2*sd), min(mode+2*sd, 1))
-    n1 <- ceiling(nmarg/3)
-    eps <- 1e-8
-    x <- sort(c(seq(eps, 1-eps, length.out=n1), seq(max(my_max - 2*my_sd,eps),min(1-eps,my_max + 2*my_sd), 
-            length.out=nmarg-n1)))
+    #n1 <- ceiling(nmarg/3)
+    eps <- 1e-6
+    x <- seq(eps, 1-eps, length.out=nmarg)
     # get the density
     y <- Repitools:::.mydmarginal(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u])
 
     if(method=="quantile"){
         ll <- (1-level)/2
         q <- c(rev(ll), 1-ll)
-        my.ci <- Repitools:::.myquantile( q=q, cbind(x,y))
+        my.ci <- Repitools:::.myquantile(q=q, x,y)$x
         names(my.ci) <- names
         return(my.ci)
     }
 
     if(method=="HPD"){
-        if(my_max > 1e-4 & my_max < 0.9999){
-            my.hpd <- Repitools:::.myhpd(level, cbind(x,y))
-            names(my.hpd) <- names
-            if(sum(my.hpd < 0 | my.hpd > 1) > 0){
-                cat("\n\n\t WARNING:  Something is wrong with the HPD intervals!\n\tThey are outside (0,1)!\n")
-            }
-            return(my.hpd)
-        }
-        
-        if(my_max <= 1e-4){
-            #cat("\n\tThe lower bound of the HPD interval is zero => Take the", level*100, "% quantile as upper bound\n\n")
-            qn <- Repitools:::.myquantile(cbind(x,y), q=level)
-            my.hpd <- c(rep(0, length(level)), qn)
-            names(my.hpd) <- names
-            return(my.hpd)
-        } 
-        if(my_max >= 0.9999){
-            #cat("\n\tThe upper bound of the HPD interval is one => Take the", (1-level)*100, "% quantile as lower bound\n\n")
-            qn <- rev(Repitools:::.myquantile(cbind(x,y), q=1-level))
-            my.hpd <- c(qn, rep(1, length(level)))
-            names(my.hpd) <- names
-            return(my.hpd) 
-        }
+        my.hpd <- Repitools:::.myhpd(level, x,y)
+        names(my.hpd) <- names
+        return(my.hpd)
+#         if(my_max > 1e-4 & my_max < 0.9999){
+#             my.hpd <- Repitools:::.myhpd(level, x,y)
+#             names(my.hpd) <- names
+#             if(sum(my.hpd < 0 | my.hpd > 1) > 0){
+#                 cat("\n\n\t WARNING:  Something is wrong with the HPD intervals!\n\tThey are outside (0,1)!\n")
+#             }
+#             return(my.hpd)
+#         }
+#         
+#         if(my_max <= 1e-4){
+#             #cat("\n\tThe lower bound of the HPD interval is zero => Take the", level*100, "% quantile as upper bound\n\n")
+#             qn <- Repitools:::.myquantile(q=level, x, y)$x
+#             my.hpd <- c(rep(0, length(level)), qn)
+#             names(my.hpd) <- names
+#             return(my.hpd)
+#         } 
+#         if(my_max >= 0.9999){
+#             #cat("\n\tThe upper bound of the HPD interval is one => Take the", (1-level)*100, "% quantile as lower bound\n\n")
+#             qn <- rev(Repitools:::.myquantile(q=1-level, x, y)$x)
+#             my.hpd <- c(qn, rep(1, length(level)))
+#             names(my.hpd) <- names
+#             return(my.hpd) 
+#         }
     }
 }
 
 
-## get quantile or HPD based intervals
+## get quantile  based intervals
 .getcredibleDBD <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons, my_sd){
 
     if(!is.element(method, c("quantile"))){
@@ -623,68 +633,157 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 
     # find the mode
-    my_max <- optimize(Repitools:::.mydmarginalDBD, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u], maximum=T)$maximum
+#     my_max <- optimize(Repitools:::.mydmarginalDBD, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u], maximum=T)$maximum
     # find support points which represent the density 
     # (take nmarg points: nmarg/3 equally spaced between 0 and 1
     #  nmarg/3*2 equally spaced in the higher probability mass, i.e
     # (max(0, mode - 2*sd), min(mode+2*sd, 1))
-    n1 <- ceiling(nmarg/3)
-    eps <- 1e-8
-    x <- sort(c(seq(eps, 1-eps, length.out=n1), seq(max(my_max - 2*my_sd,eps),min(1-eps,my_max + 2*my_sd), 
-            length.out=nmarg-n1)))
+#     n1 <- ceiling(nmarg/3)
+    eps <- 1e-6
+    x <- seq(eps, 1-eps, length.out=nmarg)
+#     x <- sort(c(seq(eps, 1-eps, length.out=n1), seq(max(my_max - 2*my_sd,eps),min(1-eps,my_max + 2*my_sd), 
+#             length.out=nmarg-n1)))
     # get the density
     y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u])
 
     ll <- (1-level)/2
     q <- c(rev(ll), 1-ll)
-    my.ci <- Repitools:::.myquantile( q=q, cbind(x,y))
+    my.ci <- Repitools:::.myquantile( q=q, x,y)$x
     names(my.ci) <- names
     return(my.ci)
 }
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-.myquantile <- function( q, den){
+## function to numerially derive the HPD interval based on a grid of density values
+.myhpd = function(level, x, y, delta=0.001, maxiter=10){
 
-    x <- den[,1]
-    y <- den[,2]
+  delta <- delta^2
 
-    # approximate the cumulative distribution using the trapezoidal rule
-    x.tmp <- x[-1] - x[-length(x)]
-    y.tmp <- (y[-1] + y[-length(y)])/2
+  # the lower HPD limit must be between zero
+  lower1 <- x[1]
+  # and the 1-level quantile
+  tail <- 1-level
+  tail_low <- Repitools:::.myquantile(tail, x, y)
+  # if the y-value at the 1-level quantile is smaller than
+  # the right most denisty value, the density is not well-behaved
+  # and we return the 1-level quantile and 1 as result.
+  if( tail_low$y < y[length(y)]){
+    return(c(tail_low$x, 1))
+  }
+  # find the level qunantile and the corresponding y-value.
+  # if the y-value at the level quantile is smaller than
+  # the left most denisty value, the density is not well-behaved
+  # and we return 0 and the level quantile as result.  
+  tail_high <- Repitools:::.myquantile(level,x,y)
+  if( tail_high$y < y[1]){
+    return(c(0, tail_high$x))
+  }
+  # if the 1-level quantile is equal to the first grid value
+  # or the level quantile is equal to the last grid value we
+  # return the quantile. The reason is probably that there are
+  # not enough point in the grid of x and y values.
+  if( tail_low$idx == 1 || tail_high$idx ==  length(x)){
+    return(tail_low$x, tail_high$x)
+  }
 
-    dn <- cumsum(x.tmp*y.tmp)
-    dn <- dn/dn[length(dn)]
-
-    qn <- c()
-    for(i in 1:length(q)){
-        qn[i] <- x[which(dn >= q[i])[1]]
-    }
-    return(qn)
+  # if we have a well-behaved density find the HPD interval 
+  # by interval halving, use zero and the 1-level quantile as start
+  lower2 <- tail_low$x
+  
+  i<-0
+  diff = 5
+  while((diff^2>delta) & (i<maxiter))
+  {
+    idx.low = which(x==lower1)
+    idx.up = which(x==lower2)
+    idx.mid = idx.low + round((idx.up - idx.low)/2,0)
+    low<-x[idx.mid]
+    #low = (lower1 + lower2)/2
+    lprob<-Repitools:::.mycdf(low,x, y)
+    ldens<-y[idx.mid]   
+    uprob<-lprob+level
+    upp<-Repitools:::.myquantile(uprob,x,y)
+    udens<-y[upp$idx]
+    diff<-(udens-ldens)/(udens+ldens)
+    i<-i+1
+    if (diff<0) lower2<-low else lower1<-low
+  }
+  result<-c(low,upp$x)
+  return(result)
 }
 
 
 
-# for uniform prior for methylation level
+.mycdf = function(value, x, y){
+  
+  idx <- which(x >= value)[1] 
+  x.tmp <- x[-1] - x[-length(x)]
+  y.tmp <- (y[-1] + y[-length(y)])/2
+  dn <- cumsum(x.tmp * y.tmp)
+  dn <- dn/dn[length(dn)]
+
+  return(dn[idx])
+}
+
+
+.myquantile = function(q, x, y){
+
+    x.tmp <- x[-1] - x[-length(x)]
+    y.tmp <- (y[-1] + y[-length(y)])/2
+    dn <- cumsum(x.tmp * y.tmp)
+    dn <- dn/dn[length(dn)]
+    idx <- c()
+    for(i in 1:length(q)){
+        idx[i] <- which(dn >= q[i])[1] 
+    }
+    return(list(x=x[idx], y=y[idx], idx=idx))
+}
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+# .myquantile <- function( q, den){
+# 
+#     x <- den[,1]
+#     y <- den[,2]
+# 
+#     # approximate the cumulative distribution using the trapezoidal rule
+#     x.tmp <- x[-1] - x[-length(x)]
+#     y.tmp <- (y[-1] + y[-length(y)])/2
+# 
+#     dn <- cumsum(x.tmp*y.tmp)
+#     dn <- dn/dn[length(dn)]
+# 
+#     qn <- c()
+#     for(i in 1:length(q)){
+#         qn[i] <- x[which(dn >= q[i])[1]]
+#     }
+#     return(qn)
+# }
+
+
 .mydmarginal <- function(mu, y1, y2, al, bl, W, control.available, w, a, b, cons, log=F){
 
-    if(mu < 0 || mu > 1){
-        if(log){
-            return(-Inf)
-        } else {
-            return(0)
-        }
+    if(any(mu < 0) || any(mu > 1)){
+        stop("mu is not within the support of [0,1]")
     }
+
+    if(length(w) > 1){
+        prior_term <- 0
+        for(i in 1:length(w)){
+            prior_term <- prior_term + w[i]*dbeta(mu, shape1=a[i], shape2=b[i])
+        }
+    } else {
+        # since mu in [0,1] we get 1 using a uniform prior
+        prior_term <- dbeta(mu, a, b)
+    }
+
     denom <- bl + cons
     if(control.available){
         denom <- denom + 1
     } 
-    prior_term <- 1
-    if(length(w) > 1){
-        prior_term <- w*dbeta(mu, shape1=a, shape2=b)
-    }
 
-    res_tmp <- prior_term*mu^{y1}/W* (1- (cons*(1-mu))/(denom))^{-(al + y1 + y2)}
+    # res_tmp <- prior_term*mu^{y1}/W* (1- (cons*(1-mu))/(denom))^{-(al + y1 + y2)}
+    # it is more stable to calculate everything on log scale
+    res_tmp <- exp(log(prior_term) + y1*log(mu) - log(W) - (al + y1 + y2)*log(1-(cons*(1-mu))/denom))
 
     if(log){
         return(log(res_tmp))
@@ -693,30 +792,20 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     }
 }
 
-
-# for uniform prior for methylation level
 .mydmarginalDBD <- function(mu, y1, y2, al, bl, W, control.available, w, a, b, cons, log=F){
 
-    if(mu < 0 || mu > 1){
-        if(log){
-            return(-Inf)
-        } else {
-            return(0)
-        }
+    if(any(mu < 0) || any(mu > 1)){
+        stop("mu is not within the support of [0,1]")
     }
+
     denom <- bl + cons
     if(control.available){
         denom <- denom + 1
     } 
-    if(mu == 0){
-        prior_term <- w[1]
-    } else if (mu == 1){
-        prior_term <- w[3]
-    } else {
-        prior_term <- w[2] * dbeta(mu, a, b)
-    }
+    prior_term <- w[1] * as.numeric(mu==0) + w[2]*dbeta(mu, shape1=a, shape2=b) + w[3]*as.numeric(mu==1)
 
-    res_tmp <- prior_term*mu^{y1}/W* (1- (cons*(1-mu))/(denom))^{-(al + y1 + y2)}
+    # res_tmp <- prior_term*mu^{y1}/W* (1- (cons*(1-mu))/(denom))^{-(al + y1 + y2)}
+    res_tmp <- exp(log(prior_term) + y1*log(mu) - log(W) - (al + y1 + y2)*log(1-(cons*(1-mu))/denom))
 
     if(log){
         return(log(res_tmp))
@@ -766,37 +855,37 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     return(m)
 }
 
-.myhpd <- function (p, marginal, len = 1024) 
-{
-    f = Repitools:::.mysfmarginal(Repitools:::.mysmarginal(marginal))
-    xx = seq(f$range[1], f$range[2], length = len)
-    d = cumsum(exp(f$fun(xx)))
-    d = d/d[length(d)]
-    eps = .Machine$double.eps * 1000
-    for (val in c(0, 1)) {
-        is.val = which(abs(d - val) <= eps)
-        if (length(is.val) > 1) {
-            is.val = is.val[-1]
-            d = d[-is.val]
-            xx = xx[-is.val]
-        }
-    }
-    fq = splinefun(d, xx, method = "monoH.FC")
-    np = length(p)
-    pp = 1 - pmin(pmax(p, rep(0, np)), rep(1, np))
-    f = function(x, posterior.icdf, conf) {
-        return(posterior.icdf(1 - conf + x) - posterior.icdf(x))
-    }
-    tol = sqrt(.Machine$double.eps)
-    result = matrix(NA, np, 2)
-    for (i in 1:np) {
-        out = optimize(f, c(0, pp[i]), posterior.icdf = fq, conf = pp[i], 
-            tol = tol)
-        result[i, ] = c(fq(out$minimum), fq(1 - pp[i] + out$minimum))
-    }
-    result <- c(rev(result[,1]), result[,2])
-    return(result)
-}
+# .myhpd <- function (p, marginal, len = 1024) 
+# {
+#     f = Repitools:::.mysfmarginal(Repitools:::.mysmarginal(marginal))
+#     xx = seq(f$range[1], f$range[2], length = len)
+#     d = cumsum(exp(f$fun(xx)))
+#     d = d/d[length(d)]
+#     eps = .Machine$double.eps * 1000
+#     for (val in c(0, 1)) {
+#         is.val = which(abs(d - val) <= eps)
+#         if (length(is.val) > 1) {
+#             is.val = is.val[-1]
+#             d = d[-is.val]
+#             xx = xx[-is.val]
+#         }
+#     }
+#     fq = splinefun(d, xx, method = "monoH.FC")
+#     np = length(p)
+#     pp = 1 - pmin(pmax(p, rep(0, np)), rep(1, np))
+#     f = function(x, posterior.icdf, conf) {
+#         return(posterior.icdf(1 - conf + x) - posterior.icdf(x))
+#     }
+#     tol = sqrt(.Machine$double.eps)
+#     result = matrix(NA, np, 2)
+#     for (i in 1:np) {
+#         out = optimize(f, c(0, pp[i]), posterior.icdf = fq, conf = pp[i], 
+#             tol = tol)
+#         result[i, ] = c(fq(out$minimum), fq(1 - pp[i] + out$minimum))
+#     }
+#     result <- c(rev(result[,1]), result[,2])
+#     return(result)
+# }
 
 ## mixture of point mass at zero, beta distribution, and point mass at one:
 ## w1*delta_0 + w2*Be(x,a,b) + (1-w1-w2)*delta_1
@@ -954,10 +1043,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 sfExport(".myquantile", namespace="Repitools")
                 sfExport(".mydmarginal", namespace="Repitools")
                 sfExport(".myhpd", namespace="Repitools")
-                sfExport(".mysfmarginal", namespace="Repitools")
-                sfExport(".mysmarginal", namespace="Repitools")
-                sfExport(".myhpd", namespace="Repitools")
-                sfExport(".mymarginalfix", namespace="Repitools")
+#                 sfExport(".mysfmarginal", namespace="Repitools")
+#                 sfExport(".mysmarginal", namespace="Repitools")
+#                 sfExport(".mymarginalfix", namespace="Repitools")
                 sfExport("controlCI")
                 sfExport("tmp_var")
                 sfExport("al")
@@ -978,7 +1066,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
                     w=w, a=a, b=b, cons=cons, my_sd= sqrt(tmp_var))
                 sfStop()
-
+                gc()
                 ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
 
             }
@@ -1021,6 +1109,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
     myMean <- myVar <- myAl <- myBl <- myW <- matrix(NA, nrow=length(x),
         ncol=nsampleInterest(x))
+    ci <- list()
     control.available <- TRUE
 
     for(j in 1:nsampleInterest(x)){
@@ -1113,10 +1202,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 sfExport(".myquantile", namespace="Repitools")
                 sfExport(".mydmarginal", namespace="Repitools")
                 sfExport(".myhpd", namespace="Repitools")
-                sfExport(".mysfmarginal", namespace="Repitools")
-                sfExport(".mysmarginal", namespace="Repitools")
-                sfExport(".myhpd", namespace="Repitools")
-                sfExport(".mymarginalfix", namespace="Repitools")
+#                 sfExport(".mysfmarginal", namespace="Repitools")
+#                 sfExport(".mysmarginal", namespace="Repitools")
+#                 sfExport(".mymarginalfix", namespace="Repitools")
                 sfExport("controlCI")
                 sfExport("tmp_var")
                 sfExport("al")
@@ -1138,7 +1226,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     w=w, a=a, b=b, cons=cons, my_sd= sqrt(tmp_var))
 
                 sfStop()
-
+                gc()
                 ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
         }
 
@@ -1149,9 +1237,10 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         myW[w.na,j] <- W
     }
     colnames(myMean) <- colnames(myVar) <- colnames(myAl) <- colnames(myBl) <- colnames(myW) <- colnames(sampleInterest(x))
+    if(controlCI$compute)
+        names(ci) <- colnames(sampleInterest(x))
 
-
-    methEst(x) <- list(mean=myMean, var=myVar, ci=NULL, 
+    methEst(x) <- list(mean=myMean, var=myVar, ci=ci, 
         W=myW, al=myAl, bl=myBl)
 
     return(x)

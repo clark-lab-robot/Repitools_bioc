@@ -13,7 +13,7 @@ motivated by the M (log ratio) versus A (average-log-count) plot.
 }
 \usage{
 determineOffset(x, quantile = 0.998, controlPlot = list(show = FALSE, 
-    nsamp = 50000, mfrow=c(1,1), ask=FALSE))
+    nsamp = 50000, mfrow=c(1,1), xlim=NULL, ylim=NULL, main=NULL, ask=FALSE))
 }
 
 \arguments{
@@ -39,6 +39,16 @@ determineOffset(x, quantile = 0.998, controlPlot = list(show = FALSE,
         \code{mfrow}
         vector of the form "c(nr, nc)" to determine how several plots 
         should be ordered.
+    }
+    \item{-}{
+        \code{xlim, ylim}
+        numeric vectors of length 2, giving the x and y coordinates ranges.
+    }
+    \item{-}{
+        \code{main}
+        If NULL the names of the sample of interest are used as title in the MA plot. 
+        Alternatively, a vector with length equal to the number of samples of interest
+        can be provided.
     }
     \item{-}{
         \code{ask}
