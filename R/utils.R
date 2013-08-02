@@ -553,7 +553,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 }
 
 ## get quantile or HPD based intervals
-.getcredible <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons, my_sd){
+.getcredible <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons){
 
     names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
 
@@ -624,7 +624,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 
 ## get quantile  based intervals
-.getcredibleDBD <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons, my_sd){
+.getcredibleDBD <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons){
 
     if(!is.element(method, c("quantile"))){
         stop("\n\t Argument 'method' must be equal to 'quantile'!\n")
@@ -956,9 +956,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
         if(ncomp==1){
             ## will change for different mixtures
-            w <- matrix(1, nrow=1, ncol=length(cpggroup))
-            a <- matrix(1, nrow=1, ncol=length(cpggroup))
-            b <- matrix(1, nrow=1, ncol=length(cpggroup))
+            w <- a <- b <-  matrix(1, nrow=1, ncol=length(cpggroup))
         } else {
             if(ncomp==2){
                 w1 <- params[3,cpggroup]
@@ -983,9 +981,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         }
 
         # reset for every sample!
-        A <- 0
-        B <- 0
-        W <- 0
+        A <- B <- W <- 0
 
         if( verbose )
             message(paste0("\nSample ",j, ":\tGetting mean and variance\t"))
@@ -1028,7 +1024,8 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 lci[w.na] <- .invlogit(logit_mean - abs(qnorm(ll)) * logit_sd)
                 uci[w.na] <- .invlogit(logit_mean + abs(qnorm(ll)) * logit_sd)
 
-                ci[[j]] <- cbind(lci=lci, uci=uci, width=uci-lci)
+                #ci[[j]] <- cbind(lci=lci, uci=uci, width=uci-lci)
+                ci[[j]] <- cbind(lci=lci, uci=uci)
             } else {
                 if( verbose )
                     message(paste0("Sample ",j, ":\tGetting ", controlCI$method, " credible interval.\n"))
@@ -1036,6 +1033,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 if(is.null(controlCI$ncpu)){
                     controlCI$ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
                 }
+                method <- controlCI$method
+                level <- controlCI$level[1]
+                nmarg <- controlCI$nmarg
 
                 sfInit(parallel=TRUE, cpus=controlCI$ncpu)
                 sfLibrary("Repitools", character.only=TRUE )
@@ -1046,8 +1046,10 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 #                 sfExport(".mysfmarginal", namespace="Repitools")
 #                 sfExport(".mysmarginal", namespace="Repitools")
 #                 sfExport(".mymarginalfix", namespace="Repitools")
-                sfExport("controlCI")
-                sfExport("tmp_var")
+              #  sfExport("controlCI")
+                sfExport("method")
+                sfExport("level")
+                sfExport("nmarg")
                 sfExport("al")
                 sfExport("bl")
                 sfExport("W")
@@ -1059,16 +1061,16 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 sfExport("y2")
                 sfExport("control.available")
                         
-                ci_tmp <- sfSapply(1:length(y1), .getcredible, 
-                    method=controlCI$method,
-                    level=controlCI$level[1], 
-                    nmarg=controlCI$nmarg, 
+                ci_tmp <- sfSapply(1:length(y1), Repitools:::.getcredible, 
+                    method=method,
+                    level=level, 
+                    nmarg=nmarg, 
                     y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
-                    w=w, a=a, b=b, cons=cons, my_sd= sqrt(tmp_var))
+                    w=w, a=a, b=b, cons=cons)
                 sfStop()
                 gc()
-                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
-
+                #ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
+                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,])
             }
         }
         myMean[w.na,j] <- tmp_mean
@@ -1206,7 +1208,6 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 #                 sfExport(".mysmarginal", namespace="Repitools")
 #                 sfExport(".mymarginalfix", namespace="Repitools")
                 sfExport("controlCI")
-                sfExport("tmp_var")
                 sfExport("al")
                 sfExport("bl")
                 sfExport("W")
@@ -1218,16 +1219,17 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 sfExport("y2")
                 sfExport("control.available")
                         
-                ci_tmp <- sfSapply(1:length(y1), .getcredibleDBD, 
+                ci_tmp <- sfSapply(1:length(y1),  Repitools:::.getcredibleDBD, 
                     method=controlCI$method,
                     level=controlCI$level[1], 
                     nmarg=controlCI$nmarg, 
                     y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
-                    w=w, a=a, b=b, cons=cons, my_sd= sqrt(tmp_var))
+                    w=w, a=a, b=b, cons=cons)
 
                 sfStop()
                 gc()
-                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
+                #ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
+                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,])
         }
 
         myMean[w.na,j] <- tmp_mean

@@ -68,7 +68,7 @@ quantile-based credible intervals are computed by numerical integration of the p
     level for each bin.}
     \item{var }{Matrix where the number of columns equals the number of samples 
         of interest. Each column contains posterior variance for each bin.}
-    \item{ci }{List with length equal to the number of samples of interest. Each list element contains a matrix where the first column contains the lower CI bound, the second column the upper CI bound, and the third column the CI width.}
+    \item{ci }{List with length equal to the number of samples of interest. Each list element contains a matrix where the first column contains the lower CI bound and the second column the upper CI bound.}
     \item{W }{Matrix where the number of columns equals the number of
     samples of interest. Each column contains the normalisation factor of the posterior marginal distribution 
         for each bin.}
