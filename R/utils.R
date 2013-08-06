@@ -555,18 +555,11 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 ## get quantile or HPD based intervals
 .getcredible <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons){
 
-    names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
-
     if(is.na(W[u]) || is.infinite(W[u])){
-        my.hpd <- c(NA, NA)
-        names(my.hpd) <- names
-        return(my.hpd)
+        return(c(NA, NA))
     }
 
-    if(!is.element(method, c("quantile", "HPD"))){
-        stop("\n\t Argument 'method' must be either equal to 'quantile' or 'HPD'!\n")
-    }
-    names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
+    method <- match.arg(method, c("quantile", "HPD"))
 
     w_tmp <- w[,u]
     a_tmp <- a[,u]
@@ -587,38 +580,11 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     if(method=="quantile"){
         ll <- (1-level)/2
         q <- c(rev(ll), 1-ll)
-        my.ci <- Repitools:::.myquantile(q=q, x,y)$x
-        names(my.ci) <- names
-        return(my.ci)
+        return( Repitools:::.myquantile(q=q, x,y)$x)
     }
 
     if(method=="HPD"){
-        my.hpd <- Repitools:::.myhpd(level, x,y)
-        names(my.hpd) <- names
-        return(my.hpd)
-#         if(my_max > 1e-4 & my_max < 0.9999){
-#             my.hpd <- Repitools:::.myhpd(level, x,y)
-#             names(my.hpd) <- names
-#             if(sum(my.hpd < 0 | my.hpd > 1) > 0){
-#                 cat("\n\n\t WARNING:  Something is wrong with the HPD intervals!\n\tThey are outside (0,1)!\n")
-#             }
-#             return(my.hpd)
-#         }
-#         
-#         if(my_max <= 1e-4){
-#             #cat("\n\tThe lower bound of the HPD interval is zero => Take the", level*100, "% quantile as upper bound\n\n")
-#             qn <- Repitools:::.myquantile(q=level, x, y)$x
-#             my.hpd <- c(rep(0, length(level)), qn)
-#             names(my.hpd) <- names
-#             return(my.hpd)
-#         } 
-#         if(my_max >= 0.9999){
-#             #cat("\n\tThe upper bound of the HPD interval is one => Take the", (1-level)*100, "% quantile as lower bound\n\n")
-#             qn <- rev(Repitools:::.myquantile(q=1-level, x, y)$x)
-#             my.hpd <- c(qn, rep(1, length(level)))
-#             names(my.hpd) <- names
-#             return(my.hpd) 
-#         }
+        return( Repitools:::.myhpd(level, x,y))
     }
 }
 
@@ -828,8 +794,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     }
     if (is.mat && keep.type) {
         return(cbind(ans$x, ans$y))
-    }
-    else {
+    } else {
         return(ans)
     }
 }
@@ -847,8 +812,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     if (is.matrix(marginal)) {
         i = (marginal[, 2] > 0) & (abs(marginal[, 2]/max(marginal[,2])) > sqrt(.Machine$double.eps))
         m = list(x = marginal[i, 1], y = marginal[i, 2])
-    }
-    else {
+    } else {
         i = (marginal$y > 0) & (abs(marginal$y/max(marginal$y)) > sqrt(.Machine$double.eps))
         m = list(x = marginal$x[i], y = marginal$y[i])
     }
