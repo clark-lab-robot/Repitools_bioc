@@ -565,13 +565,6 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     a_tmp <- a[,u]
     b_tmp <- b[,u]
 
-    # find the mode
-    #my_max <- optimize(Repitools:::.mydmarginal, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u], maximum=T)$maximum
-    # find support points which represent the density 
-    # (take nmarg points: nmarg/3 equally spaced between 0 and 1
-    #  nmarg/3*2 equally spaced in the higher probability mass, i.e
-    # (max(0, mode - 2*sd), min(mode+2*sd, 1))
-    #n1 <- ceiling(nmarg/3)
     eps <- 1e-6
     x <- seq(eps, 1-eps, length.out=nmarg)
     # get the density
@@ -592,31 +585,16 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 ## get quantile  based intervals
 .getcredibleDBD <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons){
 
-    if(!is.element(method, c("quantile"))){
-        stop("\n\t Argument 'method' must be equal to 'quantile'!\n")
-    }
-    names <- c(rev(paste("lb_", level, sep="")), paste("ub_", level, sep=""))
+    method <- match.arg(method, c("quantile"))
 
-
-    # find the mode
-#     my_max <- optimize(Repitools:::.mydmarginalDBD, interval=c(0,1), y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u], maximum=T)$maximum
-    # find support points which represent the density 
-    # (take nmarg points: nmarg/3 equally spaced between 0 and 1
-    #  nmarg/3*2 equally spaced in the higher probability mass, i.e
-    # (max(0, mode - 2*sd), min(mode+2*sd, 1))
-#     n1 <- ceiling(nmarg/3)
     eps <- 1e-6
     x <- seq(eps, 1-eps, length.out=nmarg)
-#     x <- sort(c(seq(eps, 1-eps, length.out=n1), seq(max(my_max - 2*my_sd,eps),min(1-eps,my_max + 2*my_sd), 
-#             length.out=nmarg-n1)))
-    # get the density
+
     y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u])
 
     ll <- (1-level)/2
     q <- c(rev(ll), 1-ll)
-    my.ci <- Repitools:::.myquantile( q=q, x,y)$x
-    names(my.ci) <- names
-    return(my.ci)
+    return(Repitools:::.myquantile( q=q, x,y)$x)
 }
 
 
