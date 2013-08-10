@@ -49,7 +49,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 " like to change this please cancel and set explicitly the ",
                 "argument 'ncpus'\n\n")
         } else {
-            numCoresRed <- floor(numCores/3*2)
+            numCoresRed <- floor(numCores/3)
             message("\n\tInformation: The program will take advantage of ", 
                 numCoresRed, " CPUs from total ", numCores, "\n\tIf you would",
                 " like to change this please cancel and set explicitly the ",
@@ -92,7 +92,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     ineqfun=Repitools:::.ineqn, ineqLB=eps, ineqUB=1-eps, 
                     LB=lb, UB=ub,
                     y1=sample[[i]], y2=control[[i]], 
-                    cons=f[[i]])$pars
+                    cons=f[[i]], control=list(trace=F))$pars
     }
     if(controlMethod$mode == "fixedWeights"){
         lb <- c(eps, eps, eps, eps)
@@ -102,7 +102,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac_fW, 
                     LB=lb, UB=ub,
                     y1=sample[[i]], y2=control[[i]], 
-                    cons=f[[i]], weights=controlMethod$weights)$pars
+                    cons=f[[i]], weights=controlMethod$weights, control=list(trace=F))$pars
     }
     if(controlMethod$mode == "fixedBeta"){
         lb <- c(eps, eps,  eps, eps)
@@ -113,7 +113,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     ineqfun=Repitools:::.ineqn2, ineqLB=eps, ineqUB=1-eps, 
                     LB=lb, UB=ub, 
                     y1=sample[[i]], y2=control[[i]], 
-                    cons=f[[i]], param=controlMethod$param)$pars
+                    cons=f[[i]], param=controlMethod$param, control=list(trace=F))$pars
     }
 # system.time(
 # optim(c(2.14,1.34), fn=Repitools:::.marg, method="L-BFGS-B",
@@ -369,7 +369,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
             arg <- c(2.14, 1.34, 0.5, 0.5, 1, 1, 1,1)
             paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.marg, 
                 eqfun=Repitools:::.eqn2, eqB=1, LB=lb, UB=ub, cons=f[[i]], 
-                y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars
+                y1=sample[[i]], y2=control[[i]], ncomp=ncomp, control=list(trace=F))$pars
         }
         if(ncomp==3){
             lb <- c(eps, eps, eps, eps, eps, rep(eps, 3))
@@ -378,7 +378,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
             paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.marg, 
                 eqfun=Repitools:::.eqn3, eqB=1, LB=lb, 
                 UB=ub, cons=f[[i]], 
-                y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars            
+                y1=sample[[i]], y2=control[[i]], ncomp=ncomp, control=list(trace=F))$pars            
         }
     } else {
         ## solnp is in particular better for mixtures of beta priors as you 
@@ -386,7 +386,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         paramVec <- Rsolnp:::solnp(c(2.14,1.34), fun=Repitools:::.marg, 
             eqfun=NULL, eqB=NULL, LB=c(eps, eps), 
             UB=c(Inf, Inf), cons=f[[i]], 
-            y1=sample[[i]], y2=control[[i]], ncomp=ncomp)$pars
+            y1=sample[[i]], y2=control[[i]], ncomp=ncomp, control=list(trace=F))$pars
     }
 # system.time(Rsolnp:::solnp(c(2.14,1.34), fun=Repitools:::.marg, 
 #         eqfun=NULL, eqB=NULL, LB=c(eps, eps), 
@@ -535,8 +535,6 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     return(z)
 }
 
-
-
 ## logit function
 .logit <- function(x){
     return(log(x/{1-x}))
@@ -561,14 +559,46 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
     method <- match.arg(method, c("quantile", "HPD"))
 
-    w_tmp <- w[,u]
-    a_tmp <- a[,u]
-    b_tmp <- b[,u]
+    if(ncol(w) != 1){
+        w_tmp <- w[,u]
+        a_tmp <- a[,u]
+        b_tmp <- b[,u]
+    } else {
+        w_tmp <- w[,1]
+        a_tmp <- a[,1]
+        b_tmp <- b[,1]
+    }
+
+    if(length(cons) != 1){
+        cons <- cons[u]
+    }
+
+    if(control.available){
+        y2 <- y2[u]
+    } 
 
     eps <- 1e-6
-    x <- seq(eps, 1-eps, length.out=nmarg)
-    # get the density
-    y <- Repitools:::.mydmarginal(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w_tmp, a=a_tmp, b=b_tmp, cons=cons[u])
+
+    ## get idea where the probability mass is 
+    x <- seq(eps, 1 - eps, length.out = 100)
+    y <- Repitools:::.mydmarginal(x, y1 = y1[u], y2 = y2, al = al[u], 
+        bl = bl[u], W = W[u], control.available = control.available, 
+        w = w_tmp, a = a_tmp, b = b_tmp, cons = cons)
+
+    lim <- 2*(1-level)
+    lim2 <- 1- lim
+
+    mq <- Repitools:::.myquantile(c(0.01, lim, lim2, 0.99),x,y)$x
+
+    x <- c( seq(eps, mq[1], length.out=100), 
+        seq(mq[1]+eps, mq[2], length.out=nmarg/2), 
+        seq(mq[2]+eps, mq[3], length.out=100), 
+        seq(mq[3]+eps, mq[4], length.out=nmarg/2), 
+        seq(mq[4]+eps, 1-eps, length.out=100))
+
+    y <- Repitools:::.mydmarginal(x, y1 = y1[u], y2 = y2, al = al[u], 
+        bl = bl[u], W = W[u], control.available = control.available, 
+        w = w_tmp, a = a_tmp, b = b_tmp, cons = cons)  
 
     if(method=="quantile"){
         ll <- (1-level)/2
@@ -586,11 +616,41 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 .getcredibleDBD <-  function(u, method, level, nmarg, y1, y2, al, bl, W, control.available, w, a, b, cons){
 
     method <- match.arg(method, c("quantile"))
+    if(length(cons) != 1){
+        cons <- cons[u]
+    }
 
+    if(control.available){
+        y2 <- y2[u]
+    } 
     eps <- 1e-6
-    x <- seq(eps, 1-eps, length.out=nmarg)
+#     x <- seq(eps, 1-eps, length.out=nmarg)
+# 
+#     y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2[u], al=al[u], 
+#         bl=bl[u], W=W[u], control.available=control.available, 
+#         w=w[,u], a=a[u], b=b[u], cons=cons[u])
 
-    y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2[u], al=al[u], bl=bl[u], W=W[u], control.available=control.available, w=w[,u], a=a[u], b=b[u], cons=cons[u])
+
+    ## get idea where the probability mass is 
+    x <- seq(eps, 1 - eps, length.out = 100)
+    y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2, al=al[u], 
+        bl=bl[u], W=W[u], control.available=control.available, 
+        w=w[,u], a=a[u], b=b[u], cons=cons)
+
+    lim <- 2*(1-level)
+    lim2 <- 1- lim
+
+    mq <- Repitools:::.myquantile(c(0.01, lim, lim2, 0.99),x,y)$x
+
+    x <- c( seq(eps, mq[1], length.out=100), 
+        seq(mq[1]+eps, mq[2], length.out=nmarg/2), 
+        seq(mq[2]+eps, mq[3], length.out=100), 
+        seq(mq[3]+eps, mq[4], length.out=nmarg/2), 
+        seq(mq[4]+eps, 1-eps, length.out=100))
+
+    y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2, al=al[u], 
+        bl=bl[u], W=W[u], control.available=control.available, 
+        w=w[,u], a=a[u], b=b[u], cons=cons)
 
     ll <- (1-level)/2
     q <- c(rev(ll), 1-ll)
@@ -599,7 +659,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 
 ## function to numerially derive the HPD interval based on a grid of density values
-.myhpd = function(level, x, y, delta=0.001, maxiter=10){
+.myhpd = function(level, x, y, delta=0.001, maxiter=15){
 
   delta <- delta^2
 
@@ -627,7 +687,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
   # return the quantile. The reason is probably that there are
   # not enough point in the grid of x and y values.
   if( tail_low$idx == 1 || tail_high$idx ==  length(x)){
-    return(tail_low$x, tail_high$x)
+    return(c(tail_low$x, tail_high$x))
   }
 
   # if we have a well-behaved density find the HPD interval 
@@ -638,18 +698,20 @@ setMethod(".validate", "GRanges", function(anno, up, down)
   diff = 5
   while((diff^2>delta) & (i<maxiter))
   {
-    idx.low = which(x==lower1)
-    idx.up = which(x==lower2)
-    idx.mid = idx.low + round((idx.up - idx.low)/2,0)
-    low<-x[idx.mid]
-    #low = (lower1 + lower2)/2
+    low <- (lower1 + lower2)/2
     lprob<-Repitools:::.mycdf(low,x, y)
-    ldens<-y[idx.mid]   
-    uprob<-lprob+level
-    upp<-Repitools:::.myquantile(uprob,x,y)
-    udens<-y[upp$idx]
-    diff<-(udens-ldens)/(udens+ldens)
-    i<-i+1
+    idx <- which.min(abs(low - x))
+    x_c <- x[idx]
+    if(low > x_c){
+        ldens <- y[idx] + (y[idx + 1] - y[idx])*(x_c - x[idx])/(x[idx+1] - x[idx])
+    } else {
+        ldens <- y[idx - 1] + (y[idx] - y[idx - 1])*(x_c - x[idx - 1])/(x[idx] - x[idx - 1])
+    }
+    uprob <- lprob+level
+    upp <- Repitools:::.myquantile(uprob,x,y)
+    udens <- upp$y
+    diff <- (udens-ldens)/(udens+ldens)
+    i <- i+1
     if (diff<0) lower2<-low else lower1<-low
   }
   result<-c(low,upp$x)
@@ -660,7 +722,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 .mycdf = function(value, x, y){
   
-  idx <- which(x >= value)[1] 
+  idx <- which(x <= value)[1] 
   x.tmp <- x[-1] - x[-length(x)]
   y.tmp <- (y[-1] + y[-length(y)])/2
   dn <- cumsum(x.tmp * y.tmp)
@@ -682,27 +744,6 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     }
     return(list(x=x[idx], y=y[idx], idx=idx))
 }
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-# .myquantile <- function( q, den){
-# 
-#     x <- den[,1]
-#     y <- den[,2]
-# 
-#     # approximate the cumulative distribution using the trapezoidal rule
-#     x.tmp <- x[-1] - x[-length(x)]
-#     y.tmp <- (y[-1] + y[-length(y)])/2
-# 
-#     dn <- cumsum(x.tmp*y.tmp)
-#     dn <- dn/dn[length(dn)]
-# 
-#     qn <- c()
-#     for(i in 1:length(q)){
-#         qn[i] <- x[which(dn >= q[i])[1]]
-#     }
-#     return(qn)
-# }
-
 
 .mydmarginal <- function(mu, y1, y2, al, bl, W, control.available, w, a, b, cons, log=F){
 
@@ -759,76 +800,6 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 }
 
 
-.mysmarginal <- function (marginal, log = FALSE, extrapolate = 0, keep.type = FALSE) 
-{
-    is.mat = is.matrix(marginal)
-    m = Repitools:::.mymarginalfix(marginal)
-    r = range(m$x)
-    r = r[2] - r[1]
-    ans = spline(m$x, log(m$y), xmin = min(m$x) - extrapolate * 
-        r, xmax = max(m$x) + extrapolate * r, n = 10 * length(m$x))
-    if (!log) {
-        ans$y = exp(ans$y)
-    }
-    if (is.mat && keep.type) {
-        return(cbind(ans$x, ans$y))
-    } else {
-        return(ans)
-    }
-}
-
-.mysfmarginal <- function (marginal) 
-{
-    m = Repitools:::.mymarginalfix(marginal)
-    r = range(m$x)
-    return(list(range = r, fun = splinefun(m$x, log(m$y))))
-}
-
-
-.mymarginalfix <- function (marginal) 
-{
-    if (is.matrix(marginal)) {
-        i = (marginal[, 2] > 0) & (abs(marginal[, 2]/max(marginal[,2])) > sqrt(.Machine$double.eps))
-        m = list(x = marginal[i, 1], y = marginal[i, 2])
-    } else {
-        i = (marginal$y > 0) & (abs(marginal$y/max(marginal$y)) > sqrt(.Machine$double.eps))
-        m = list(x = marginal$x[i], y = marginal$y[i])
-    }
-    return(m)
-}
-
-# .myhpd <- function (p, marginal, len = 1024) 
-# {
-#     f = Repitools:::.mysfmarginal(Repitools:::.mysmarginal(marginal))
-#     xx = seq(f$range[1], f$range[2], length = len)
-#     d = cumsum(exp(f$fun(xx)))
-#     d = d/d[length(d)]
-#     eps = .Machine$double.eps * 1000
-#     for (val in c(0, 1)) {
-#         is.val = which(abs(d - val) <= eps)
-#         if (length(is.val) > 1) {
-#             is.val = is.val[-1]
-#             d = d[-is.val]
-#             xx = xx[-is.val]
-#         }
-#     }
-#     fq = splinefun(d, xx, method = "monoH.FC")
-#     np = length(p)
-#     pp = 1 - pmin(pmax(p, rep(0, np)), rep(1, np))
-#     f = function(x, posterior.icdf, conf) {
-#         return(posterior.icdf(1 - conf + x) - posterior.icdf(x))
-#     }
-#     tol = sqrt(.Machine$double.eps)
-#     result = matrix(NA, np, 2)
-#     for (i in 1:np) {
-#         out = optimize(f, c(0, pp[i]), posterior.icdf = fq, conf = pp[i], 
-#             tol = tol)
-#         result[i, ] = c(fq(out$minimum), fq(1 - pp[i] + out$minimum))
-#     }
-#     result <- c(rev(result[,1]), result[,2])
-#     return(result)
-# }
-
 ## mixture of point mass at zero, beta distribution, and point mass at one:
 ## w1*delta_0 + w2*Be(x,a,b) + (1-w1-w2)*delta_1
 .diracBetaDirac <- function(x, w1, w2, a, b){
@@ -866,17 +837,17 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
     for(j in 1:nsampleInterest(x)){
 
-        y1 <- sampleInterest(x)[,j]
+        y1 <- as.numeric(sampleInterest(x)[,j])
         if(nrow(control(x)) == 1){
             w.na <- !is.na(y1)
             y1 <- y1[w.na]
-            y2 <- rep(0, length(y1))
+            y2 <- 0
             control.available <- FALSE
         } else {
             if(ncontrol(x) == 1){
-                y2 <- control(x)[,1]
+                y2 <- as.numeric(control(x)[,1])
             } else {
-                y2 <- control(x)[,j]
+                y2 <- as.numeric(control(x)[,j])
             }
             # only compute methylation estimates for bins with 
             # sensible values for control and sample of interest
@@ -898,7 +869,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
         if(ncomp==1){
             ## will change for different mixtures
-            w <- a <- b <-  matrix(1, nrow=1, ncol=length(cpggroup))
+            w <- a <- matrix(1, nrow=1, ncol=1)
+            ## for b we need the full length as it directly goes to hyperg2F1_vec
+            b <-  matrix(1, nrow=1, ncol=length(cpggroup))
         } else {
             if(ncomp==2){
                 w1 <- params[3,cpggroup]
@@ -918,9 +891,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         cons <- f[,j]
         if(length(cons) > 1){
             cons <- cons[w.na]
-        } else {
-            cons <- rep(cons, length(y1))
-        }
+        } 
 
         # reset for every sample!
         A <- B <- W <- 0
@@ -950,6 +921,13 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         }
         tmp_mean <- A/W
         tmp_var <- B/W - (A/W)^2
+        if(ncomp==1){
+            rm(a_arg, ab, y1a, y1ab, z_arg, A, B, b)
+            b <- matrix(1, ncol=1, nrow=1)
+        } else {
+            rm(a_arg, ab, y1a, y1ab, z_arg, A, B)
+        }
+        gc()
 
         if(controlCI$compute){
 
@@ -979,60 +957,28 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                 level <- controlCI$level[1]
                 nmarg <- controlCI$nmarg
 
-                sfInit(parallel=TRUE, cpus=controlCI$ncpu)
-                sfLibrary("Repitools", character.only=TRUE )
-                sfExport(".getcredible", namespace="Repitools")
-                sfExport(".myquantile", namespace="Repitools")
-                sfExport(".mydmarginal", namespace="Repitools")
-                sfExport(".myhpd", namespace="Repitools")
-#                 sfExport(".mysfmarginal", namespace="Repitools")
-#                 sfExport(".mysmarginal", namespace="Repitools")
-#                 sfExport(".mymarginalfix", namespace="Repitools")
-              #  sfExport("controlCI")
-                sfExport("method")
-                sfExport("level")
-                sfExport("nmarg")
-                sfExport("al")
-                sfExport("bl")
-                sfExport("W")
-                sfExport("w")
-                sfExport("a")
-                sfExport("b")
-                sfExport("cons")
-                sfExport("y1")
-                sfExport("y2")
-                sfExport("control.available")
-                        
-                ci_tmp <- sfSapply(1:length(y1), Repitools:::.getcredible, 
-                    method=method,
-                    level=level, 
-                    nmarg=nmarg, 
-                    y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
-                    w=w, a=a, b=b, cons=cons)
-                sfStop()
+                ci_tmp <- parallel:::mclapply(1:len, Repitools:::.getcredible, 
+                    method = method, level = level, nmarg = nmarg, 
+                    y1 = y1, y2 = y2, al = al, bl = bl, W = W, 
+                    control.available = control.available, w = w, 
+                    a = a, b = b, cons = cons,  mc.cores=controlCI$ncpu)
+                ci[[j]] <- do.call(rbind, ci_tmp)  
+                colnames(ci[[j]]) <- c("lower.limit", "upper.limit")
                 gc()
-                #ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
-                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,])
             }
         }
         myMean[w.na,j] <- tmp_mean
         myVar[w.na,j] <- tmp_var
-        myAl[w.na,j] <- al
-        myBl[w.na,j] <- bl
         myW[w.na,j] <- W
     }
-    colnames(myMean) <- colnames(myVar) <- colnames(myAl) <- colnames(myBl) <- colnames(myW) <- colnames(sampleInterest(x))
+    colnames(myMean) <- colnames(myVar) <- colnames(myW) <- colnames(sampleInterest(x))
     if(controlCI$compute)
         names(ci) <- colnames(sampleInterest(x))
 
-    methEst(x) <- list(mean=myMean, var=myVar, ci=ci, 
-        W=myW, al=myAl, bl=myBl)
+    methEst(x) <- list(mean=myMean, var=myVar, ci=ci, W=myW)
 
     return(x)
 }
-
-
-
 
 
 .methylEstDBD <- function(x, verbose=TRUE, controlCI=list(compute=FALSE, method="quantile", 
@@ -1132,6 +1078,14 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         tmp_mean <- A/W
         tmp_var <- B/W - (A/W)^2
 
+        if(ncomp==1){
+            rm(a_arg, ab, y1a, y1ab, z_arg, A, B, b)
+            b <- matrix(1, ncol=1, nrow=1)
+        } else {
+            rm(a_arg, ab, y1a, y1ab, z_arg, A, B)
+        }
+        gc()
+
         if(controlCI$compute){
                if( verbose )
                     message(paste0("Sample ",j, ":\tGetting ", controlCI$method, " credible interval.\n"))
@@ -1140,52 +1094,30 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     controlCI$ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
                 }
 
-                sfInit(parallel=TRUE, cpus=controlCI$ncpu)
-                sfLibrary("Repitools", character.only=TRUE )
-                sfExport(".getcredible", namespace="Repitools")
-                sfExport(".myquantile", namespace="Repitools")
-                sfExport(".mydmarginal", namespace="Repitools")
-                sfExport(".myhpd", namespace="Repitools")
-#                 sfExport(".mysfmarginal", namespace="Repitools")
-#                 sfExport(".mysmarginal", namespace="Repitools")
-#                 sfExport(".mymarginalfix", namespace="Repitools")
-                sfExport("controlCI")
-                sfExport("al")
-                sfExport("bl")
-                sfExport("W")
-                sfExport("w")
-                sfExport("a")
-                sfExport("b")
-                sfExport("cons")
-                sfExport("y1")
-                sfExport("y2")
-                sfExport("control.available")
-                        
-                ci_tmp <- sfSapply(1:length(y1),  Repitools:::.getcredibleDBD, 
-                    method=controlCI$method,
-                    level=controlCI$level[1], 
-                    nmarg=controlCI$nmarg, 
-                    y1=y1, y2=y2, al=al, bl=bl, W=W,  control.available=control.available,
-                    w=w, a=a, b=b, cons=cons)
+                method <- controlCI$method
+                level <- controlCI$level[1]
+                nmarg <- controlCI$nmarg
 
-                sfStop()
+                ci_tmp <- parallel:::mclapply(1:len, Repitools:::.getcredibleDBD, 
+                    method = method, level = level, nmarg = nmarg, 
+                    y1 = y1, y2 = y2, al = al, bl = bl, W = W, 
+                    control.available = control.available, w = w, 
+                    a = a, b = b, cons = cons,  mc.cores=controlCI$ncpu)
+                ci_tmp_mclapply <- do.call(rbind, ci_tmp)  
                 gc()
-                #ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,], width=ci_tmp[2,]-ci_tmp[1,])
-                ci[[j]] <- cbind(lci=ci_tmp[1,], uci=ci_tmp[2,])
+
+                ci[[j]] <- cbind(lci=ci_tmp_mclapply[1,], uci=ci_tmp_mclapply[2,])
         }
 
         myMean[w.na,j] <- tmp_mean
         myVar[w.na,j] <- tmp_var
-        myAl[w.na,j] <- al
-        myBl[w.na,j] <- bl
         myW[w.na,j] <- W
     }
-    colnames(myMean) <- colnames(myVar) <- colnames(myAl) <- colnames(myBl) <- colnames(myW) <- colnames(sampleInterest(x))
+    colnames(myMean) <- colnames(myVar) <- colnames(myW) <- colnames(sampleInterest(x))
     if(controlCI$compute)
         names(ci) <- colnames(sampleInterest(x))
 
-    methEst(x) <- list(mean=myMean, var=myVar, ci=ci, 
-        W=myW, al=myAl, bl=myBl)
+    methEst(x) <- list(mean=myMean, var=myVar, ci=ci, W=myW)
 
     return(x)
 }

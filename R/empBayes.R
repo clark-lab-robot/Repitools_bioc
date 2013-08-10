@@ -121,29 +121,16 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
             co_tmp <- co_filtered[,j]
             co_list <- sapply(1:ngroups, function(u){co_tmp[red_idx[[u]]]})
         }
-        sfInit(parallel=TRUE,cpus=ncpu)
-        sfLibrary("Rsolnp", character.only=TRUE )
-        sfLibrary("Repitools", character.only=TRUE )
-        sfExport(".marg", namespace="Repitools")
-        sfExport(".myoptimize", namespace="Repitools")
-        sfExport(".eqn3", namespace="Repitools")
-        sfExport(".eqn2", namespace="Repitools")
-        sfExport(".ineqn", namespace="Repitools")
-        sfExport("controlMethod")
-        sfExport("co_list")
-        sfExport("sI_list")
-        sfExport("f_list")
-        sfExport("method")
-        sfExport("ncomp")   
-
         if(method=="beta"){
-            paramTab[[j+3]] <- snowfall:::sfSapply(1:ngroups, Repitools:::.myoptimize, 
-                sI_list, co_list, f_list, ncomp)
+            tmp <- parallel:::mclapply(1:ngroups, Repitools:::.myoptimize, 
+                sI_list, co_list, f_list, ncomp, mc.cores=ncpu)
+            paramTab[[j+3]] <- t(do.call(rbind, tmp))
         } else {
-            paramTab[[j+3]] <- snowfall:::sfSapply(1:ngroups, Repitools:::.myoptimizeDirac, 
-                sI_list, co_list, f_list, controlMethod)
+            tmp <- parallel:::mclapply(1:ngroups, Repitools:::.myoptimizeDirac, 
+                sI_list, co_list, f_list, controlMethod, mc.cores=ncpu)
+            paramTab[[j+3]] <- t(do.call(rbind, tmp))
         }
-        sfStop()
+
         gc()
 
         if(controlMethod$mode=="fixedBeta"){
