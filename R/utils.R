@@ -197,9 +197,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     w_rm <- c(w_na, w_inf)
     
     if(length(w_rm) > 0){
-        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
-        message("The reason might be extreme read density in one of the samples\n")
-        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+#         message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+#         message("The reason might be extreme read density in one of the samples\n")
+#         print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
         s_tmp <- s_tmp[-w_rm]
     }
 
@@ -260,9 +260,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     w_rm <- c(w_na, w_inf)
     
     if(length(w_rm) > 0){
-        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
-        message("The reason might be extreme read density in one of the samples\n")
-        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+#         message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+#         message("The reason might be extreme read density in one of the samples\n")
+#         print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
         s_tmp <- s_tmp[-w_rm]
     }
 
@@ -324,9 +324,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     w_rm <- c(w_na, w_inf)
     
     if(length(w_rm) > 0){
-        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
-        message("The reason might be extreme read density in one of the samples\n")
-        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+#         message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+#         message("The reason might be extreme read density in one of the samples\n")
+#         print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
         s_tmp <- s_tmp[-w_rm]
     }
 
@@ -475,9 +475,9 @@ setMethod(".validate", "GRanges", function(anno, up, down)
     w_rm <- c(w_na, w_inf)
     
     if(length(w_rm) > 0){
-        message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
-        message("The reason might be extreme read density in one of the samples\n")
-        print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
+#         message("We remove ", length(w_rm), " bins out of ", len,  " in the empirical Bayes\n")
+#         message("The reason might be extreme read density in one of the samples\n")
+#         print(head(cbind("sampleInterest"=y1[w_rm], "control"=y2[w_rm])))
         s_tmp <- s_tmp[-w_rm]
     }
 
