@@ -35,6 +35,11 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
 .getCpu <- function(maxCPU=FALSE){
 
+    if (.Platform$OS.type == "windows"){
+        message("\n\tCAUTION: Parallel computing using mclapply is not possible on Windows, we therefore set ncpu=1\n\n!")
+        return(1)
+    }
+
     numCores <- detectCores()
     if(maxCPU){
         message("\n\tInformation: The program will take advantage of ", 
