@@ -1,7 +1,77 @@
-setGeneric("mappabilityCalc", function(x, ...){standardGeneric("mappabilityCalc")})
+setGeneric("mappabilityCalc", function(x, organism, ...){standardGeneric("mappabilityCalc")})
+
+.mappabilityBSGenome <- function(regions.by.chr, organism)
+{
+    chr.maxs <- seqlengths(organism)[names(regions.by.chr)]
     
-setMethod("mappabilityCalc", "GRanges", function(x, organism, window = NULL,
-          type = c("block", "TSS", "center"), verbose = TRUE)
+    mappability.by.chr <- mapply(function(y, z)
+    {
+        # Handle case of windows overlapping past ends of chromosome.
+        inside.regions <- restrict(y, 1, z, keep.all.ranges = TRUE)
+        window.seqs <- suppressWarnings(getSeq(organism, inside.regions))
+        unmap.counts <- letterFrequency(DNAStringSet(window.seqs), 'N')
+        unmap.counts <- unmap.counts + width(y) - width(inside.regions)
+        1 - (unmap.counts / width(y))
+    }, as.list(regions.by.chr), as.list(chr.maxs), SIMPLIFY = FALSE)
+}
+
+.mappabilityFASTA <- function(regions.by.chr, map.file, verbose)
+{
+    file.conn <- file(map.file, 'r')
+    chr.found <- FALSE
+    chr.map <- list()
+
+    repeat
+    {
+        text.line <- readLines(file.conn, 1)
+        if(grepl("^~[^~]", text.line) && chr.found == FALSE)
+        # First time seeing a chromosome.
+        {
+            chr.name <- gsub('~', '', text.line)
+            chr.found <- TRUE
+            map.string <- character(10000000)
+            fileLineIndex = 1
+            vectorIndex = 1
+            if(verbose) message("Reading mappability for ", chr.name, '.')
+        } else if((grepl("^~[^~]", text.line) && chr.found == TRUE) || length(text.line) == 0) 
+        {
+        # End of reading data for a chromosome. Process user regions.
+            if(verbose) message("Finished reading mappability for ", chr.name, '.')
+            map.string <- paste(map.string, collapse = '')
+	    if(chr.name %in% names(regions.by.chr))
+            {
+                chr.regions <- regions.by.chr[[chr.name]]
+                inside.regions <- restrict(chr.regions, 1, nchar(map.string),
+                                           keep.all.ranges = TRUE)
+                map.set <- BString(map.string, start(inside.regions),
+                                      width(inside.regions))
+                unique.bases <- letterFrequency(map.set, '!')
+                chr.map <- c(chr.map, list(unique.bases / width(chr.regions)))
+                names(chr.map)[length(chr.map)] <- chr.name
+                if(verbose) message("Processed regions on ", chr.name, '.')
+            }
+            if(length(text.line) == 0) break 
+            map.string <- character(10000000)
+            vectorIndex <- 1
+            chr.name <- gsub('~', '', text.line)
+            if(verbose) message("Reading mappability for ", chr.name, '.')
+        } else if (chr.found == TRUE) {
+        # Line of mappability scores. Append to existing scores list.
+            map.string[vectorIndex] <- text.line
+            vectorIndex <- vectorIndex + 1
+            fileLineIndex <- fileLineIndex + 1
+        }
+    }
+
+    close(file.conn)
+    if(length(setdiff(names(regions.by.chr), names(chr.map))) > 0)
+        stop("Some user regions' chromosomes are not present in the FASTA file.")
+    chr.map[names(regions.by.chr)]
+}
+    
+setMethod("mappabilityCalc", c("GRanges", "MappabilitySource"),
+          function(x, organism, window = NULL, type = c("block", "TSS", "center"),
+          verbose = TRUE)
 {
     require(GenomicRanges)
 
@@ -34,22 +104,17 @@ setMethod("mappabilityCalc", "GRanges", function(x, organism, window = NULL,
     strand(x) <- "+"
     chrs <- as.character(seqnames(x))
     regions.by.chr <- split(x, chrs)
-    chr.maxs <- seqlengths(organism)[names(regions.by.chr)]
-    
-    mappability.by.chr <- mapply(function(y, z)
+
+    if(class(organism) == "character")
     {
-        # Handle case of windows overlapping past ends of chromosome.
-        inside.regions <- restrict(y, 1, z, keep.all.ranges = TRUE)
-        window.seqs <- suppressWarnings(getSeq(organism, inside.regions))
-        unmap.counts <- alphabetFrequency(DNAStringSet(window.seqs))[, 'N']
-        unmap.counts <- unmap.counts + width(y) - width(inside.regions)
-        1 - (unmap.counts / width(y))
-    }, as.list(regions.by.chr), as.list(chr.maxs), SIMPLIFY = FALSE)
-    unsplit(mappability.by.chr, chrs)
+        unsplit(.mappabilityFASTA(regions.by.chr, organism, verbose), chrs)
+    } else {
+        unsplit(.mappabilityBSGenome(regions.by.chr, organism), chrs)
+    }
 })
     
-setMethod("mappabilityCalc", "data.frame", function(x, organism, window = NULL,
-          type = c("block", "TSS", "center"), ...)
+setMethod("mappabilityCalc", c("data.frame", "MappabilitySource"),
+         function(x, organism, window = NULL, type = c("block", "TSS", "center"), ...)
 {
     require(GenomicRanges)
 

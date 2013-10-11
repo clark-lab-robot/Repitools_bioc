@@ -2,6 +2,8 @@
 # An S4 class, so that they are created once, then dispatched on when
 # required for multiple samples.
 
+setClassUnion("MappabilitySource", c("BSgenome", "character"))
+
 setClass(".CoverageSamples",
          representation(
                         pos.labels = "ANY", # character or numeric.
@@ -160,7 +162,7 @@ setMethod("clusters", "ClusteredScoresList",
 
 setClass("GCAdjustParams", representation(
                                     genome = "BSgenome",
-                                    mappability = "BSgenome",
+                                    mappability = "MappabilitySource",
                                     min.mappability = "numeric",
 				    n.bins = "numeric",
                                     min.bin.size = "numeric",
@@ -171,7 +173,7 @@ setClass("GCAdjustParams", representation(
 # Constructor
 setGeneric("GCAdjustParams", function(genome, mappability, ...)
            {standardGeneric("GCAdjustParams")})
-setMethod("GCAdjustParams", c("BSgenome", "BSgenome"),
+setMethod("GCAdjustParams", c("BSgenome", "MappabilitySource"),
     function(genome, mappability, min.mappability, n.bins = NULL, min.bin.size = 2,
              poly.degree = NULL, ploidy = 1)
 {
@@ -480,11 +482,6 @@ setMethod("[", "BayMethList",
    } else {
         controlt <- x@control
    }
-   if(nrow(x@f) > 1){
-        f <- x@f[i,,drop=FALSE]
-    } else {
-        f <- x@f
-    }
 
    new_methEst <- list()
    new_methEst[["mean"]] <- x@methEst$mean[i,, drop=FALSE]
@@ -499,7 +496,7 @@ setMethod("[", "BayMethList",
         control=controlt,
         sampleInterest=x@sampleInterest[i,,drop=FALSE], 
         cpgDens=x@cpgDens[i],
-        f=f,
+        f=x@f,
         priorTab=x@priorTab,
         methEst=new_methEst,
         maskEmpBayes=x@maskEmpBayes[i])
