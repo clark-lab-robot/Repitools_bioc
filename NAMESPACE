@@ -4,7 +4,7 @@ useDynLib(Repitools)
 #.onLoad <- function(lib, pkg) require(methods)
 
 #  All functions exported other than those starting with "."
-import(methods, BiocGenerics, IRanges, GenomicRanges, BSgenome, edgeR, parallel, Rsolnp)
+import(methods, BiocGenerics, IRanges, GenomicRanges, GenomicAlignments, BSgenome, edgeR, parallel, Rsolnp)
 importFrom(parallel, detectCores)
 exportClasses(FastQC, SequenceQC, SequenceQCSet, ScoresList, ClusteredScoresList, QdnaData, BayMethList)
 exportMethods(show)

@@ -1,11 +1,11 @@
 Package: Repitools
-Version: 1.9.1
+Version: 1.9.2
 Date: 2013/10/11
 Title: Epigenomic tools
 Author: Mark Robinson <mark.robinson@imls.uzh.ch>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>, Andrea Riebler <andrea.riebler@math.ntnu.no>
 Maintainer: Mark Robinson <mark.robinson@imls.uzh.ch>
 LazyLoad: Yes
-Depends: R (>= 2.13.0), methods, BiocGenerics (>= 0.1.0), GenomicRanges (>= 1.13.3)
+Depends: R (>= 2.13.0), methods, BiocGenerics (>= 0.1.0), GenomicRanges (>= 1.13.3), GenomicAlignments
 Imports: BiocGenerics, IRanges (>= 1.13.5), GenomicRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR (>= 2.99.2), DNAcopy, Ringo, aroma.affymetrix, Rsolnp, parallel
 Suggests: GenomicRanges, IRanges, BSgenome, gplots, grid, MASS, gsmoothr, edgeR, DNAcopy, Ringo, aroma.affymetrix, ShortRead, BSgenome.Hsapiens.UCSC.hg18, rtracklayer
 Description: Tools for the analysis of enrichment-based epigenomic data.  Features include summarization and visualization of epigenomic data across promoters according to gene expression context, finding regions of differential methylation/binding, BayMeth for quantifying methylation etc. 
