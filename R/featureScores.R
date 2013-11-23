@@ -189,7 +189,7 @@ setMethod(".featureScores", c("matrix", "GRanges"),
 
     if(is.null(mapping))
     {
-        if("index" %in% colnames(x)) p.inds <- x$index else p.inds <- 1:nrow(x)    
+        if(!"index" %in% colnames(p.anno)) p.anno[, "index"] <- 1:nrow(p.anno)
         ind.col <- colnames(p.anno) == "index"
         mapping <- annotationLookup(p.anno[, !ind.col], y, up, down, verbose)
         p.used <- unique(unlist(mapping$indexes, use.names = FALSE))

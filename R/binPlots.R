@@ -11,15 +11,19 @@ setMethod("binPlots", "ScoresList",
         stop("Label text for ordering not given.")
 
     summarize <- match.arg(summarize)
+    plot.type <- match.arg(plot.type)
+    if(class(ordering) %in% c("numeric", "integer", "factor"))
+        ordering <- data.frame(ordering)
+    if(nrow(ordering) != nrow(tables(x)[[1]]))
+        stop("Length of the ordering is not the same as the number of features.")
+
     scores <- tables(x)
     n.points <- ncol(scores[[1]])
     x.vals <- as.numeric(gsub('%', '', colnames(scores[[1]])))
     x.gap <- x.vals[2] - x.vals[1]
 
     def.par <- par(no.readonly = TRUE) # save default, for resetting.
-    plot.type <- match.arg(plot.type)
-    if(class(ordering) %in% c("numeric", "integer", "factor"))
-        ordering <- data.frame(ordering)
+
     if(!ncol(ordering) == length(scores))
     {
         if(!ncol(ordering) == 1)
