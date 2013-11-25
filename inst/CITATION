@@ -1,0 +1,26 @@
+citHeader("Please cite the Bioinformatics paper for the software itself and the other papers for the various original statistical methods implemented in Repitools.")
+
+citEntry(
+   entry="article",
+   title = "Repitools: an R package for the analysis of enrichment-based epigenomic data"
+   author = "Statham AL, Strbenac D, Coolen MW, Stirzaker C, Clark SJ, Robinson MD"
+   journal = "Bioinformatics",
+   volume = 26(13),
+   pages = 1662-3,
+   year = 2010,
+   textVersion = "Statham AL, Strbenac D, Coolen MW, Stirzaker C, Clark SJ, Robinson MD. (2010). Repitools: an R package for the analysis of enrichment-based epigenomic data", Bioinformatics 26(13), 1662-3"
+)
+
+citEntry(
+   entry="article",
+   title = "Copy-number-aware differential analysis of quantitative DNA sequencing data",
+   author = "Robinson MD, Strbenac D, Stirzaker C, Statham AL, Song J, Speed TP, Clark SJ.",
+   journal = "Genome Research",
+   volume = 22(12),
+   pages = 2489-96,
+   year = 2012,
+   textVersion = "Robinson MD, Strbenac D, Stirzaker C, Statham AL, Song J, Speed TP, Clark SJ (2012). Copy-number-aware differential analysis of quantitative DNA sequencing data. Genome Research 22(12):2489-96."
+)
+
+
+
