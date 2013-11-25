@@ -2,8 +2,8 @@ citHeader("Please cite the Bioinformatics paper for the software itself and the 
 
 citEntry(
    entry="article",
-   title = "Repitools: an R package for the analysis of enrichment-based epigenomic data"
-   author = "Statham AL, Strbenac D, Coolen MW, Stirzaker C, Clark SJ, Robinson MD"
+   title = "Repitools: an R package for the analysis of enrichment-based epigenomic data",
+   author = "Statham AL, Strbenac D, Coolen MW, Stirzaker C, Clark SJ, Robinson MD",
    journal = "Bioinformatics",
    volume = 26(13),
    pages = 1662-3,
@@ -21,6 +21,5 @@ citEntry(
    year = 2012,
    textVersion = "Robinson MD, Strbenac D, Stirzaker C, Statham AL, Song J, Speed TP, Clark SJ (2012). Copy-number-aware differential analysis of quantitative DNA sequencing data. Genome Research 22(12):2489-96."
 )
-
 
 
