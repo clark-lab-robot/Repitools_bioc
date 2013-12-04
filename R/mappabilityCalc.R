@@ -17,6 +17,8 @@ setGeneric("mappabilityCalc", function(x, organism, ...){standardGeneric("mappab
 
 .mappabilityFASTA <- function(regions.by.chr, map.file, verbose)
 {
+    require(Biostrings)
+
     file.conn <- file(map.file, 'r')
     chr.found <- FALSE
     chr.map <- list()
@@ -43,7 +45,7 @@ setGeneric("mappabilityCalc", function(x, organism, ...){standardGeneric("mappab
                 chr.regions <- regions.by.chr[[chr.name]]
                 inside.regions <- restrict(chr.regions, 1, nchar(map.string),
                                            keep.all.ranges = TRUE)
-                map.set <- BString(map.string, start(inside.regions),
+                map.set <- BStringSet(map.string, start(inside.regions),
                                       width(inside.regions))
                 unique.bases <- letterFrequency(map.set, '!')
                 chr.map <- c(chr.map, list(unique.bases / width(chr.regions)))

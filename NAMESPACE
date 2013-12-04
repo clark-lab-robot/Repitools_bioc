@@ -6,6 +6,7 @@ useDynLib(Repitools)
 #  All functions exported other than those starting with "."
 import(methods, BiocGenerics, IRanges, GenomicRanges, GenomicAlignments, BSgenome, edgeR, parallel, Rsolnp)
 importFrom(parallel, detectCores)
+importFrom(Biostrings, BString, letterFrequency)
 exportClasses(FastQC, SequenceQC, SequenceQCSet, ScoresList, ClusteredScoresList, QdnaData, BayMethList)
 exportMethods(show)
 exportPattern("^[^\\_|^\\.]")
