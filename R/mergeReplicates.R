@@ -3,8 +3,6 @@ setGeneric("mergeReplicates", signature = "reads", function(reads, types, ...)
 
 setMethod("mergeReplicates", "GRangesList", function(reads, types, verbose = TRUE)
 {
-    require(GenomicRanges)
-
     if(is.null(types))
     	stop("Mandatory argument 'types' not provided.\n")
     if(length(types) != length(reads))

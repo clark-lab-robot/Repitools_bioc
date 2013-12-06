@@ -5,8 +5,6 @@ setMethod("genomeBlocks", "numeric",
 {
     if(is.null(width))
         stop("Block width not given.")
-
-    require(GenomicRanges)
     
     chr.windows <- lapply(chrs, function(x) {
       centres <- seq.int(min(spacing/2,genome[x]),genome[x],spacing)
@@ -23,9 +21,7 @@ setMethod("genomeBlocks", "BSgenome",
 {
     if(is.null(width))
         stop("Block width not given.")
-
-    require(BSgenome)
-    
+   
     chr.lengths <- seqlengths(genome)[chrs]
     genomeBlocks(chr.lengths, chrs = names(chr.lengths), width = width, spacing = spacing)
 })

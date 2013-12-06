@@ -17,8 +17,6 @@ setGeneric("mappabilityCalc", function(x, organism, ...){standardGeneric("mappab
 
 .mappabilityFASTA <- function(regions.by.chr, map.file, verbose)
 {
-    require(Biostrings)
-
     file.conn <- file(map.file, 'r')
     chr.found <- FALSE
     chr.map <- list()
@@ -75,8 +73,6 @@ setMethod("mappabilityCalc", c("GRanges", "MappabilitySource"),
           function(x, organism, window = NULL, type = c("block", "TSS", "center"),
           verbose = TRUE)
 {
-    require(GenomicRanges)
-
     type <- match.arg(type)
     if(type == "block" && !is.null(window))
         stop("'window' is meaningless when region type is \"block\".")
@@ -118,8 +114,6 @@ setMethod("mappabilityCalc", c("GRanges", "MappabilitySource"),
 setMethod("mappabilityCalc", c("data.frame", "MappabilitySource"),
          function(x, organism, window = NULL, type = c("block", "TSS", "center"), ...)
 {
-    require(GenomicRanges)
-
     type <- match.arg(type)
     if(type == "block" && !is.null(window))
         stop("'window' is meaningless when region type is \"block\".")

@@ -24,9 +24,9 @@ methylEst <- function(x, verbose=FALSE, controlCI=list(compute=FALSE, method="Wa
     }
 
     if(priorTab(x)$method == "beta"){
-        Repitools:::.methylEstbeta(x=x, verbose=verbose, controlCI=controlCI)
+        .methylEstbeta(x=x, verbose=verbose, controlCI=controlCI)
     } else if(priorTab(x)$method == "DBD"){
-        Repitools:::.methylEstDBD(x=x, verbose=verbose, controlCI=controlCI)
+        .methylEstDBD(x=x, verbose=verbose, controlCI=controlCI)
     } else {
         stop("This should not happen!")
     }

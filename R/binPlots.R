@@ -34,7 +34,6 @@ setMethod("binPlots", "ScoresList",
 
     if(is.null(cols))
     {
-        require(gplots)
 	if(plot.type == "line") {
 	  cols <- colorpanel(n.bins, "blue", "green", "red")
 	} else {

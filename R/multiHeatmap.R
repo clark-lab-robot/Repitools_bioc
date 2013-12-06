@@ -14,7 +14,7 @@
 multiHeatmap <- function(dataList, colourList, titles=NULL, main="", showColour=TRUE,
                          xspace=1, cwidth=.5, ystarts=c(.05,.90,.925,.95,.98), rlabelcex=1,
                         clabelcex=1,titlecex=1.2,maincex=1.5,scalecex=.7, offset=.001) {
-  require(grid)
+
   if(length(xspace)==1)
     xspace <- rep(xspace,length(dataList)+1)
   if(length(colourList)==1)

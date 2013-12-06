@@ -9,10 +9,6 @@ setMethod("relativeCN", c("GRanges", "matrix"),
 
     if(!class(gc.params) %in% c("GCAdjustParams", "NULL"))
         stop("'gc.params' is not an object of class 'GCAdjustParams' or 'NULL'.")
-    
-    require(GenomicRanges)
-    require(DNAcopy)
-
     if(!is.null(gc.params)) # Do mappability / GC bias adjustment on counts.
     {
         CN.result <- GCadjustCopy(input.windows, input.counts, gc.params,

@@ -60,7 +60,6 @@ setMethod(".blocksStats", c("matrix", "GRanges"),
         {
             if(robust && length(pr.inds) >= robust)
             {
-                require(MASS)
                 r.model <- summary(rlm(diffs[pr.inds, j] ~ 1))
                 t.stats[i, j] <- r.model$coef[3]
                 means[i, j] <- r.model$coef[1]
@@ -103,7 +102,6 @@ setMethod(".blocksStats", c("AffymetrixCelSet", "GRanges"),
 {
     if(is.null(design))
         stop("No design matrix given.")
-    require(aroma.affymetrix)
 
     if(nrow(design) != nbrOfArrays(x))
         stop("The number of rows in the design matrix does not equal the number
@@ -127,8 +125,6 @@ setMethod(".blocksStats", c("GRangesList", "GRanges"),
 {
     if(is.null(design))
         stop("No design matrix given.")
-
-    require(edgeR)
 
     if(lib.size == "ref" && is.null(Acutoff))
         stop("Must give value of Acutoff if using \"ref\" normalisation.\n")

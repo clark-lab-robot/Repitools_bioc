@@ -13,9 +13,8 @@ setMethod("ChromaBlocks", c("GRangesList", "GRangesList"), function(rs.ip, rs.in
     }
     
     .callRegions <- function(bins, RPKM=NULL, cutoffs, blockWidth, ipWidth, minBlocks) {
-        require(Ringo)
         callCutoff <- function(dat, cutoff) {
-            dat$cutoff <- Ringo::sliding.meansd(dat$position, as.integer(dat$RPKM>=cutoff), ipWidth*blockWidth/2)[,"mean"]>=minBlocks/blockWidth
+            dat$cutoff <- sliding.meansd(dat$position, as.integer(dat$RPKM>=cutoff), ipWidth*blockWidth/2)[,"mean"]>=minBlocks/blockWidth
             temp <- dat$mean>cutoff&dat$cutoff
             #clean the ends of the chromosomes
             temp[c(1:(blockWidth/2), (length(temp)-(blockWidth/2)):length(temp))] <- FALSE
@@ -34,7 +33,7 @@ setMethod("ChromaBlocks", c("GRangesList", "GRangesList"), function(rs.ip, rs.in
 
         callChr <- function(dat) {
             if (verbose) cat(".")
-            dat$mean <- Ringo::sliding.meansd(dat$position, dat$RPKM, ipWidth*blockWidth/2)[,"mean"]
+            dat$mean <- sliding.meansd(dat$position, dat$RPKM, ipWidth*blockWidth/2)[,"mean"]
             if (!is.null(extend)) dat$extend <- dat$mean<extend 
             if (length(cutoffs)>1) sapply(cutoffs, function(x) callCutoff(dat, x)) else callCutoff(dat, cutoffs)
         }

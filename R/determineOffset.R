@@ -69,7 +69,7 @@ determineOffset <- function(x,  quantile=0.998,
                controlPlot$main=cnames[i]
             } 
 
-            mp <- edgeR:::maPlot(tmpcc[!is.na(rs)], tmpss[!is.na(rs)],
+            mp <- maPlot(tmpcc[!is.na(rs)], tmpss[!is.na(rs)],
                 normalize=FALSE, xlab="A=log2(sampleInterest*SssI)/2",
                 ylab="M=log2(sampleInterest/SssI)", pch=19, cex=.5,
                 cex.lab=1.1,

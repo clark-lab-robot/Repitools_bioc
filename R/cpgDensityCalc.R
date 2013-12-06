@@ -16,8 +16,6 @@ setMethod("cpgDensityCalc", c("GRanges", "BSgenome"),
     function(x, organism, seq.len = NULL, window = NULL,
              w.function = c("none", "linear", "exp", "log"), verbose = TRUE)
 {
-    require(GenomicRanges)
-
     w.function <- match.arg(w.function)
     if(!is.null(seq.len)) x <- suppressWarnings(resize(x, seq.len))
     if(!is.null(window)) x <- suppressWarnings(resize(x, window, fix = "center"))
@@ -42,8 +40,6 @@ setMethod("cpgDensityCalc", c("GRanges", "BSgenome"),
 setMethod("cpgDensityCalc", c("data.frame", "BSgenome"),
     function(x, organism, ...)
 {
-    require(GenomicRanges)
-
     if (is.null(x$position)) x$position <- ifelse(x$strand == '+', x$start, x$end)
     x <- GRanges(x$chr, IRanges(x$position, width=1),
                  seqlengths=seqlengths(organism)[unique(x$chr)])

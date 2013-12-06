@@ -16,8 +16,6 @@ setMethod("enrichmentCalc", "GRangesList",
 setMethod("enrichmentCalc", "GRanges",
     function(x, seq.len = NULL, verbose = TRUE)
 {
-    require(GenomicRanges)
-
     if(any(is.na(seqlengths(x))))
         stop("Some chromosome lengths missing in Seqinfo of reads.")
     if(!is.null(seq.len))

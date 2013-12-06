@@ -1,8 +1,6 @@
 .makeClusters <- function(scores.chr, w.size, n.med, n.consec, cut, count = FALSE,
                           verbose)
 {
-    require(IRanges)
-
     mergeOverlaps <- function(query, subject)
     {
         candidates <- slice(coverage(c(query, subject)), lower = 1, rangesOnly = TRUE)
@@ -56,7 +54,6 @@ findClusters <- function(stats, score.col = NULL, w.size = NULL, n.med = NULL, n
     if(is.null(cut.samps))
         stop("Cutoffs to try not given.")
 
-    require(IRanges)
     trend <- match.arg(trend)
     
     # Do check in case users pass in some rows with NA scores.

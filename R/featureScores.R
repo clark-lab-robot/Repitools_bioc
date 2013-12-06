@@ -9,8 +9,6 @@ setMethod(".featureScores", c("GRanges", ".CoverageSamples"),
     function(x, y, anno, up, down, dist, freq, s.width, adj.par.index = 1, map.cutoff,
              use.strand = FALSE, verbose)
 {
-    require(GenomicRanges)
-
     # Unpack variables in y.
     pos.labels <- y@pos.labels
     cvg.samps <- y@cvg.samps
@@ -99,7 +97,6 @@ setMethod(".featureScores", c(".SequencingData", "GRanges"),
     function(x, y, up, down, dist = c("base", "percent"), freq, s.width = NULL, mappability = NULL,
              map.cutoff = 0.5, tag.len = NULL, ..., verbose = TRUE)
 {
-    require(IRanges)
     dist <- match.arg(dist)
 
     if(is.null(s.width) && !is.null(mappability) && is.null(tag.len))
@@ -219,8 +216,6 @@ setMethod(".featureScores", c("matrix", "GRanges"),
 setMethod(".featureScores", c("AffymetrixCelSet", "GRanges"),
     function(x, y, p.anno = NULL, mapping = NULL, chrs = NULL, ...)
 {
-    require(aroma.affymetrix)
-
     if(is.null(mapping) && is.null(p.anno))
         p.anno <- getProbePositionsDf(getCdf(x), chrs, verbose = verbose)
 

@@ -8,8 +8,6 @@ setMethod("plotClusters", "GRanges", function(x, s.col = NULL, non.cl = NULL, ..
     if(is.null(non.cl))
         stop("Cluster exclusion ID given.")
 
-    require(GenomicRanges)
-
     elementMetadata(x) <- DataFrame(elementMetadata(x),
                           TSS = as.numeric(ifelse(strand(x) == '+',
                                            start(x),
@@ -37,8 +35,6 @@ setMethod("plotClusters", "data.frame", function(x, s.col = NULL, non.cl = NULL,
         stop("Score column not given.")
     if(is.null(non.cl))
         stop("Cluster exclusion ID given.")
-
-    require(GenomicRanges)
 
     s.name <- colnames(x)[s.col]
     summaryGR <- annoDF2GR(x)

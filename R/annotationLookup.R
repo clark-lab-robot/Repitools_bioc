@@ -76,8 +76,6 @@ setMethod("annotationLookup", c("data.frame", "data.frame"),
 setMethod("annotationBlocksCounts", c("GRanges", "GRanges"),
     function(x, anno, seq.len = NULL, verbose = TRUE)
 {
-    require(GenomicRanges)
-
     f.names <- .getNames(anno)
     if(!is.null(seq.len))
     {
@@ -98,8 +96,6 @@ setMethod("annotationBlocksCounts", c("GRanges", "GRanges"),
 setMethod("annotationBlocksCounts", c("GRangesList", "GRanges"),
     function(x, anno, ...)
 {
-    require(GenomicRanges)
-
     f.names <- .getNames(anno)
     counts <- IRanges::lapply(x, function(z)
                   annotationBlocksCounts(z, anno, ...))

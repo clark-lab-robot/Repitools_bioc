@@ -6,8 +6,6 @@ setGeneric("getProbePositionsDf", function(cdf, ...)
 setMethod("getProbePositionsDf", "AffymetrixCdfFile",
     function(cdf, chrs = NULL, ..., verbose = TRUE)
 {
-    require(aroma.affymetrix)
-	
     ind <- getCellIndices(cdf, ..., useNames = FALSE, unlist = TRUE, verbose = verbose)
     acp <- AromaCellPositionFile$byChipType(getChipType(cdf))
     ch <- acp[ind,1,drop=TRUE]

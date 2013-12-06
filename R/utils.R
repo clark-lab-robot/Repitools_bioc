@@ -93,8 +93,8 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         ub <- c(Inf, Inf, Inf, Inf, 1-eps, 1-eps)
 
         arg <- c(2.14, 1.3, 0.7,0.7, 0.1, 0.8)
-        paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac, 
-                    ineqfun=Repitools:::.ineqn, ineqLB=eps, ineqUB=1-eps, 
+        paramVec <- solnp(arg, fun=.margDirac, 
+                    ineqfun=.ineqn, ineqLB=eps, ineqUB=1-eps, 
                     LB=lb, UB=ub,
                     y1=sample[[i]], y2=control[[i]], 
                     cons=f[[i]], control=list(trace=F))$pars
@@ -104,7 +104,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         ub <- c(Inf, Inf, Inf, Inf)
 
         arg <- c(2.14, 1.3, 0.7,0.7)
-        paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac_fW, 
+        paramVec <- solnp(arg, fun=.margDirac_fW, 
                     LB=lb, UB=ub,
                     y1=sample[[i]], y2=control[[i]], 
                     cons=f[[i]], weights=controlMethod$weights, control=list(trace=F))$pars
@@ -114,8 +114,8 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         ub <- c(Inf, Inf, 1-eps, 1-eps)
 
         arg <- c(2.14, 1.3, 0.1, 0.8)
-        paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.margDirac_fB, 
-                    ineqfun=Repitools:::.ineqn2, ineqLB=eps, ineqUB=1-eps, 
+        paramVec <- solnp(arg, fun=.margDirac_fB, 
+                    ineqfun=.ineqn2, ineqLB=eps, ineqUB=1-eps, 
                     LB=lb, UB=ub, 
                     y1=sample[[i]], y2=control[[i]], 
                     cons=f[[i]], param=controlMethod$param, control=list(trace=F))$pars
@@ -372,23 +372,23 @@ setMethod(".validate", "GRanges", function(anno, up, down)
             lb <-  c(eps, eps, eps,eps, rep(eps, 4))
             ub <- c(Inf, Inf, 1-eps, 1-eps, rep(Inf,4))
             arg <- c(2.14, 1.34, 0.5, 0.5, 1, 1, 1,1)
-            paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.marg, 
-                eqfun=Repitools:::.eqn2, eqB=1, LB=lb, UB=ub, cons=f[[i]], 
+            paramVec <- solnp(arg, fun=.marg, 
+                eqfun=.eqn2, eqB=1, LB=lb, UB=ub, cons=f[[i]], 
                 y1=sample[[i]], y2=control[[i]], ncomp=ncomp, control=list(trace=F))$pars
         }
         if(ncomp==3){
             lb <- c(eps, eps, eps, eps, eps, rep(eps, 3))
             ub <- c(Inf, Inf, 1-eps, 1-eps, 1-eps, rep(Inf,3))
             arg <- c(2.14, 1.34, 0.2, 0.2, 0.6, 1, 1, 1)
-            paramVec <- Rsolnp:::solnp(arg, fun=Repitools:::.marg, 
-                eqfun=Repitools:::.eqn3, eqB=1, LB=lb, 
+            paramVec <- solnp(arg, fun=.marg, 
+                eqfun=.eqn3, eqB=1, LB=lb, 
                 UB=ub, cons=f[[i]], 
                 y1=sample[[i]], y2=control[[i]], ncomp=ncomp, control=list(trace=F))$pars            
         }
     } else {
         ## solnp is in particular better for mixtures of beta priors as you 
         ## can give equality constraints so that the weights sum to one
-        paramVec <- Rsolnp:::solnp(c(2.14,1.34), fun=Repitools:::.marg, 
+        paramVec <- solnp(c(2.14,1.34), fun=.marg, 
             eqfun=NULL, eqB=NULL, LB=c(eps, eps), 
             UB=c(Inf, Inf), cons=f[[i]], 
             y1=sample[[i]], y2=control[[i]], ncomp=ncomp, control=list(trace=F))$pars
@@ -586,14 +586,14 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
     ## get idea where the probability mass is 
     x <- seq(eps, 1 - eps, length.out = 100)
-    y <- Repitools:::.mydmarginal(x, y1 = y1[u], y2 = y2, al = al[u], 
+    y <- .mydmarginal(x, y1 = y1[u], y2 = y2, al = al[u], 
         bl = bl[u], W = W[u], control.available = control.available, 
         w = w_tmp, a = a_tmp, b = b_tmp, cons = cons)
 
     lim <- 2*(1-level)
     lim2 <- 1- lim
 
-    mq <- Repitools:::.myquantile(c(0.01, lim, lim2, 0.99),x,y)$x
+    mq <- .myquantile(c(0.01, lim, lim2, 0.99),x,y)$x
 
     x <- c( seq(eps, mq[1], length.out=100), 
         seq(mq[1]+eps, mq[2], length.out=nmarg/2), 
@@ -601,18 +601,18 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         seq(mq[3]+eps, mq[4], length.out=nmarg/2), 
         seq(mq[4]+eps, 1-eps, length.out=100))
 
-    y <- Repitools:::.mydmarginal(x, y1 = y1[u], y2 = y2, al = al[u], 
+    y <- .mydmarginal(x, y1 = y1[u], y2 = y2, al = al[u], 
         bl = bl[u], W = W[u], control.available = control.available, 
         w = w_tmp, a = a_tmp, b = b_tmp, cons = cons)  
 
     if(method=="quantile"){
         ll <- (1-level)/2
         q <- c(rev(ll), 1-ll)
-        return( Repitools:::.myquantile(q=q, x,y)$x)
+        return(.myquantile(q=q, x,y)$x)
     }
 
     if(method=="HPD"){
-        return( Repitools:::.myhpd(level, x,y))
+        return(.myhpd(level, x,y))
     }
 }
 
@@ -638,14 +638,14 @@ setMethod(".validate", "GRanges", function(anno, up, down)
 
     ## get idea where the probability mass is 
     x <- seq(eps, 1 - eps, length.out = 100)
-    y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2, al=al[u], 
+    y <- .mydmarginalDBD(x, y1=y1[u], y2=y2, al=al[u], 
         bl=bl[u], W=W[u], control.available=control.available, 
         w=w[,u], a=a[u], b=b[u], cons=cons)
 
     lim <- 2*(1-level)
     lim2 <- 1- lim
 
-    mq <- Repitools:::.myquantile(c(0.01, lim, lim2, 0.99),x,y)$x
+    mq <- .myquantile(c(0.01, lim, lim2, 0.99),x,y)$x
 
     x <- c( seq(eps, mq[1], length.out=100), 
         seq(mq[1]+eps, mq[2], length.out=nmarg/2), 
@@ -653,13 +653,13 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         seq(mq[3]+eps, mq[4], length.out=nmarg/2), 
         seq(mq[4]+eps, 1-eps, length.out=100))
 
-    y <- Repitools:::.mydmarginalDBD(x, y1=y1[u], y2=y2, al=al[u], 
+    y <- .mydmarginalDBD(x, y1=y1[u], y2=y2, al=al[u], 
         bl=bl[u], W=W[u], control.available=control.available, 
         w=w[,u], a=a[u], b=b[u], cons=cons)
 
     ll <- (1-level)/2
     q <- c(rev(ll), 1-ll)
-    return(Repitools:::.myquantile( q=q, x,y)$x)
+    return(.myquantile( q=q, x,y)$x)
 }
 
 
@@ -672,7 +672,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
   lower1 <- x[1]
   # and the 1-level quantile
   tail <- 1-level
-  tail_low <- Repitools:::.myquantile(tail, x, y)
+  tail.myquantile(tail, x, y)
   # if the y-value at the 1-level quantile is smaller than
   # the right most denisty value, the density is not well-behaved
   # and we return the 1-level quantile and 1 as result.
@@ -683,7 +683,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
   # if the y-value at the level quantile is smaller than
   # the left most denisty value, the density is not well-behaved
   # and we return 0 and the level quantile as result.  
-  tail_high <- Repitools:::.myquantile(level,x,y)
+  tail_high <- .myquantile(level,x,y)
   if( tail_high$y < y[1]){
     return(c(0, tail_high$x))
   }
@@ -704,7 +704,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
   while((diff^2>delta) & (i<maxiter))
   {
     low <- (lower1 + lower2)/2
-    lprob<-Repitools:::.mycdf(low,x, y)
+    lprob<-.mycdf(low,x, y)
     idx <- which.min(abs(low - x))
     x_c <- x[idx]
     if(low > x_c){
@@ -713,7 +713,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
         ldens <- y[idx - 1] + (y[idx] - y[idx - 1])*(x_c - x[idx - 1])/(x[idx] - x[idx - 1])
     }
     uprob <- lprob+level
-    upp <- Repitools:::.myquantile(uprob,x,y)
+    upp <- .myquantile(uprob,x,y)
     udens <- upp$y
     diff <- (udens-ldens)/(udens+ldens)
     i <- i+1
@@ -956,13 +956,13 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     message(paste0("Sample ",j, ":\tGetting ", controlCI$method, " credible interval.\n"))
 
                 if(is.null(controlCI$ncpu)){
-                    controlCI$ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
+                    controlCI$ncpu <- .getCpu(maxCPU=FALSE)
                 }
                 method <- controlCI$method
                 level <- controlCI$level[1]
                 nmarg <- controlCI$nmarg
 
-                ci_tmp <- parallel:::mclapply(1:len, Repitools:::.getcredible, 
+                ci_tmp <- mclapply(1:len, .getcredible, 
                     method = method, level = level, nmarg = nmarg, 
                     y1 = y1, y2 = y2, al = al, bl = bl, W = W, 
                     control.available = control.available, w = w, 
@@ -1096,14 +1096,14 @@ setMethod(".validate", "GRanges", function(anno, up, down)
                     message(paste0("Sample ",j, ":\tGetting ", controlCI$method, " credible interval.\n"))
 
                 if(is.null(controlCI$ncpu)){
-                    controlCI$ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
+                    controlCI$ncpu <- .getCpu(maxCPU=FALSE)
                 }
 
                 method <- controlCI$method
                 level <- controlCI$level[1]
                 nmarg <- controlCI$nmarg
 
-                ci_tmp <- parallel:::mclapply(1:len, Repitools:::.getcredibleDBD, 
+                ci_tmp <- mclapply(1:len, .getcredibleDBD, 
                     method = method, level = level, nmarg = nmarg, 
                     y1 = y1, y2 = y2, al = al, bl = bl, W = W, 
                     control.available = control.available, w = w, 

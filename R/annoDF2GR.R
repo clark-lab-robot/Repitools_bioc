@@ -3,8 +3,6 @@ setGeneric("annoDF2GR", signature = "anno", function(anno, ...)
 
 setMethod("annoDF2GR", "data.frame", function(anno)
 {
-    require(GenomicRanges)
-
     col.missing <- setdiff(c("chr", "start", "end"), colnames(anno))
     if(length(col.missing) > 0)
 	stop("Columns ", paste(col.missing, collapse = ", "),

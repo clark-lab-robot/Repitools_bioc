@@ -14,7 +14,6 @@ setMethod("clusterPlots", "ClusteredScoresList",
 
     if(is.null(cols) == TRUE)
     {
-	require(gplots)
 	if(plot.type %in% c("by.cluster", "line"))
 	{
 	    cols <- colorpanel(n.marks, "blue", "green", "red")
@@ -255,8 +254,6 @@ setMethod("clusterPlots", "ScoresList", function(scores.list, scale = function(x
           summarize = c("mean", "median"), cols = NULL, t.name = NULL,
           verbose = TRUE, ...)
 {
-    require(cluster)
-    
     scores.list <- scores.list[plot.ord]
     plot.type <- match.arg(plot.type)
     cap.type <- match.arg(cap.type)

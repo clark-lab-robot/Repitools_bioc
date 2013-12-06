@@ -3,8 +3,6 @@ setGeneric("writeWig", function(rs, ...) standardGeneric("writeWig"))
 setMethod("writeWig", "GRangesList",
     function(rs, seq.len = NULL, design=NULL, sample=20, drop.zero=TRUE, normalize=TRUE, verbose=TRUE)
 {
-    require(GenomicRanges)	
-
     scipen <- getOption("scipen")
     options(scipen=100)
     if(!is.null(seq.len))

@@ -8,7 +8,6 @@ setMethod("BAM2GRanges", "character",
                    flag = scanBamFlag(isUnmappedQuery = FALSE, isDuplicate = FALSE),
                    verbose = TRUE)
           {
-              require(Rsamtools)
               if(length(path) > 1)
                   stop("This method is only for one BAM file. See ?BAM2GRangesList.")
               if(!grepl("bam", path))

@@ -3,7 +3,6 @@ setGeneric("annoGR2DF", signature = "anno", function(anno, ...)
 
 setMethod("annoGR2DF", "GRanges", function(anno)
 {
-    require(GenomicRanges)
     annoDF <- as.data.frame(anno)
     colnames(annoDF)[1] <- "chr"
     if('*' %in% annoDF$strand)

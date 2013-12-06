@@ -4,8 +4,6 @@ setGeneric("checkProbes", signature = c("regs", "probes"), function(regs, probes
 setMethod("checkProbes", c("GRanges", "GRanges"),
 	function(regs, probes, up = NULL, down = NULL, ...)
 {
-    require(GenomicRanges)
-
     str.regs <- as.character(strand(regs))
     chr.regs <- as.character(seqnames(regs))
     pr.names <- elementMetadata(probes)[, "name"]

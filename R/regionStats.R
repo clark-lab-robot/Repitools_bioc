@@ -82,8 +82,6 @@ setMethod("regionStats","AffymetrixCelSet",
     if(is.null(design))
         stop("Design matrix not provided.")
 
-    require(aroma.affymetrix)
-
     cdf <- getCdf(x)
     
     if( is.null(ind) )
@@ -217,7 +215,6 @@ setMethod("regionStats","matrix",
 
 .fdrTable <- function(realScore, permScore, ch, sp, cutsLength, min.probes, max.gap, two.sides, 
                       minCutoff = .5, maxCutoff=max( abs(permScore), na.rm=TRUE ), verbose) {
-  require(gsmoothr)
   cuts <- seq(minCutoff,maxCutoff,length=cutsLength)
 
   fdr <- matrix(,nrow=length(cuts),ncol=4)

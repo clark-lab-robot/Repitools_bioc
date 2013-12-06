@@ -21,7 +21,7 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
         if(is.null(controlMethod$weights)){
             controlMethod$weights <- c(0.1, 0.8, 0.1)
         } else {
-            if(sum(Repitools:::.belongsTo(controlMethod$weights, 0, 1)) != 3){
+            if(sum(.belongsTo(controlMethod$weights, 0, 1)) != 3){
                     stop("The weights of the mixture must be between 0 and 1")
             }
             if(sum(controlMethod$weights) != 1){
@@ -31,7 +31,7 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
         if(is.null(controlMethod$param)){
             controlMethod$param <- c(1,1)
         } else {
-            if(sum(Repitools:::.belongsTo(controlMethod$param, 1e-20, Inf))!=2){
+            if(sum(.belongsTo(controlMethod$param, 1e-20, Inf))!=2){
                 stop("The parameters for the beta component must be positive")
             }
         }
@@ -77,7 +77,7 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
     }
 
     if(is.null(ncpu)){
-        ncpu <- Repitools:::.getCpu(maxCPU=FALSE)
+        ncpu <- .getCpu(maxCPU=FALSE)
     }
     paramTab <- list()
     ## save for all bins the information to which CpG group it belongs
@@ -122,11 +122,11 @@ empBayes <- function(x, ngroups=100, ncomp=1, maxBins=50000, method="beta", cont
             co_list <- sapply(1:ngroups, function(u){co_tmp[red_idx[[u]]]})
         }
         if(method=="beta"){
-            tmp <- parallel:::mclapply(1:ngroups, Repitools:::.myoptimize, 
+            tmp <- mclapply(1:ngroups, .myoptimize, 
                 sI_list, co_list, f_list, ncomp, mc.cores=ncpu)
             paramTab[[j+3]] <- t(do.call(rbind, tmp))
         } else {
-            tmp <- parallel:::mclapply(1:ngroups, Repitools:::.myoptimizeDirac, 
+            tmp <- mclapply(1:ngroups, .myoptimizeDirac, 
                 sI_list, co_list, f_list, controlMethod, mc.cores=ncpu)
             paramTab[[j+3]] <- t(do.call(rbind, tmp))
         }

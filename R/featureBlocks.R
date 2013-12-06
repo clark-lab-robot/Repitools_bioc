@@ -4,7 +4,6 @@ setGeneric("featureBlocks", signature = "anno", function(anno, ...)
 setMethod("featureBlocks", "GRanges",
     function(anno, up = NULL, down = NULL, dist = c("base", "percent"), keep.strand = FALSE)
 {
-    require(GenomicRanges)
     dist <- match.arg(dist)
     .validate(anno, up, down)
 
