@@ -1,6 +1,6 @@
 Package: Repitools
-Version: 1.9.8
-Date: 2013/12/08
+Version: 1.9.7
+Date: 2013/12/06
 Title: Epigenomic tools
 Author: Mark Robinson <mark.robinson@imls.uzh.ch>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>, Andrea Riebler <andrea.riebler@math.ntnu.no>
 Maintainer: Mark Robinson <mark.robinson@imls.uzh.ch>
