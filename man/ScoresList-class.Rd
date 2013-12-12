@@ -8,7 +8,7 @@
 \alias{tables,ScoresList-method}
 \alias{length,ScoresList-method}
 \alias{show,ScoresList-method}
-\alias{[,ScoresList-method}
+\alias{[,ScoresList,ANY,missing,ANY-method}
 \alias{subsetRows}
 \alias{subsetRows,ScoresList-method}
 

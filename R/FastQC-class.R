@@ -159,7 +159,7 @@ setMethod("Overrepresented_sequences", "SequenceQCSet", function(x, ...) lapply(
 setMethod("Mismatches", "SequenceQCSet", function(x) lapply(x, Mismatches))
 setMethod("MismatchTable", "SequenceQCSet", function(x) lapply(x, MismatchTable))
 
-setMethod("[", "SequenceQCSet", function(x, i, j, ..., drop){
+setMethod("[", c("SequenceQCSet", "ANY", "missing"), function(x, i, j, ..., drop = TRUE){
     newSet <- x@.Data[i]
     names(newSet) <- names(x)[i]
     new("SequenceQCSet", newSet)

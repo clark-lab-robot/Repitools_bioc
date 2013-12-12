@@ -50,8 +50,8 @@ setMethod("show", "ScoresList",
         }        
     })
 
-setMethod("[", "ScoresList",
-    function(x, i)
+setMethod("[", c("ScoresList", "ANY", "missing"),
+    function(x, i, j, ..., drop = TRUE)
     {
 	new("ScoresList", names = x@names[i], anno = x@anno, scores = x@scores[i],
 	                  up = x@up, down = x@down, dist = x@dist,
@@ -127,8 +127,8 @@ setMethod("ClusteredScoresList", "ScoresList",
             sort.name = sort.name, .samp.info = x@.samp.info)
 })
 
-setMethod("[", "ClusteredScoresList",
-    function(x, i)
+setMethod("[", c("ClusteredScoresList", "ANY", "missing"),
+    function(x, i, j, ..., drop = TRUE)
 {
     new("ClusteredScoresList", names = x@names[i], scores = x@scores[i],
 	anno = x@anno, up = x@up, down = x@down, dist = x@dist,
@@ -471,8 +471,8 @@ setMethod("show", "BayMethList", function(object) {
 ######################################################################
 
 if(!isGeneric("[")) setGeneric("[", function(object) standardGeneric("["))
-setMethod("[", "BayMethList",
-    function(x, i) {
+setMethod("[", c("BayMethList", "ANY", "missing"),
+    function(x, i, j, ..., drop = TRUE) {
 
     message("\n\n\tCAUTION: Slots 'f' and 'priorTab' ", 
         "do not change when taking the subset!\n\n")

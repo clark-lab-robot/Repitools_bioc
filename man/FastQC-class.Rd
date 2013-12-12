@@ -61,7 +61,7 @@
 \alias{Overrepresented_sequences,SequenceQCSet-method}
 \alias{Mismatches,SequenceQCSet-method}
 \alias{MismatchTable,SequenceQCSet-method}
-\alias{[,SequenceQCSet-method}
+\alias{[,SequenceQCSet,ANY,missing,ANY-method}
  
 
 \title{FastQC and associated classes}

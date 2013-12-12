@@ -4,7 +4,7 @@
 \alias{BayMethList}
 \alias{BayMethList-class}
 \alias{BayMethList,GRanges,matrix,matrix,numeric-method}
-\alias{[,BayMethList-method}
+\alias{[,BayMethList,ANY,missing,ANY-method}
 \alias{length}
 \alias{length,BayMethList-method}
 \alias{control}

@@ -4,7 +4,7 @@
 \alias{ClusteredScoresList-class}
 \alias{ClusteredScoresList,ScoresList-method}
 \alias{show,ClusteredScoresList-method}
-\alias{[,ClusteredScoresList-method}
+\alias{[,ClusteredScoresList,ANY,missing,ANY-method}
 \alias{subsetRows,ClusteredScoresList-method}
 \alias{clusters}
 \alias{clusters,ClusteredScoresList-method}
