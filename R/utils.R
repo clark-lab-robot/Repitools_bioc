@@ -672,7 +672,7 @@ setMethod(".validate", "GRanges", function(anno, up, down)
   lower1 <- x[1]
   # and the 1-level quantile
   tail <- 1-level
-  tail.myquantile(tail, x, y)
+  tail_low <- .myquantile(tail, x, y)
   # if the y-value at the 1-level quantile is smaller than
   # the right most denisty value, the density is not well-behaved
   # and we return the 1-level quantile and 1 as result.

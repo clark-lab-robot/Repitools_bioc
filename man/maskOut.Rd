@@ -41,12 +41,7 @@ boolean vector indicating which bins will be excluded in \code{empBayes}.
 
         # mask out unannotated high copy number regions
         # see Pickrell et al. (2011), Bioinformatics 27: 2144-2146.
-        require(rtracklayer)
-        tmpdir <- tempdir()
-        url <- 'http://eqtl.uchicago.edu/Masking/seq.cov1.ONHG19.bed.gz'
-        file <- basename(url)
-        download.file(url, file)
-        hcRegions <- import(file, asRangedData=FALSE)
+        data(hcRegions)
 
         bm <- maskOut(bm, hcRegions)
    }

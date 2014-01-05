@@ -22,3 +22,11 @@ citEntry(
    textVersion = "Robinson MD, Strbenac D, Stirzaker C, Statham AL, Song J, Speed TP, Clark SJ (2012). Copy-number-aware differential analysis of quantitative DNA sequencing data. Genome Research 22(12):2489-96."
 )
 
+citEntry(
+   entry="article",
+   title = "BayMeth: Improved DNA methylation quantification for affinity capture sequencing data using a flexible Bayesian approach",
+   author = "Riebler A, Menigatti M, Song JZ, Statham AL, Stirzaker C, Mahmud N, Mein CA, Clark SJ, Robinson MD",
+   journal = "arXiv:1312.3115",
+   year = 2013,
+   textVersion = "Riebler A, Menigatti M, Song JZ, Statham AL, Stirzaker C, Mahmud N, Mein CA, Clark SJ, Robinson MD (2013). BayMeth: Improved DNA methylation quantification for affinity capture sequencing data using a flexible Bayesian approach, arXiv:1312.3115."
+)

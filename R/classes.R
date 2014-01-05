@@ -411,13 +411,13 @@ setMethod("BayMethList", c("GRanges", "matrix", "matrix", "numeric"),
             the sample of interest or one. If it is one it is assumed that 
             no control information is available\n\n")
     }
-    if(nc == 1){
-        control <- matrix(0, nrow=1, ncol=1)
-    }
-    if((nf != 1)  && (nf != na)){
-        stop("\n\n\tThe number of offsets per sample must be either one or be
-equal to the length of the annotation matrix.\n\n")
-    }
+#     if(nc == 1){
+#         control <- matrix(0, nrow=1, ncol=1)
+#     }
+#     if((nf != 1)  && (nf != na)){
+#         stop("\n\n\tThe number of offsets per sample must be either one or be
+# equal to the length of the annotation matrix.\n\n")
+#     }
     if((nm != 0)  && (nm != na)){
         stop("\n\n\tThe logical vector to mask bins out from the empirical Bayes approach must be of the same lenth as the number of bins.\n\n")
     }
