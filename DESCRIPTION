@@ -1,16 +1,24 @@
 Package: Repitools
-Version: 1.9.10
+Version: 1.9.11
 Date: 2014/01/01
 Title: Epigenomic tools
-Author: Mark Robinson <mark.robinson@imls.uzh.ch>, Dario Strbenac <d.strbenac@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>, Andrea Riebler <andrea.riebler@math.ntnu.no>
+Author: Mark Robinson <mark.robinson@imls.uzh.ch>, Dario Strbenac
+        <d.strbenac@garvan.org.au>, Aaron Statham
+        <a.statham@garvan.org.au>, Andrea Riebler
+        <andrea.riebler@math.ntnu.no>
 Maintainer: Mark Robinson <mark.robinson@imls.uzh.ch>
 LazyLoad: Yes
 Depends: R (>= 3.0.0), methods, BiocGenerics (>= 0.8.0)
-Imports: IRanges (>= 1.20.0), GenomicRanges, GenomicAlignments, BSgenome,
-        gplots, grid, MASS, gsmoothr, edgeR (>= 3.4.0), DNAcopy,
-        Ringo, aroma.affymetrix, Rsolnp, parallel, Biostrings, Rsamtools, cluster
+Imports: IRanges (>= 1.20.0), GenomicRanges, GenomicAlignments,
+        BSgenome, gplots, grid, MASS, gsmoothr, edgeR (>= 3.4.0),
+        DNAcopy, Ringo, aroma.affymetrix, Rsolnp, parallel, Biostrings,
+        Rsamtools, cluster
 Suggests: ShortRead, BSgenome.Hsapiens.UCSC.hg18, rtracklayer
-Description: Tools for the analysis of enrichment-based epigenomic data.  Features include summarization and visualization of epigenomic data across promoters according to gene expression context, finding regions of differential methylation/binding, BayMeth for quantifying methylation etc. 
+Description: Tools for the analysis of enrichment-based epigenomic
+        data.  Features include summarization and visualization of
+        epigenomic data across promoters according to gene expression
+        context, finding regions of differential methylation/binding,
+        BayMeth for quantifying methylation etc.
 Collate: classes.R multiHeatmap.R BAM2GRanges.R FastQC-class.R
         plotClusters.R annoDF2GR.R GCbiasPlots.R featureScores.R
         profilePlots.R findClusters.R mergeReplicates.R
@@ -25,5 +33,5 @@ Collate: classes.R multiHeatmap.R BAM2GRanges.R FastQC-class.R
         summarizeScores.R determineOffset.R empBayes.R methylEst.R
         hyper.R maskOut.R
 License: LGPL (>= 2)
-biocViews: DNAMethylation, GeneExpression, Methylseq
 Packaged: 2013-12-05 05:57:52 UTC; biocbuild
+biocViews: DNAMethylation, GeneExpression, MethylSeq
