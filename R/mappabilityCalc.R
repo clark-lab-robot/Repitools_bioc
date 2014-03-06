@@ -68,6 +68,20 @@ setGeneric("mappabilityCalc", function(x, organism, ...){standardGeneric("mappab
         stop("Some user regions' chromosomes are not present in the FASTA file.")
     chr.map[names(regions.by.chr)]
 }
+
+.mappabilityBigWig <- function(regions.by.chr, map.file, verbose)
+{
+    lapply(names(regions.by.chr), function(chr)
+    {
+        if(verbose) message("Reading mappability for ", chr, '.')
+        chr.map <- import(map.file, which = seqinfo(BigWigFile(map.file))[chr], asRle = TRUE)
+        chr.map <- chr.map[[chr]]
+        chr.regions <- regions.by.chr[[chr]]
+        inside.regions <- restrict(chr.regions, 1, length(chr.map),
+                                           keep.all.ranges = TRUE)
+        viewApply(Views(chr.map, start(inside.regions), end(inside.regions)), function(scores) sum(scores == 1))
+    })
+}
     
 setMethod("mappabilityCalc", c("GRanges", "MappabilitySource"),
           function(x, organism, window = NULL, type = c("block", "TSS", "center"),
@@ -105,7 +119,17 @@ setMethod("mappabilityCalc", c("GRanges", "MappabilitySource"),
 
     if(class(organism) == "character")
     {
-        unsplit(.mappabilityFASTA(regions.by.chr, organism, verbose), chrs)
+        if(length(grep("\\.fa$|\\.fasta$", organism, ignore.case = TRUE)) > 0)
+        {
+            unsplit(.mappabilityFASTA(regions.by.chr, organism, verbose), chrs)
+        } else if (length(grep("\\.bw$|\\.bigWig$", organism, ignore.case = TRUE)) > 0)
+        {
+            if(.Platform$OS.type == "windows")
+                stop("bigWig files cannot be read on the Windows operating system.")
+            unsplit(.mappabilityBigWig(regions.by.chr, organism, verbose), chrs)
+        } else {
+        stop("'organism' is of character type, but doesn't the have file extension of a FASTA or bigWig file.")
+        }
     } else {
         unsplit(.mappabilityBSGenome(regions.by.chr, organism), chrs)
     }
