@@ -79,7 +79,8 @@ setGeneric("mappabilityCalc", function(x, organism, ...){standardGeneric("mappab
         chr.regions <- regions.by.chr[[chr]]
         inside.regions <- restrict(chr.regions, 1, length(chr.map),
                                            keep.all.ranges = TRUE)
-        viewApply(Views(chr.map, start(inside.regions), end(inside.regions)), function(scores) sum(scores == 1))
+        viewApply(Views(chr.map, start(inside.regions), end(inside.regions)), 
+                  function(scores) sum(scores == 1) / length(scores))
     })
 }
     
