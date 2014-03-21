@@ -1,3 +1,5 @@
+setOldClass("AffymetrixCelSet")
+
 setGeneric("featureScores", signature = c("x", "anno"), function(x, anno, ...)
                                            {standardGeneric("featureScores")})
 setGeneric(".featureScores", signature = c("x", "y"), function(x, y, ...)
