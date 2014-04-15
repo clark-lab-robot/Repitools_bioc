@@ -153,7 +153,7 @@ setMethod(".blocksStats", c("GRangesList", "GRanges"),
                      group = as.character(design[used, i]),
                      lib.size = lib.sizes[used])
 	dge <- estimateCommonDisp(dge)
-	pseudo.counts <- dge$pseudo.alt
+	pseudo.counts <- dge$pseudo.counts
 	colnames(pseudo.counts) <- paste(colnames(pseudo.counts), "pseudo",
                                          sep = '_')
 	results <- cbind(results, pseudo.counts)
